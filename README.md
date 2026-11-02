@@ -109,7 +109,7 @@ npm run build      # production build into dist/
 ```
 
 Locally the editor runs in **local mode**: saving writes straight to the files in `content/` and `public/images/`.
-Without `CERT_API_URL` the Verify page runs in **demo mode** with three clearly labelled made-up records: try
+Without `CODA_DOC_ID` the Verify page runs in **demo mode** with three clearly labelled made-up records: try
 `DEMO-0001`, `DEMO-0002` or `DEMO-0003` (anything else shows the "not found" state). Copy `.env.example` to `.env` to try settings.
 
 ## Where things are
@@ -127,8 +127,8 @@ Without `CERT_API_URL` the Verify page runs in **demo mode** with three clearly 
 | Draft text still to confirm with the owner | `CONTENT_TO_CONFIRM.md` |
 | Certificate shape + schema | `src/lib/certs/certificate.ts` |
 | Adapter interface (website ↔ the owner's database) | `src/lib/certs/adapter.ts` |
-| **The owner's database: the only provider-specific file** | `src/lib/certs/providers/registry-api.ts` |
-| DEMO records (used when `CERT_API_URL` is unset) | `src/lib/certs/providers/mock.ts` |
+| **The owner's database: the only provider-specific file** | `src/lib/certs/providers/coda.ts` |
+| DEMO records (used when `CODA_DOC_ID` is unset) | `src/lib/certs/providers/mock.ts` |
 | Lookup, cache, rate limit, population loader | `src/lib/certs/verify.ts`, `src/pages/api/verify.ts`, `src/lib/population.ts` |
 
 ### How certificate verification works
@@ -150,9 +150,9 @@ website edit or rebuild.
   and must be for the number asked. Errors reach the visitor only as a generic message; logs carry the error kind
   only. **The API key is read from server environment variables and is never sent to the browser or logged.**
 - **Adapter**: `src/lib/certs/adapter.ts` is the small interface (`getCertificate(number)`, optional `listAll()`).
-  `providers/registry-api.ts` is the one file that knows the owner's database; today it assumes a plain JSON API
-  (`GET {CERT_API_URL}/certificates/{number}` with `Authorization: Bearer {CERT_API_KEY}`) and maps common field
-  names. Once we know which system he uses, only that file changes. With `CERT_API_URL` unset, `providers/mock.ts`
+  `providers/coda.ts` is the one file that knows the owner's database; today it assumes a plain JSON API
+  (`GET {CODA_DOC_ID}/certificates/{number}` with `Authorization: Bearer {CODA_API_TOKEN}`) and maps common field
+  names. Once we know which system he uses, only that file changes. With `CODA_DOC_ID` unset, `providers/mock.ts`
   serves the DEMO records.
 - **Population report** (`/population`): needs the database to list every certificate (`listAll()`). It is hidden
   (404, not in the menu or sitemap) until **Site settings → Show the population report** is ticked. With the DEMO
@@ -193,9 +193,9 @@ website edit or rebuild.
    - Keystatic shows the values to add in Netlify: `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`,
      `KEYSTATIC_SECRET`, `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`. Add them, redeploy, sign in at /admin to test.
    - See https://keystatic.com/docs/github-mode for the current steps.
-4. **Certificate database**: once `registry-api.ts` matches the owner's system, the owner creates a **read-only** API key
+4. **Certificate database**: once `coda.ts` matches the owner's system, the owner creates a **read-only** API key
    in his database and adds two variables in Netlify (Site configuration → Environment variables, marked secret,
-   Functions scope): `CERT_API_URL` (the API address) and `CERT_API_KEY`. Redeploy, then verify one real certificate
+   Functions scope): `CODA_DOC_ID` (the API address) and `CODA_API_TOKEN`. Redeploy, then verify one real certificate
    number and one wrong number. If his API can list every certificate, tick **Show the population report** in Site
    settings and check the figures.
 5. **Forms**: Netlify → Forms → enable form detection, redeploy, then Forms → Form notifications → email to the owner's
@@ -206,8 +206,8 @@ website edit or rebuild.
 
 ## LAUNCH CHECKLIST
 
-- [ ] `CERT_API_URL` + read-only `CERT_API_KEY` set in Netlify; one real certificate and one wrong number tested (the
-      DEMO records disappear by themselves once `CERT_API_URL` is set).
+- [ ] `CODA_DOC_ID` + read-only `CODA_API_TOKEN` set in Netlify; one real certificate and one wrong number tested (the
+      DEMO records disappear by themselves once `CODA_DOC_ID` is set).
 - [ ] Population report switch: on only if the owner's database can list every certificate and the figures look right.
 - [ ] Every item in `CONTENT_TO_CONFIRM.md` confirmed by the owner (name, headline, process claims, grading scale
       and standards, About text, FAQ answers, phone, email, hours, location, privacy text) and the text updated.
