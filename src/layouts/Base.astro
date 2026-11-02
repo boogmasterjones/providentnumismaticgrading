@@ -51,7 +51,7 @@ const year = new Date().getFullYear();
         {tel && <a class="btn secondary" href={tel}>Call {settings.phone}</a>}
         <nav class="nav" aria-label="Main">
             <ul>
-              {NAV.map((l) => (
+              {NAV.filter((l) => l.href !== '/population' || settings.showPopulation).map((l) => (
                 <li><a href={l.href} aria-current={path === l.href || path.startsWith(l.href + '/') ? 'page' : undefined}>{l.label}</a></li>
               ))}
               <li><a class="btn" href="/submit">Submit coins</a></li>
@@ -88,7 +88,6 @@ const year = new Date().getFullYear();
           <ul>
             <li><a href="/submit">Submit coins</a></li>
             <li><a href="/verify">Verify a certificate</a></li>
-            <li><a href="/pcgs-lookup">PCGS lookup</a></li>
             <li><a href="/privacy">Privacy</a></li>
           </ul>
           <p class="muted">© {year} {settings.siteName}</p>

@@ -34,18 +34,18 @@ describe('coinTypeOf', () => {
 
 describe('computePopulation', () => {
   it('returns an empty report for no certificates', () => {
-    expect(computePopulation([])).toEqual({ grades: [], rows: [], total: 0, sampleCount: 0 });
+    expect(computePopulation([])).toEqual({ grades: [], rows: [], total: 0, demoCount: 0 });
   });
 
   it('groups by coin type and grade and totals each row', () => {
     const report = computePopulation([
       { countryDenomination: 'Roman Empire, denarius', year: 'c. 200 AD', grade: 'VF 30' },
       { countryDenomination: 'Roman Empire, denarius', year: 'c. 200 AD', grade: 'vf30' },
-      { countryDenomination: 'Roman Empire, denarius', year: 'c. 200 AD', grade: 'XF 40', sample: true },
+      { countryDenomination: 'Roman Empire, denarius', year: 'c. 200 AD', grade: 'XF 40', demo: true },
       { countryDenomination: 'United States, Morgan dollar', year: '1921', grade: 'MS 63' },
     ]);
     expect(report.total).toBe(4);
-    expect(report.sampleCount).toBe(1);
+    expect(report.demoCount).toBe(1);
     expect(report.grades).toEqual(['MS 63', 'XF 40', 'VF 30']);
     expect(report.rows).toEqual([
       { coinType: 'Roman Empire, denarius — c. 200 AD', counts: { 'VF 30': 2, 'XF 40': 1 }, total: 3 },

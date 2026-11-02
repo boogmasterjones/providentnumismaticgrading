@@ -59,7 +59,6 @@ export default config({
     brand: { name: 'Website editor' },
     navigation: {
       'Site': ['settings', 'fees', 'faq', 'gallery'],
-      'Certificates': ['certificates'],
       'Blog': ['blog'],
       'Pages': [
         'pageHome',
@@ -73,7 +72,6 @@ export default config({
         'pageBlog',
         'pageVerify',
         'pagePopulation',
-        'pagePcgs',
         'pagePrivacy',
         'pageThankYou',
       ],
@@ -111,6 +109,12 @@ export default config({
           }),
           { label: 'Social links', itemLabel: (p) => p.fields.label.value || 'Link' },
         ),
+        showPopulation: fields.checkbox({
+          label: 'Show the population report',
+          description:
+            'Leave OFF until we know the certificate database can list every certificate. While off, the Population page is hidden and not linked.',
+          defaultValue: false,
+        }),
         launched: fields.checkbox({
           label: 'Site is launched (let Google index it)',
           description:
@@ -196,7 +200,6 @@ export default config({
     pageBlog: page('Blog (list page)', 'blog'),
     pageVerify: page('Verify a certificate', 'verify'),
     pagePopulation: page('Population report', 'population'),
-    pagePcgs: page('PCGS lookup', 'pcgs-lookup'),
     pagePrivacy: page('Privacy', 'privacy'),
     pageThankYou: page('Thank-you page', 'thank-you'),
   },
@@ -223,49 +226,6 @@ export default config({
           label: 'Post',
           options: { image: { directory: 'public/images/blog', publicPath: '/images/blog/' } },
         }),
-      },
-    }),
-    certificates: collection({
-      label: 'Certificates',
-      path: 'content/certificates/*',
-      slugField: 'certNumber',
-      format: { data: 'json' },
-      columns: ['certNumber', 'coinDescription', 'grade'],
-      schema: {
-        certNumber: fields.slug({
-          name: {
-            label: 'Certificate number',
-            description: 'Exactly as printed on the label.',
-            validation: { isRequired: true },
-          },
-        }),
-        sample: fields.checkbox({
-          label: 'SAMPLE record (not a real certificate)',
-          description: 'Sample records show a "Sample record" badge. Delete all samples before launch.',
-          defaultValue: false,
-        }),
-        coinDescription: fields.text({ label: 'Coin description', validation: { isRequired: true } }),
-        year: fields.text({ label: 'Year or date', description: 'e.g. 1921, or "c. 200 AD"' }),
-        countryDenomination: fields.text({
-          label: 'Country / denomination',
-          description: 'e.g. "United States, Morgan dollar". Used to group the population report.',
-          validation: { isRequired: true },
-        }),
-        grade: fields.text({ label: 'Grade', validation: { isRequired: true } }),
-        strikeScore: fields.text({ label: 'Strike score' }),
-        surfaceScore: fields.text({ label: 'Surface score' }),
-        notes: fields.text({ label: 'Notes', multiline: true }),
-        obverse: fields.image({
-          label: 'Obverse photo (front)',
-          directory: 'public/images/certificates',
-          publicPath: '/images/certificates/',
-        }),
-        reverse: fields.image({
-          label: 'Reverse photo (back)',
-          directory: 'public/images/certificates',
-          publicPath: '/images/certificates/',
-        }),
-        dateGraded: fields.date({ label: 'Date graded' }),
       },
     }),
   },

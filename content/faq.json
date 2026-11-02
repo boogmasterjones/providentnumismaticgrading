@@ -3,7 +3,6 @@
     { "question": "What kinds of coins do you grade?", "answer": "[PLACEHOLDER — Alex to confirm] The current website mentions US, world and ancient coins, plus tokens and medals." },
     { "question": "How long does grading take?", "answer": "[PLACEHOLDER — Alex to confirm] See the Fees & turnaround page once Alex confirms the times." },
     { "question": "How do I ship my coins to you safely?", "answer": "[PLACEHOLDER — Alex to confirm] Packing, insurance and shipping instructions to come from Alex." },
-    { "question": "How can I check a certificate you issued?", "answer": "Use the Verify a certificate page and type the certificate number exactly as it appears on the label." },
-    { "question": "Can I look up a PCGS certificate here?", "answer": "Yes. The PCGS lookup page checks a PCGS certificate number and links to PCGS's own verification page. For NGC, CAC and ICG coins it links to their verification pages." }
+    { "question": "How can I check a certificate you issued?", "answer": "Use the Verify a certificate page and type the certificate number exactly as it appears on the label." }
   ]
 }

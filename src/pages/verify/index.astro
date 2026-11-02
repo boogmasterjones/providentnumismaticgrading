@@ -2,25 +2,18 @@
 import Base from '../../layouts/Base.astro';
 import PageIntro from '../../components/PageIntro.astro';
 import { loadPage } from '../../lib/pages';
-import { getCertIndex } from '../../lib/certificates';
-import { settings } from '../../lib/site';
+import { settings, telHref } from '../../lib/site';
 
 const { data, Content, hasBody } = await loadPage('verify');
-const index = await getCertIndex();
-const sampleCount = Object.values(index.certs).filter((c) => c.s).length;
+const tel = telHref(settings.phone);
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
   <PageIntro heading={data.heading} intro={data.intro} />
-  {sampleCount > 0 && (
-    <p class="notice warning">
-      Preview: the records on file are SAMPLE records (try <code>SAMPLE-0001</code>). They are deleted before launch.
-    </p>
-  )}
-  <form class="stack" id="verify-form" action="/verify" method="get" role="search">
+  <form class="stack verify-form" id="verify-form" action="/verify" method="get" role="search">
     <div class="field">
       <label for="cert">Certificate number</label>
       <span class="hint" id="cert-hint">Exactly as printed on the label. Capitals and spaces don't matter.</span>
-      <input id="cert" name="cert" type="text" required autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="cert-hint" />
+      <input id="cert" name="cert" type="text" required maxlength="100" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="cert-hint" />
     </div>
     <div><button class="btn" type="submit">Verify</button></div>
   </form>
@@ -32,44 +25,114 @@ const sampleCount = Object.values(index.certs).filter((c) => c.s).length;
       <p><strong>No certificate found for "<span data-cert></span>".</strong></p>
       <ul>
         <li>Check the number against the label, character by character (0 and O, 1 and I are easy to mix up).</li>
-        <li>Newly graded coins appear once their record is published. If your coin was graded recently, try again in a few days.</li>
-        <li>If the number is right and still isn't found, <a href="/contact">contact us</a>{settings.phone ? ` or call ${settings.phone}` : ''} before buying or selling the coin: the holder may not be one of ours.</li>
+        <li>A coin graded in the last few days may not be in the registry yet. Try again soon.</li>
+        <li>
+          If the number is right and still isn't found, <a href="/contact">contact us</a>{tel && <> or call <a href={tel}>{settings.phone}</a></>}
+          before buying or selling the coin: the holder may not be one of ours.
+        </li>
       </ul>
     </div>
   </template>
 
   {hasBody && <div class="prose"><Content /></div>}
-  <p class="muted prose">For coins graded by PCGS, NGC, CAC or ICG, use the <a href="/pcgs-lookup">PCGS lookup and other graders' links</a>.</p>
+  <p class="muted prose small">
+    A match means this certificate number is on record in our registry with the details shown. Compare them, and the
+    photos, with the coin and label in your hand.
+  </p>
 </Base>
 
 <script>
-  import { lookupCert, type CertIndex } from '../../lib/certIndex';
+  import type { VerifyResponseBody } from '../../lib/certs/verify';
+  import type { Certificate } from '../../lib/certs/certificate';
 
   const form = document.getElementById('verify-form') as HTMLFormElement;
   const input = document.getElementById('cert') as HTMLInputElement;
   const out = document.getElementById('verify-result') as HTMLDivElement;
   const tpl = document.getElementById('not-found-template') as HTMLTemplateElement;
-  let index: Promise<CertIndex> | null = null;
-  const loadIndex = () =>
-    (index ??= fetch('/verify/certificates.json').then((r) => {
-      if (!r.ok) throw new Error('index');
-      return r.json() as Promise<CertIndex>;
-    }));
+
+  /** Build DOM with textContent only: nothing from the database is ever inserted as HTML. */
+  function el(tag: string, attrs: Record<string, string> = {}, ...kids: (Node | string)[]) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    e.append(...kids);
+    return e;
+  }
+
+  function photo(url: string | undefined, side: string, cert: string) {
+    return url
+      ? el('img', { src: url, alt: `${side} of certificate ${cert}`, loading: 'lazy', decoding: 'async' })
+      : el('div', { class: 'photo-placeholder' }, `${side} photo`);
+  }
+
+  function card(c: Certificate) {
+    const facts: [string, string | undefined][] = [
+      ['Certificate number', c.certNumber],
+      ['Coin', c.coinDescription],
+      ['Year', c.year],
+      ['Country / denomination', c.countryDenomination],
+      ['Grade', c.grade],
+      ['Strike', c.strikeScore],
+      ['Surface', c.surfaceScore],
+      ['Date graded', c.dateGraded],
+    ];
+    const dl = el('dl', { class: 'facts' });
+    for (const [k, v] of facts) if (v) dl.append(el('dt', {}, k), el('dd', {}, v));
+    const head = el(
+      'div',
+      { class: 'cert-card-head' },
+      el('p', { class: 'cert-status' }, c.demo ? 'Demo record' : 'On record in our registry'),
+      el('h2', {}, `Certificate ${c.certNumber}`),
+    );
+    if (c.demo) head.append(el('span', { class: 'badge demo' }, 'DEMO'));
+    const parts: Node[] = [head];
+    if (c.demo) {
+      parts.push(
+        el('p', { class: 'notice warning' }, el('strong', {}, 'Demo record. '), 'The certificate database is not connected yet. This made-up record only previews the page.'),
+      );
+    }
+    parts.push(
+      el(
+        'div',
+        { class: 'cert-card-body' },
+        dl,
+        el('div', { class: 'coin-photos' }, photo(c.obverseUrl, 'Obverse (front)', c.certNumber), photo(c.reverseUrl, 'Reverse (back)', c.certNumber)),
+      ),
+    );
+    if (c.notes) parts.push(el('p', { class: 'cert-notes' }, c.notes));
+    parts.push(
+      el(
+        'p',
+        { class: 'muted small' },
+        'This confirms the certificate number exists in our registry with these details. If the coin or label in front of you differs from them, ',
+        el('a', { href: '/contact' }, 'contact us'),
+        ' before buying or selling it.',
+      ),
+    );
+    return el('article', { class: 'cert-card' }, ...parts);
+  }
 
   async function verify(value: string) {
-    out.textContent = 'Checking…';
+    out.replaceChildren(el('p', { class: 'muted' }, 'Checking…'));
     try {
-      const hit = lookupCert(await loadIndex(), value);
-      if (hit) {
-        window.location.assign(hit.u);
+      const res = await fetch(`/api/verify?cert=${encodeURIComponent(value)}`, { headers: { Accept: 'application/json' } });
+      const body = (await res.json()) as VerifyResponseBody;
+      if (!body.ok) {
+        out.replaceChildren(el('p', { class: 'notice error' }, body.error ?? 'The lookup is not available right now.'));
+        return;
+      }
+      if (body.found && body.certificate) {
+        out.replaceChildren(card(body.certificate));
         return;
       }
       const node = tpl.content.cloneNode(true) as DocumentFragment;
       (node.querySelector('[data-cert]') as HTMLElement).textContent = value;
-      out.replaceChildren(node);
+      const parts: Node[] = [node];
+      if (body.mode === 'demo') {
+        parts.unshift(el('p', { class: 'notice warning' }, 'Preview: the certificate database is not connected yet. Try DEMO-0001, DEMO-0002 or DEMO-0003.'));
+      }
+      out.replaceChildren(...parts);
     } catch {
-      index = null;
-      out.textContent = 'The lookup could not load. Please check your connection and try again.';
+      out.replaceChildren(el('p', { class: 'notice error' }, 'The lookup could not load. Please check your connection and try again.'));
     }
   }
 

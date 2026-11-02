@@ -1,13 +1,13 @@
 /**
- * Population report: how many certificates exist for each coin type at each grade. Computed at build time from the
- * certificate records, so it is always in step with what is published.
+ * Population report: how many certificates exist for each coin type at each grade. Computed on the server from the
+ * certificate database's full list (when it can provide one): see loadPopulation() in certs/verify.ts.
  */
 
 export interface PopulationInput {
   year?: string | null;
   countryDenomination: string;
   grade: string;
-  sample?: boolean;
+  demo?: boolean;
 }
 
 export interface PopulationRow {
@@ -21,7 +21,7 @@ export interface PopulationReport {
   grades: string[];
   rows: PopulationRow[];
   total: number;
-  sampleCount: number;
+  demoCount: number;
 }
 
 const clean = (s: string | null | undefined) => (s ?? '').replace(/\s+/g, ' ').trim();
@@ -58,9 +58,9 @@ export function compareGrades(a: string, b: string): number {
 export function computePopulation(certs: PopulationInput[]): PopulationReport {
   const byType = new Map<string, Record<string, number>>();
   const grades = new Set<string>();
-  let sampleCount = 0;
+  let demoCount = 0;
   for (const c of certs) {
-    if (c.sample) sampleCount++;
+    if (c.demo) demoCount++;
     const type = coinTypeOf(c);
     const grade = normalizeGrade(c.grade);
     grades.add(grade);
@@ -79,6 +79,6 @@ export function computePopulation(certs: PopulationInput[]): PopulationReport {
     grades: [...grades].sort(compareGrades),
     rows,
     total: certs.length,
-    sampleCount,
+    demoCount,
   };
 }

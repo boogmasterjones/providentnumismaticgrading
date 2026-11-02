@@ -8,5 +8,6 @@
   "hours": "Monday to Saturday, 9am to 8pm [PLACEHOLDER — Alex to confirm]",
   "contactNote": "[PLACEHOLDER — Alex to confirm] Business name, phone, email, hours and location are taken from the current website and need Alex's OK for the new site.",
   "socialLinks": [],
+  "showPopulation": false,
   "launched": false
 }

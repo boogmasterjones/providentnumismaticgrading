@@ -27,22 +27,4 @@ const blog = defineCollection({
   }),
 });
 
-const certificates = defineCollection({
-  loader: glob({ pattern: '*.json', base: './content/certificates' }),
-  schema: z.object({
-    certNumber: z.string(),
-    sample: z.boolean().optional().default(false),
-    coinDescription: z.string(),
-    year: z.string().nullish(),
-    countryDenomination: z.string(),
-    grade: z.string(),
-    strikeScore: z.string().nullish(),
-    surfaceScore: z.string().nullish(),
-    notes: z.string().nullish(),
-    obverse: z.string().nullish(),
-    reverse: z.string().nullish(),
-    dateGraded: z.string().nullish(),
-  }),
-});
-
-export const collections = { pages, blog, certificates };
+export const collections = { pages, blog };

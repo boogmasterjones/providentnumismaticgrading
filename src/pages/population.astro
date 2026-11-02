@@ -2,40 +2,59 @@
 import Base from '../layouts/Base.astro';
 import PageIntro from '../components/PageIntro.astro';
 import { loadPage } from '../lib/pages';
-import { getPopulation } from '../lib/certificates';
+import { settings } from '../lib/site';
+import { loadPopulation } from '../lib/certs/verify';
+import { getCertStore, getServerCertAdapter } from '../lib/certs/server';
+
+// Built on request from the certificate database (cached for an hour), so it stays current without a rebuild.
+export const prerender = false;
 
 const { data, Content, hasBody } = await loadPage('population');
-const pop = await getPopulation();
+// Hidden unless "Show the population report" is ticked in Site settings.
+const enabled = settings.showPopulation;
+if (!enabled) Astro.response.status = 404;
+const outcome = enabled
+  ? await loadPopulation({ adapter: getServerCertAdapter(), store: getCertStore(), now: Date.now, log: (m) => console.warn(m) })
+  : null;
+const pop = outcome?.kind === 'report' ? outcome.report : null;
 ---
-<Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} />
-  {pop.sampleCount > 0 && (
-    <p class="notice warning">Preview: these figures include {pop.sampleCount} SAMPLE record{pop.sampleCount === 1 ? '' : 's'}, which are deleted before launch.</p>
-  )}
-  {pop.total === 0 ? (
-    <p>No certificates published yet.</p>
-  ) : (
-    <div class="table-wrap">
-      <table>
-        <caption class="muted" style="text-align:left">{pop.total} coin{pop.total === 1 ? '' : 's'} graded, by coin type and grade</caption>
-        <thead>
-          <tr>
-            <th scope="col">Coin type</th>
-            {pop.grades.map((g) => <th scope="col" class="num">{g}</th>)}
-            <th scope="col" class="num">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pop.rows.map((r) => (
+{!enabled ? (
+  <Base title="Page not found" description="This page is not available." noindex>
+    <h1>Page not found</h1>
+    <p>This page isn't available. Try the <a href="/">home page</a>, or <a href="/verify">verify a certificate</a>.</p>
+  </Base>
+) : (
+  <Base title={data.metaTitle} description={data.metaDescription}>
+    <PageIntro heading={data.heading} intro={data.intro} />
+    {outcome?.kind === 'report' && outcome.demo && (
+      <p class="notice warning"><span class="badge demo">DEMO</span> These figures come from made-up DEMO records. The certificate database is not connected yet.</p>
+    )}
+    {outcome?.kind === 'unsupported' && <p class="notice info">The population report isn't available yet.</p>}
+    {outcome?.kind === 'error' && <p class="notice error">The population report can't be loaded right now. Please try again later.</p>}
+    {pop && pop.total === 0 && <p>No certificates on record yet.</p>}
+    {pop && pop.total > 0 && (
+      <div class="table-wrap">
+        <table>
+          <caption>{pop.total} coin{pop.total === 1 ? '' : 's'} graded, by coin type and grade</caption>
+          <thead>
             <tr>
-              <th scope="row">{r.coinType}</th>
-              {pop.grades.map((g) => <td class="num">{r.counts[g] ?? '–'}</td>)}
-              <td class="num"><strong>{r.total}</strong></td>
+              <th scope="col">Coin type</th>
+              {pop.grades.map((g) => <th scope="col" class="num">{g}</th>)}
+              <th scope="col" class="num">Total</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )}
-  {hasBody && <div class="prose"><Content /></div>}
-</Base>
+          </thead>
+          <tbody>
+            {pop.rows.map((r) => (
+              <tr>
+                <th scope="row">{r.coinType}</th>
+                {pop.grades.map((g) => <td class="num">{r.counts[g] ?? '–'}</td>)}
+                <td class="num"><strong>{r.total}</strong></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+    {hasBody && <div class="prose"><Content /></div>}
+  </Base>
+)}

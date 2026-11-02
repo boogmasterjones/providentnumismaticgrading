@@ -12,7 +12,7 @@ const settings = JSON.parse(readFileSync(new URL('./content/settings.json', impo
 
 export default defineConfig({
   site: settings.siteUrl,
-  // Pages are static (fast, cheap); only the editor (/keystatic) and /api/pcgs run on demand on Netlify.
+  // Pages are static (fast, cheap); only the editor (/keystatic), /api/verify and /population run on demand on Netlify.
   output: 'static',
   // No edge functions in this site; turning off their local emulation avoids a Deno start-up error in `astro dev`.
   adapter: netlify({ devFeatures: { images: true, environmentVariables: false, edgeFunctions: false } }),
@@ -22,6 +22,8 @@ export default defineConfig({
     keystatic(),
     sitemap({
       filter: (page) => !/\/(thank-you|keystatic|404)(\/|$)/.test(page),
+      // /population is rendered on request, so it is added by hand (only when it is switched on).
+      customPages: settings.showPopulation ? [new URL('/population', settings.siteUrl).href] : [],
     }),
   ],
   redirects: {

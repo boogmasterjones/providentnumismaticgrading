@@ -4,7 +4,6 @@ export const NAV = [
   { href: '/grading-standards', label: 'Grading standards' },
   { href: '/verify', label: 'Verify a certificate' },
   { href: '/population', label: 'Population' },
-  { href: '/pcgs-lookup', label: 'PCGS lookup' },
   { href: '/faq', label: 'FAQ' },
   { href: '/blog', label: 'Blog' },
   { href: '/about', label: 'About' },

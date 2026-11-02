@@ -14,6 +14,8 @@ export interface SiteSettings {
   hours: string;
   contactNote: string;
   socialLinks: { label: string; url: string }[];
+  /** Show the population report page (only once the certificate database can list every certificate). */
+  showPopulation: boolean;
   launched: boolean;
 }
 
@@ -32,6 +34,7 @@ export const settings: SiteSettings = {
   hours: '',
   contactNote: '',
   socialLinks: [],
+  showPopulation: false,
   launched: false,
   ...(settingsJson as Partial<SiteSettings>),
 } as SiteSettings;
