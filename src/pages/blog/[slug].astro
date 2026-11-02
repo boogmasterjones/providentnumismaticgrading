@@ -1,0 +1,32 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { publishedPosts, formatDate } from '../../lib/blog';
+import { settings } from '../../lib/site';
+
+export async function getStaticPaths() {
+  const posts = await publishedPosts();
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+const { post } = Astro.props;
+const { Content } = await render(post);
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  datePublished: post.data.date.toISOString().slice(0, 10),
+  description: post.data.description,
+  publisher: { '@type': 'Organization', name: settings.siteName },
+  ...(post.data.cover ? { image: new URL(post.data.cover, settings.siteUrl).href } : {}),
+};
+---
+<Base title={post.data.title} description={post.data.description}>
+  <article class="prose">
+    <p><a href="/blog">← All posts</a></p>
+    <h1>{post.data.title}</h1>
+    <p class="muted"><time datetime={post.data.date.toISOString().slice(0, 10)}>{formatDate(post.data.date)}</time></p>
+    {post.data.cover && <img src={post.data.cover} alt={post.data.coverAlt ?? ''} decoding="async" />}
+    <Content />
+  </article>
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+</Base>

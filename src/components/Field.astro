@@ -1,0 +1,32 @@
+---
+/** Labelled form field. Every input has a visible label and, when given, a hint linked with aria-describedby. */
+interface Props {
+  name: string;
+  label: string;
+  type?: 'text' | 'email' | 'tel' | 'number' | 'textarea' | 'select';
+  required?: boolean;
+  hint?: string;
+  autocomplete?: string;
+  options?: string[];
+  rows?: number;
+  min?: number;
+  inputmode?: 'numeric' | 'decimal' | 'text' | 'tel' | 'email';
+}
+const { name, label, type = 'text', required = false, hint, autocomplete, options = [], rows = 4, min, inputmode } = Astro.props;
+const id = `f-${name}`;
+const hintId = hint ? `${id}-hint` : undefined;
+---
+<div class="field">
+  <label for={id}>{label}{required && <span class="req" aria-hidden="true"> *</span>}</label>
+  {hint && <span class="hint" id={hintId}>{hint}</span>}
+  {type === 'textarea' ? (
+    <textarea id={id} name={name} rows={rows} required={required} aria-describedby={hintId} autocomplete={autocomplete}></textarea>
+  ) : type === 'select' ? (
+    <select id={id} name={name} required={required} aria-describedby={hintId}>
+      <option value="">Choose…</option>
+      {options.map((o) => <option value={o}>{o}</option>)}
+    </select>
+  ) : (
+    <input id={id} name={name} type={type} required={required} aria-describedby={hintId} autocomplete={autocomplete} min={min} inputmode={inputmode} />
+  )}
+</div>

@@ -1,0 +1,9 @@
+---
+interface Props { heading: string; intro?: string }
+const { heading, intro } = Astro.props;
+---
+<header class="prose">
+  <h1>{heading}</h1>
+  {intro && <p class="lead">{intro}</p>}
+  <slot />
+</header>

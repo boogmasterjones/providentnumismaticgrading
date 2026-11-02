@@ -1,0 +1,27 @@
+{
+  "tiers": [
+    {
+      "name": "Tier 1 [PLACEHOLDER — Alex to confirm]",
+      "price": "[PLACEHOLDER — Alex to confirm]",
+      "turnaround": "[PLACEHOLDER — Alex to confirm]",
+      "notes": "The current website lists fees from $18 to $120 per coin by tier. Tier names, prices and turnaround times are needed from Alex."
+    },
+    {
+      "name": "Tier 2 [PLACEHOLDER — Alex to confirm]",
+      "price": "[PLACEHOLDER — Alex to confirm]",
+      "turnaround": "[PLACEHOLDER — Alex to confirm]",
+      "notes": ""
+    },
+    {
+      "name": "Tier 3 [PLACEHOLDER — Alex to confirm]",
+      "price": "[PLACEHOLDER — Alex to confirm]",
+      "turnaround": "[PLACEHOLDER — Alex to confirm]",
+      "notes": ""
+    }
+  ],
+  "extraNotes": [
+    "Insurance: [PLACEHOLDER — Alex to confirm] (the current website says 1% of declared value).",
+    "Signature on delivery: [PLACEHOLDER — Alex to confirm] (the current website says it is required for packages over $750).",
+    "Return shipping: [PLACEHOLDER — Alex to confirm]"
+  ]
+}

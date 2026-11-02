@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import { loadPage } from '../../lib/pages';
+import { publishedPosts, formatDate } from '../../lib/blog';
+
+const { data, Content, hasBody } = await loadPage('blog');
+const posts = await publishedPosts();
+---
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <PageIntro heading={data.heading} intro={data.intro} />
+  {hasBody && <div class="prose"><Content /></div>}
+  {posts.length === 0 ? (
+    <p>No posts yet.</p>
+  ) : (
+    <ul class="grid" style="list-style:none;padding:0">
+      {posts.map((p) => (
+        <li class="card">
+          {p.data.cover && <img src={p.data.cover} alt={p.data.coverAlt ?? ''} loading="lazy" decoding="async" />}
+          <h2 style="font-size:1.25rem"><a href={`/blog/${p.id}`}>{p.data.title}</a></h2>
+          <p class="muted"><time datetime={p.data.date.toISOString().slice(0, 10)}>{formatDate(p.data.date)}</time></p>
+          <p>{p.data.description}</p>
+        </li>
+      ))}
+    </ul>
+  )}
+</Base>

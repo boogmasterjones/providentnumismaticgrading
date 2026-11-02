@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import { loadPage } from '../lib/pages';
+import { faq } from '../lib/site';
+
+const { data, Content, hasBody } = await loadPage('faq');
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faq.items.map((i) => ({ '@type': 'Question', name: i.question, acceptedAnswer: { '@type': 'Answer', text: i.answer } })),
+};
+---
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <PageIntro heading={data.heading} intro={data.intro} />
+  <div class="prose">
+    {faq.items.map((i) => (
+      <details>
+        <summary><strong>{i.question}</strong></summary>
+        <p style="white-space: pre-line">{i.answer}</p>
+      </details>
+    ))}
+    {hasBody && <Content />}
+  </div>
+  {faq.items.length > 0 && <script type="application/ld+json" set:html={JSON.stringify(ld)} />}
+</Base>

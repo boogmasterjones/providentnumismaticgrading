@@ -1,0 +1,15 @@
+---
+/** A page that is only editable text: heading, intro and body from Keystatic. */
+import Base from '../layouts/Base.astro';
+import PageIntro from './PageIntro.astro';
+import { loadPage } from '../lib/pages';
+
+interface Props { id: string; noindex?: boolean }
+const { id, noindex } = Astro.props;
+const { data, Content, hasBody } = await loadPage(id);
+---
+<Base title={data.metaTitle} description={data.metaDescription} noindex={noindex}>
+  <PageIntro heading={data.heading} intro={data.intro} />
+  {hasBody && <div class="prose"><Content /></div>}
+  <slot />
+</Base>

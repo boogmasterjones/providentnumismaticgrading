@@ -1,0 +1,41 @@
+{
+  "name": "provident-grading",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.22.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/markdoc": "2.1.0",
+    "@astrojs/netlify": "8.2.10",
+    "@astrojs/react": "7.1.0",
+    "@astrojs/sitemap": "3.7.4",
+    "@keystatic/astro": "6.0.0",
+    "@keystatic/core": "0.6.9",
+    "@netlify/blobs": "11.1.4",
+    "astro": "7.4.0",
+    "react": "19.1.10",
+    "react-dom": "19.1.10"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@netlify/functions": "6.0.2",
+    "@types/node": "24.13.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.12"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}

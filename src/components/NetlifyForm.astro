@@ -1,0 +1,18 @@
+---
+/**
+ * Netlify Forms: Netlify finds this form in the built HTML at deploy time and emails each entry to the address set in
+ * the Netlify site (Forms > Form notifications). "bot-field" is a honeypot: humans never see it, bots fill it in,
+ * and Netlify drops those entries.
+ */
+interface Props { name: string; submitLabel: string }
+const { name, submitLabel } = Astro.props;
+---
+<form class="stack" name={name} method="POST" action="/thank-you" data-netlify="true" netlify-honeypot="bot-field">
+  <input type="hidden" name="form-name" value={name} />
+  <p class="hidden-field" aria-hidden="true">
+    <label>Leave this empty: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+  </p>
+  <p class="muted">Fields marked <span class="req">*</span> are required.</p>
+  <slot />
+  <div><button class="btn" type="submit">{submitLabel}</button></div>
+</form>

@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import { loadPage } from '../lib/pages';
+import { fees } from '../lib/site';
+
+const { data, Content, hasBody } = await loadPage('fees');
+---
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <PageIntro heading={data.heading} intro={data.intro} />
+  <div class="table-wrap">
+    <table>
+      <caption class="muted" style="text-align:left">Grading fees per coin</caption>
+      <thead>
+        <tr><th scope="col">Service</th><th scope="col">Price per coin</th><th scope="col">Turnaround</th><th scope="col">Notes</th></tr>
+      </thead>
+      <tbody>
+        {fees.tiers.map((t) => (
+          <tr><th scope="row">{t.name}</th><td>{t.price}</td><td>{t.turnaround}</td><td>{t.notes}</td></tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  {fees.extraNotes.length > 0 && (
+    <ul class="prose">{fees.extraNotes.map((n) => <li>{n}</li>)}</ul>
+  )}
+  {hasBody && <div class="prose"><Content /></div>}
+  <div class="actions"><a class="btn" href="/submit">Start a submission</a></div>
+</Base>

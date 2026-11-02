@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import NetlifyForm from '../components/NetlifyForm.astro';
+import Field from '../components/Field.astro';
+import { loadPage } from '../lib/pages';
+import { settings, telHref, mailtoHref } from '../lib/site';
+
+const { data, Content, hasBody } = await loadPage('contact');
+const tel = telHref(settings.phone);
+const mailto = mailtoHref(settings.email);
+---
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <PageIntro heading={data.heading} intro={data.intro} />
+  <div class="grid">
+    <section class="card" aria-labelledby="direct">
+      <h2 id="direct">Call, text or email</h2>
+      <ul>
+        {settings.phone && <li>Phone: {tel ? <a href={tel}>{settings.phone}</a> : settings.phone}</li>}
+        {settings.email && <li>Email: {mailto ? <a href={mailto}>{settings.email}</a> : settings.email}</li>}
+        {settings.location && <li>{settings.location}</li>}
+        {settings.hours && <li>{settings.hours}</li>}
+      </ul>
+      {settings.contactNote && <p class="muted">{settings.contactNote}</p>}
+    </section>
+    <section aria-labelledby="msg">
+      <h2 id="msg">Send a message</h2>
+      <NetlifyForm name="contact" submitLabel="Send message">
+        <Field name="name" label="Your name" required autocomplete="name" />
+        <Field name="email" label="Email" type="email" required autocomplete="email" />
+        <Field name="phone" label="Phone" type="tel" autocomplete="tel" />
+        <Field name="message" label="Message" type="textarea" required rows={6} />
+      </NetlifyForm>
+    </section>
+  </div>
+  {hasBody && <div class="prose"><Content /></div>}
+</Base>

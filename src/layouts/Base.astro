@@ -1,0 +1,99 @@
+---
+import '../styles/theme.css';
+import '../styles/global.css';
+import { settings, telHref, mailtoHref } from '../lib/site';
+import { NAV } from '../lib/nav';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Set for pages that must never be indexed (thank-you, 404). */
+  noindex?: boolean;
+}
+const { title, description, noindex = false } = Astro.props;
+const fullTitle = title.includes(settings.siteName) ? title : `${title} | ${settings.siteName}`;
+// One switch for the whole site: until "launched" is ticked in Site settings, nothing is indexed.
+const blockIndexing = noindex || !settings.launched;
+const canonical = new URL(Astro.url.pathname, settings.siteUrl).href;
+const tel = telHref(settings.phone);
+const mailto = mailtoHref(settings.email);
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const year = new Date().getFullYear();
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {blockIndexing && <meta name="robots" content="noindex, nofollow" />}
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    {!settings.launched && (
+      <div class="preview-banner" role="note">
+        <div class="container">
+          Preview site, not launched. Text marked [PLACEHOLDER] is waiting for the owner's confirmation.
+        </div>
+      </div>
+    )}
+    <header class="site-header">
+      <div class="container bar">
+        <a class="brand" href="/">{settings.siteName}</a>
+        {tel && <a class="btn secondary" href={tel}>Call {settings.phone}</a>}
+        <nav class="nav" aria-label="Main">
+            <ul>
+              {NAV.map((l) => (
+                <li><a href={l.href} aria-current={path === l.href || path.startsWith(l.href + '/') ? 'page' : undefined}>{l.label}</a></li>
+              ))}
+              <li><a class="btn" href="/submit">Submit coins</a></li>
+            </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main">
+      <div class="container">
+        <slot />
+      </div>
+    </main>
+    <footer class="site-footer">
+      <div class="container cols">
+        <div>
+          <p><strong>{settings.siteName}</strong></p>
+          {settings.tagline && <p class="muted">{settings.tagline}</p>}
+          {settings.location && <p>{settings.location}</p>}
+        </div>
+        <div>
+          <ul>
+            {settings.phone && <li>{tel ? <a href={tel}>{settings.phone}</a> : settings.phone}</li>}
+            {settings.email && <li>{mailto ? <a href={mailto}>{settings.email}</a> : settings.email}</li>}
+            {settings.hours && <li class="muted">{settings.hours}</li>}
+          </ul>
+          {settings.contactNote && <p class="muted">{settings.contactNote}</p>}
+          {settings.socialLinks.length > 0 && (
+            <ul>
+              {settings.socialLinks.map((s) => <li><a href={s.url} rel="noopener">{s.label}</a></li>)}
+            </ul>
+          )}
+        </div>
+        <div>
+          <ul>
+            <li><a href="/submit">Submit coins</a></li>
+            <li><a href="/verify">Verify a certificate</a></li>
+            <li><a href="/pcgs-lookup">PCGS lookup</a></li>
+            <li><a href="/privacy">Privacy</a></li>
+          </ul>
+          <p class="muted">© {year} {settings.siteName}</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

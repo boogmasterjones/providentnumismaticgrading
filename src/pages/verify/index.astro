@@ -1,0 +1,89 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageIntro from '../../components/PageIntro.astro';
+import { loadPage } from '../../lib/pages';
+import { getCertIndex } from '../../lib/certificates';
+import { settings } from '../../lib/site';
+
+const { data, Content, hasBody } = await loadPage('verify');
+const index = await getCertIndex();
+const sampleCount = Object.values(index.certs).filter((c) => c.s).length;
+---
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <PageIntro heading={data.heading} intro={data.intro} />
+  {sampleCount > 0 && (
+    <p class="notice warning">
+      Preview: the records on file are SAMPLE records (try <code>SAMPLE-0001</code>). They are deleted before launch.
+    </p>
+  )}
+  <form class="stack" id="verify-form" action="/verify" method="get" role="search">
+    <div class="field">
+      <label for="cert">Certificate number</label>
+      <span class="hint" id="cert-hint">Exactly as printed on the label. Capitals and spaces don't matter.</span>
+      <input id="cert" name="cert" type="text" required autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="cert-hint" />
+    </div>
+    <div><button class="btn" type="submit">Verify</button></div>
+  </form>
+  <div id="verify-result" aria-live="polite"></div>
+  <noscript><p class="notice info">The lookup needs JavaScript. You can also <a href="/contact">contact us</a> with the certificate number.</p></noscript>
+
+  <template id="not-found-template">
+    <div class="notice error">
+      <p><strong>No certificate found for "<span data-cert></span>".</strong></p>
+      <ul>
+        <li>Check the number against the label, character by character (0 and O, 1 and I are easy to mix up).</li>
+        <li>Newly graded coins appear once their record is published. If your coin was graded recently, try again in a few days.</li>
+        <li>If the number is right and still isn't found, <a href="/contact">contact us</a>{settings.phone ? ` or call ${settings.phone}` : ''} before buying or selling the coin: the holder may not be one of ours.</li>
+      </ul>
+    </div>
+  </template>
+
+  {hasBody && <div class="prose"><Content /></div>}
+  <p class="muted prose">For coins graded by PCGS, NGC, CAC or ICG, use the <a href="/pcgs-lookup">PCGS lookup and other graders' links</a>.</p>
+</Base>
+
+<script>
+  import { lookupCert, type CertIndex } from '../../lib/certIndex';
+
+  const form = document.getElementById('verify-form') as HTMLFormElement;
+  const input = document.getElementById('cert') as HTMLInputElement;
+  const out = document.getElementById('verify-result') as HTMLDivElement;
+  const tpl = document.getElementById('not-found-template') as HTMLTemplateElement;
+  let index: Promise<CertIndex> | null = null;
+  const loadIndex = () =>
+    (index ??= fetch('/verify/certificates.json').then((r) => {
+      if (!r.ok) throw new Error('index');
+      return r.json() as Promise<CertIndex>;
+    }));
+
+  async function verify(value: string) {
+    out.textContent = 'Checking…';
+    try {
+      const hit = lookupCert(await loadIndex(), value);
+      if (hit) {
+        window.location.assign(hit.u);
+        return;
+      }
+      const node = tpl.content.cloneNode(true) as DocumentFragment;
+      (node.querySelector('[data-cert]') as HTMLElement).textContent = value;
+      out.replaceChildren(node);
+    } catch {
+      index = null;
+      out.textContent = 'The lookup could not load. Please check your connection and try again.';
+    }
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const v = input.value.trim();
+    if (!v) return;
+    history.replaceState(null, '', `?cert=${encodeURIComponent(v)}`);
+    void verify(v);
+  });
+
+  const fromUrl = new URLSearchParams(location.search).get('cert');
+  if (fromUrl) {
+    input.value = fromUrl;
+    void verify(fromUrl);
+  }
+</script>

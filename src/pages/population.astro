@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import { loadPage } from '../lib/pages';
+import { getPopulation } from '../lib/certificates';
+
+const { data, Content, hasBody } = await loadPage('population');
+const pop = await getPopulation();
+---
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <PageIntro heading={data.heading} intro={data.intro} />
+  {pop.sampleCount > 0 && (
+    <p class="notice warning">Preview: these figures include {pop.sampleCount} SAMPLE record{pop.sampleCount === 1 ? '' : 's'}, which are deleted before launch.</p>
+  )}
+  {pop.total === 0 ? (
+    <p>No certificates published yet.</p>
+  ) : (
+    <div class="table-wrap">
+      <table>
+        <caption class="muted" style="text-align:left">{pop.total} coin{pop.total === 1 ? '' : 's'} graded, by coin type and grade</caption>
+        <thead>
+          <tr>
+            <th scope="col">Coin type</th>
+            {pop.grades.map((g) => <th scope="col" class="num">{g}</th>)}
+            <th scope="col" class="num">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {pop.rows.map((r) => (
+            <tr>
+              <th scope="row">{r.coinType}</th>
+              {pop.grades.map((g) => <td class="num">{r.counts[g] ?? '–'}</td>)}
+              <td class="num"><strong>{r.total}</strong></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+  {hasBody && <div class="prose"><Content /></div>}
+</Base>

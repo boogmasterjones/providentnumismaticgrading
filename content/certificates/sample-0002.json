@@ -1,0 +1,14 @@
+{
+  "certNumber": "SAMPLE-0002",
+  "sample": true,
+  "coinDescription": "SAMPLE RECORD — Roman Empire silver denarius (not a real coin or grade)",
+  "year": "c. 200 AD",
+  "countryDenomination": "Roman Empire, denarius",
+  "grade": "XF 40",
+  "strikeScore": "5/5",
+  "surfaceScore": "4/5",
+  "notes": "Sample record for previewing the website. Delete before launch.",
+  "obverse": null,
+  "reverse": null,
+  "dateGraded": "2026-11-01"
+}

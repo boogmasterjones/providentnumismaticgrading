@@ -1,0 +1,137 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import { loadPage } from '../lib/pages';
+import { VERIFY_LINKS } from '../lib/pcgs/lookup';
+
+const { data, Content, hasBody } = await loadPage('pcgs-lookup');
+---
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <PageIntro heading={data.heading} intro={data.intro} />
+
+  <form class="stack" id="pcgs-form" role="search">
+    <div class="field">
+      <label for="pcgs-kind">What are you typing?</label>
+      <select id="pcgs-kind" name="kind">
+        <option value="cert">PCGS certificate number</option>
+        <option value="barcode-PCGS">Barcode number on a PCGS holder</option>
+        <option value="barcode-NGC">Barcode number on an NGC holder</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="pcgs-value">Number</label>
+      <span class="hint" id="pcgs-hint">Digits only. A PCGS certificate number is usually 7 or 8 digits.</span>
+      <input id="pcgs-value" name="value" type="text" inputmode="numeric" autocomplete="off" required aria-describedby="pcgs-hint" />
+    </div>
+    <div><button class="btn" type="submit">Look up</button></div>
+  </form>
+
+  <div id="pcgs-result" aria-live="polite"></div>
+
+  <section class="prose" aria-labelledby="verify-elsewhere">
+    <p class="notice info">
+      <strong>Always confirm on the grader's own site.</strong> A matching record does not prove the coin or holder in
+      your hand is genuine: counterfeit and altered holders exist. Compare the coin, grade and label with the grader's
+      record and photos. This page shows information supplied by PCGS and is not run by PCGS.
+    </p>
+    <h2 id="verify-elsewhere">Other grading companies</h2>
+    <p>NGC, CAC and ICG do not offer a lookup we can connect to. Check their certificates on their own sites:</p>
+    <ul>
+      <li><a href={VERIFY_LINKS.pcgs} rel="noopener" target="_blank">PCGS certificate verification</a></li>
+      <li><a href={VERIFY_LINKS.ngc} rel="noopener" target="_blank">NGC certificate verification</a></li>
+      <li><a href={VERIFY_LINKS.cac} rel="noopener" target="_blank">CAC verification</a></li>
+      <li><a href={VERIFY_LINKS.icg} rel="noopener" target="_blank">ICG certificate verification</a></li>
+      <li>One of our own holders? <a href="/verify">Verify it here</a>.</li>
+    </ul>
+  </section>
+  {hasBody && <div class="prose"><Content /></div>}
+</Base>
+
+<script>
+  import type { LookupResponseBody, Coin } from '../lib/pcgs/lookup';
+
+  const form = document.getElementById('pcgs-form') as HTMLFormElement;
+  const kind = document.getElementById('pcgs-kind') as HTMLSelectElement;
+  const input = document.getElementById('pcgs-value') as HTMLInputElement;
+  const out = document.getElementById('pcgs-result') as HTMLDivElement;
+
+  /** Build DOM with textContent only: nothing from PCGS is ever inserted as HTML. */
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, string> = {}, ...kids: (Node | string)[]) {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    e.append(...kids);
+    return e;
+  }
+  const link = (href: string, text: string) => el('a', { href, rel: 'noopener', target: '_blank' }, text);
+
+  function coinFacts(c: Coin) {
+    const rows: [string, string | number | undefined][] = [
+      ['Certificate', c.certNo],
+      ['Coin', c.name],
+      ['Year', c.year],
+      ['Denomination', c.denomination],
+      ['Mint mark', c.mintMark],
+      ['Country', c.country],
+      ['Grade', [c.grade, c.designation].filter(Boolean).join(' ')],
+      ['PCGS number', c.pcgsNo],
+      ['Mintage', c.mintage],
+      ['Metal', c.metalContent],
+      ['Weight (g)', c.weightGrams],
+      ['Diameter (mm)', c.diameterMm],
+      ['PCGS population at this grade', c.population],
+      ['Graded higher', c.popHigher],
+      ['PCGS price guide', c.priceGuideValue != null ? `$${c.priceGuideValue.toLocaleString('en-US')}` : undefined],
+    ];
+    const dl = el('dl', { class: 'facts' });
+    for (const [k, v] of rows) if (v !== undefined && v !== '') dl.append(el('dt', {}, k), el('dd', {}, String(v)));
+    return dl;
+  }
+
+  function render(body: LookupResponseBody) {
+    const parts: Node[] = [];
+    if (body.mode === 'demo') {
+      parts.push(el('p', { class: 'notice warning' }, el('span', { class: 'badge demo' }, 'DEMO DATA'),
+        ' The live PCGS connection is not set up yet. These results are made up to preview the page.'));
+    }
+    if (!body.ok) {
+      parts.push(el('p', { class: 'notice error' }, body.error ?? 'Something went wrong.'));
+    } else if (!body.found) {
+      parts.push(el('div', { class: 'notice error' },
+        el('p', {}, el('strong', {}, 'No PCGS record found for that number.')),
+        el('p', {}, body.message ?? ''),
+        el('p', {}, 'Check the number on the holder and try again. If it still is not found, do not rely on the holder until PCGS confirms it.')));
+    } else if (body.coin) {
+      const card = el('div', { class: 'card' }, el('h2', {}, body.coin.name ?? 'PCGS record'), coinFacts(body.coin));
+      if (body.coin.images?.length) {
+        const imgs = el('div', { class: 'coin-photos' });
+        for (const i of body.coin.images.slice(0, 2)) {
+          if (i.thumbnail || i.full) imgs.append(el('img', { src: (i.full ?? i.thumbnail) as string, alt: 'Photo from PCGS', loading: 'lazy' }));
+        }
+        card.append(imgs);
+      }
+      if (body.coin.coinFactsLink) card.append(el('p', {}, link(body.coin.coinFactsLink, 'More about this coin on PCGS CoinFacts')));
+      parts.push(card);
+    }
+    parts.push(el('p', {}, el('strong', {}, link(body.verifyUrl, 'Verify this on the PCGS website →'))));
+    out.replaceChildren(...parts);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const value = input.value.trim();
+    if (!value) return;
+    const params = new URLSearchParams();
+    if (kind.value === 'cert') params.set('cert', value);
+    else {
+      params.set('barcode', value);
+      params.set('service', kind.value.split('-')[1]);
+    }
+    out.textContent = 'Looking up…';
+    try {
+      const res = await fetch(`/api/pcgs?${params}`, { headers: { Accept: 'application/json' } });
+      render((await res.json()) as LookupResponseBody);
+    } catch {
+      out.replaceChildren(el('p', { class: 'notice error' }, 'The lookup is not available right now. ', link('https://www.pcgs.com/cert', 'Check on the PCGS website instead.')));
+    }
+  });
+</script>

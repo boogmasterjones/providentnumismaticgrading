@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import { loadPage } from '../lib/pages';
+import { gallery, settings } from '../lib/site';
+
+const { data, Content, hasBody } = await loadPage('home');
+---
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <!-- DESIGN STEP: the sideways coin strip and hero motion go here once Alex picks a design (real photos only). -->
+  <section class="prose" aria-labelledby="hero-heading">
+    <p class="muted">{settings.siteName}</p>
+    <h1 id="hero-heading">{data.heading}</h1>
+    {data.intro && <p class="lead">{data.intro}</p>}
+    <div class="actions">
+      <a class="btn" href="/submit">{data.primaryButton || 'Submit coins'}</a>
+      <a class="btn secondary" href="/contact">{data.secondaryButton || 'Talk to us'}</a>
+    </div>
+  </section>
+
+  <section class="grid" aria-label="Quick links">
+    <a class="card" href="/how-to-submit"><strong>How to submit</strong><br /><span class="muted">The steps, packing and shipping.</span></a>
+    <a class="card" href="/fees"><strong>Fees & turnaround</strong><br /><span class="muted">Prices per coin by service.</span></a>
+    <a class="card" href="/verify"><strong>Verify a certificate</strong><br /><span class="muted">Check one of our labels.</span></a>
+    <a class="card" href="/pcgs-lookup"><strong>PCGS lookup</strong><br /><span class="muted">Check a PCGS certificate.</span></a>
+  </section>
+
+  {hasBody && <div class="prose"><Content /></div>}
+
+  {gallery.photos.length > 0 && (
+    <section aria-labelledby="gallery-heading">
+      <h2 id="gallery-heading">Photos</h2>
+      <div class="grid">
+        {gallery.photos.map((p) => (
+          <figure>
+            <img src={p.image} alt={p.alt} loading="lazy" decoding="async" />
+            {p.caption && <figcaption class="muted">{p.caption}</figcaption>}
+          </figure>
+        ))}
+      </div>
+    </section>
+  )}
+</Base>

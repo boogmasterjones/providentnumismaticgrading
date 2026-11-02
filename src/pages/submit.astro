@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import NetlifyForm from '../components/NetlifyForm.astro';
+import Field from '../components/Field.astro';
+import { loadPage } from '../lib/pages';
+import { fees } from '../lib/site';
+
+const { data, Content, hasBody } = await loadPage('submit');
+const tiers = [...fees.tiers.map((t) => t.name), 'Not sure, please advise'];
+---
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <PageIntro heading={data.heading} intro={data.intro} />
+  {hasBody && <div class="prose"><Content /></div>}
+  <NetlifyForm name="submission" submitLabel="Send submission">
+    <Field name="name" label="Your name" required autocomplete="name" />
+    <Field name="email" label="Email" type="email" required autocomplete="email" />
+    <Field name="phone" label="Phone" type="tel" autocomplete="tel" />
+    <Field name="coin-count" label="Number of coins" type="number" required min={1} inputmode="numeric" />
+    <Field name="coin-list" label="List of coins" type="textarea" required rows={6}
+      hint="One coin per line: year, country, denomination and anything else you know." />
+    <Field name="declared-value" label="Total declared value (US$)" inputmode="decimal"
+      hint="Used for insurance while your coins are with us." />
+    <Field name="service-tier" label="Service" type="select" required options={tiers}
+      hint="See Fees & turnaround for what each service includes." />
+    <Field name="shipping-notes" label="Shipping and insurance notes" type="textarea" rows={3} />
+    <Field name="message" label="Anything else?" type="textarea" rows={4} />
+  </NetlifyForm>
+</Base>

@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Only the production branch builds. Keystatic edits go to "edits/..." branches and do not trigger a build until
+# they are merged ("published"). Set Branch deploys to "None" in the Netlify UI as well (see README).
