@@ -150,23 +150,19 @@ website edit or rebuild.
   and must be for the number asked. Errors reach the visitor only as a generic message; logs carry the error kind
   only. **The API key is read from server environment variables and is never sent to the browser or logged.**
 - **Adapter**: `src/lib/certs/adapter.ts` is the small interface (`getCertificate(number)`, optional `listAll()`).
-  `providers/coda.ts` is the one file that knows the owner's database; today it assumes a plain JSON API
-  (`GET {CODA_DOC_ID}/certificates/{number}` with `Authorization: Bearer {CODA_API_TOKEN}`) and maps common field
-  names. Once we know which system he uses, only that file changes. With `CODA_DOC_ID` unset, `providers/mock.ts`
-  serves the DEMO records.
+  `providers/coda.ts` is the one file that knows the owner's database: his certificate table in Coda (coda.io, now
+  also called Superhuman Docs), read with a read-only, doc-restricted API token. Column names are mapped with
+  `CODA_COLUMN_MAP`. With no `CODA_*` variable set, `providers/mock.ts` serves the DEMO records. Setup steps:
+  `docs/CODA_SETUP.md`.
 - **Population report** (`/population`): needs the database to list every certificate (`listAll()`). It is hidden
   (404, not in the menu or sitemap) until **Site settings → Show the population report** is ticked. With the DEMO
   records it shows demo numbers labelled DEMO; if the real database can't list certificates it says the report isn't
   available, so leave the switch off.
 
-### What we need from the owner about the certificate database
+### What we need from the owner about the certificate database (Coda)
 
-1. **Which software or service** holds his certificates (name, or a link to it).
-2. **Its API documentation** (or a link to it): how to fetch one certificate by number, and what the reply looks like.
-3. **An API key with READ-ONLY access** (the website never needs to change his records). He creates it himself in
-   his account and enters it in Netlify; we don't need his password.
-4. **Can the API list all certificates?** If yes, the population report can be switched on.
-5. **Does it hold the obverse/reverse photos**, and as web links (https) the site can show?
+See `docs/CODA_SETUP.md`: the doc link, the table name, a screenshot of the header row, how photos and cert numbers
+are stored, and (at launch) a read-only token restricted to that doc, pasted into Netlify only.
 
 ## How the owner edits the site (after launch)
 
@@ -193,9 +189,9 @@ website edit or rebuild.
    - Keystatic shows the values to add in Netlify: `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`,
      `KEYSTATIC_SECRET`, `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`. Add them, redeploy, sign in at /admin to test.
    - See https://keystatic.com/docs/github-mode for the current steps.
-4. **Certificate database**: once `coda.ts` matches the owner's system, the owner creates a **read-only** API key
-   in his database and adds two variables in Netlify (Site configuration → Environment variables, marked secret,
-   Functions scope): `CODA_DOC_ID` (the API address) and `CODA_API_TOKEN`. Redeploy, then verify one real certificate
+4. **Certificate database (Coda)**: follow `docs/CODA_SETUP.md`. The owner creates a **read-only** token restricted to
+   his certificate doc, and the Netlify variables are added (Functions scope, token marked secret): `CODA_API_TOKEN`,
+   `CODA_DOC_ID`, `CODA_TABLE_ID`, `CODA_COLUMN_MAP`. Redeploy, then verify one real certificate
    number and one wrong number. If his API can list every certificate, tick **Show the population report** in Site
    settings and check the figures.
 5. **Forms**: Netlify → Forms → enable form detection, redeploy, then Forms → Form notifications → email to the owner's
@@ -206,8 +202,8 @@ website edit or rebuild.
 
 ## LAUNCH CHECKLIST
 
-- [ ] `CODA_DOC_ID` + read-only `CODA_API_TOKEN` set in Netlify; one real certificate and one wrong number tested (the
-      DEMO records disappear by themselves once `CODA_DOC_ID` is set).
+- [ ] `CODA_*` variables + read-only `CODA_API_TOKEN` set in Netlify; one real certificate and one wrong number tested (the
+      DEMO records disappear by themselves once the `CODA_*` variables are set).
 - [ ] Population report switch: on only if the owner's database can list every certificate and the figures look right.
 - [ ] Every item in `CONTENT_TO_CONFIRM.md` confirmed by the owner (name, headline, process claims, grading scale
       and standards, About text, FAQ answers, phone, email, hours, location, privacy text) and the text updated.
