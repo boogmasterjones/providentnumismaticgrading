@@ -2,7 +2,7 @@
  * deco.css: the decorative system. References: security printing (guilloche rosettes, microtext, holographic foil),
  * Art Deco framing (stepped corners, sunbursts), raking light across relief, and title-sequence reveals.
  * Everything here is static or animates transform/opacity/background-position only. Scroll-linked values arrive as
- * CSS variables from src/scripts/scrollfx.ts (--p: 0..1 progress through a section).
+ * CSS variables from src/scripts/scrollfx.ts (--p: 0..1 progress through the two home scroll sections; --scroll).
  */
 
 /* microtext: a line of tiny repeated lettering, as on banknote borders */

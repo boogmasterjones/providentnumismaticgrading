@@ -53,7 +53,7 @@ strong { color: var(--color-text); font-weight: 600; }
 .muted { color: var(--color-muted); }
 .small { font-size: 0.9rem; }
 .lead { font: 400 clamp(1.3rem, 1.9vw, 1.55rem)/1.45 var(--font-heading); color: var(--color-text-2); max-width: 34em; }
-/* decorations bleed to the screen edges but must never widen the page (clip keeps sticky sections working) */
+/* decorations bleed to the screen edges but must never widen the page (clip keeps the two sticky home sections working) */
 main, .site-footer { overflow-x: clip; }
 main { min-height: 60vh; }
 
@@ -149,8 +149,7 @@ main { min-height: 60vh; }
 /* page body spacing */
 .page-body { padding: var(--space-7) 0 var(--space-8); }
 .split { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--space-6); align-items: start; }
-.split > .side { position: sticky; top: calc(var(--header-h) + 2rem); }
-@media (max-width: 900px) { .split { grid-template-columns: 1fr; gap: var(--space-4); } .split > .side { position: static; } }
+@media (max-width: 900px) { .split { grid-template-columns: 1fr; gap: var(--space-4); } }
 
 /* ---------- numbered steps (process, submissions) ---------- */
 .steps { list-style: none; margin: 0; padding: 0; }

@@ -42,8 +42,9 @@ if (header) {
   });
 }
 
-// Reveal on scroll, once. Elements with .rv rise and fade; .rake sections get a sweep of raking light.
-const reveal = document.querySelectorAll('.rv, .rake, .draw');
+// Reveal on scroll, once. Elements with .rv rise and fade; .rake sections get a sweep of raking light; .draw engraves
+// its symbols; .assemble (the exploded holder) puts itself together. Time-based, never tied to scroll position.
+const reveal = document.querySelectorAll('.rv, .rake, .draw, .assemble');
 if ('IntersectionObserver' in window) {
   const io = new IntersectionObserver(
     (entries) => {

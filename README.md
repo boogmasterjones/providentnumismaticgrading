@@ -47,11 +47,14 @@ Dark, warm ivory and a restrained gold; Cormorant Garamond (display), Cinzel (wo
 Approved references (owner, 2026-11-02): security printing, Art Deco, coin engraving, raking light, film titles,
 watch movements, plus two effects from patek.com and rolex.com (below). No loupe, no hover flips, no pointer-driven
 toys. **Animations always play** (owner's rule: no reduced-motion opt-out). Coins never flip, so they never show an edge.
+**Two scroll-driven moments on the whole site, both short** (owner, 2026-11-02: too many scroll stories, too long):
+the hero hold and the film scrub. Nothing else pins or maps scroll position; everything else reveals once on entering
+view.
 
 | Effect | Where | How |
 |---|---|---|
-| Hero hold-and-release (after rolex.com's opening scroll: the hero media stays pinned full-screen while the headline scrolls up and away, then the page moves on) | Home hero | `.hero-pin` is 210% of the screen tall; the hero inside is sticky. As you scroll, the title lifts and fades, the coin river pushes in and darkens, an Art Deco frame closes in, and "Examined · Recorded · Sealed" rises in its place. Driven by `--p` from `src/scripts/scrollfx.ts`. |
-| Scroll-scrubbed footage (after patek.com's scroll-driven video) | Home, between "What we grade" and "The process at a glance" | `.film` is pinned for four screens; scrolling scrubs 80 frames of real coin footage drawn to a canvas (`src/scripts/scrub.ts`), with three captions that change in turn and a fade through black where the clips change. Phones load every second frame. |
+| Hero hold-and-release (after rolex.com's opening scroll: a brief hold while the headline lifts away, then the page moves on) | Home hero | `.hero-pin` is 140% of the screen tall, so the sticky hero holds for only 40% of a screen. As you scroll, the title lifts and fades, the coin river pushes in and darkens, an Art Deco frame closes in, and "Examined · Recorded · Sealed" rises in its place. Driven by `--p` from `src/scripts/scrollfx.ts`. |
+| Scroll-scrubbed footage (after patek.com's scroll-driven video) | Home, between "What we grade" and "The process at a glance" | `.film` is pinned for 1.5 screens of scroll; scrolling scrubs 80 frames of real coin footage drawn to a canvas (`src/scripts/scrub.ts`), with two captions (only the first two in the CMS show) that change in turn and a fade through black where the clips change. Phones load every second frame. |
 | Coin river (the one ambient signature) | Home hero | Slow, dimmed, desaturated; no interaction. `src/scripts/coin-engine.js`. |
 | Guilloche rosettes, turning very slowly | Page titles, home hero, closing bands, certificate panels | `/guilloche.svg` is generated at build time (`src/lib/guilloche.ts`, about 20 KB) and rotated by CSS (4 minutes per turn). |
 | Microtext borders | Footer edge, certificate panels | `.microtext` in `src/styles/deco.css`. |
@@ -59,7 +62,7 @@ toys. **Animations always play** (owner's rule: no reduced-motion opt-out). Coin
 | Art Deco | Stepped corners, stepped rules under titles, sunbursts behind closing sections | `src/styles/deco.css`. |
 | Raking light | Section titles | A light band sweeps once across each title when it scrolls into view. |
 | Engraved line drawings | Steps, scope, principles, the grading scale rule | Inline SVG that draws itself once (stroke dash). |
-| Exploded holder (after a watch-movement drawing) | Home and `/holder` | Back shell, insert, coin, label and front shell float apart in perspective and slide together as the section scrolls in (`src/components/HolderExplode.astro`). |
+| Exploded holder (after a watch-movement drawing) | Home and `/holder` | Back shell, insert, coin, label and front shell float apart in perspective and slide together on their own in about 1.3 seconds once the drawing comes into view; not scroll-driven (`src/components/HolderExplode.astro`, `src/styles/explode.css`). |
 
 ### Footage (stock, free licence, real footage only)
 

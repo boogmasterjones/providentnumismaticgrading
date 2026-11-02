@@ -16,7 +16,8 @@ const steps = process.data.sections ?? [];
 const words = settings.siteName.split(' ');
 const first = words[0];
 const rest = words.slice(1).join(' ');
-const film = data.film ?? [];
+// two captions at most: the film is a short scrub (about 1.5 screens of scroll), not a long story
+const film = (data.film ?? []).slice(0, 2);
 
 // Organization only: no people, no prices (client request, 2026-11-02).
 const jsonLd = {
@@ -30,7 +31,7 @@ const jsonLd = {
 };
 ---
 <Base title={data.metaTitle} description={data.metaDescription} home jsonLd={jsonLd}>
-  <!-- HERO: pinned while the title lifts away and the frame closes in (after rolex.com's opening scroll) -->
+  <!-- HERO: a brief hold (under half a screen) while the title lifts away and the frame closes in (after rolex.com) -->
   <section class="hero-pin" data-progress="pin" aria-labelledby="hero-title">
     <div class="hero">
       <div class="hero-media" aria-hidden="true">
@@ -151,7 +152,7 @@ const jsonLd = {
     </div>
   </section>
 
-  <!-- HOLDER: an exploded view that assembles as it scrolls in (after a watch movement) -->
+  <!-- HOLDER: an exploded view that assembles on its own when it comes into view (after a watch movement) -->
   <section class="sec holder-sec rake" aria-labelledby="holder-title">
     <div class="container holder-grid">
       <HolderExplode />

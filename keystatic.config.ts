@@ -198,7 +198,7 @@ export default config({
         approachTitle: t('Our approach: heading'),
         approachText: t('Our approach: text', 'Leave a blank line between paragraphs.'),
         principles: sections('Our approach: principles', 'Principle'),
-        film: sections('Film: captions shown in turn as the footage scrubs', 'Caption'),
+        film: sections('Film: captions shown in turn as the footage scrubs (two at most; only the first two show)', 'Caption'),
         processTitle: t('Process at a glance: heading', 'The steps themselves come from the Our process page.'),
         processText: t('Process at a glance: intro'),
         holderTitle: t('Holder and label: heading'),

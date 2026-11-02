@@ -1,15 +1,15 @@
 ---
 /**
  * The holder as an exploded view (like a watch movement drawing): back shell, insert, coin, label and front shell
- * float apart in perspective, then slide together and turn to face the viewer as the section scrolls into view.
- * Scroll progress comes from scrollfx.ts (--p). An illustration, not a photograph or the real label design.
+ * float apart in perspective, then slide together and turn to face the viewer, on their own (about 1.3 seconds) once
+ * the drawing comes into view. Not scroll-driven: site.ts adds .in, explode.css animates. An illustration, not a photograph or the real label design.
  * The coin is a flat drawing: it never flips and never shows an edge.
  */
 import '../styles/coin-engine.css';
 import '../styles/explode.css';
 const parts = ['Front shell', 'Label', 'Coin', 'Insert', 'Back shell'];
 ---
-<figure class="explode" data-progress="view">
+<figure class="explode assemble">
   <div class="ex-scene" role="img" aria-label="Illustration of the holder's parts coming together: back shell, insert, coin, label and front shell, sealed into one holder.">
     <div class="ex-stack">
       <div class="ex-layer ex-back" style="--z:-2"></div>
