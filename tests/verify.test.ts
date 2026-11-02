@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { CertAdapterError, getCertAdapter, type CertAdapter } from '../src/lib/certs/adapter';
 import { isPlausibleCertNumber, normalizeCertNumber, parseCertificate } from '../src/lib/certs/certificate';
 import { createMockAdapter, DEMO_CERTIFICATES } from '../src/lib/certs/providers/mock';
-import { createRegistryApiAdapter, mapRecord } from '../src/lib/certs/providers/registry-api';
+import { createCodaAdapter, readCodaConfig } from '../src/lib/certs/providers/coda';
 import {
   CACHE_TTL_FOUND_MS,
   CACHE_TTL_MISS_MS,
@@ -15,7 +15,7 @@ import {
 } from '../src/lib/certs/verify';
 
 const KEY = 'secret-test-key-123';
-const BASE = 'https://registry.example.com/v1';
+const CODA_ENV = { CODA_DOC_ID: 'AbCDeFGH', CODA_TABLE_ID: 'Certificates', CODA_API_TOKEN: KEY };
 
 const record = {
   certNumber: 'PNA-1001',
@@ -34,12 +34,34 @@ const record = {
 const okResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
+/** The record above as a Coda row (default column names). */
+const codaValues = (r: typeof record) => ({
+  'Cert #': r.certNumber,
+  Coin: r.coinDescription,
+  Year: r.year,
+  'Country/Denomination': r.countryDenomination,
+  Grade: r.grade,
+  Strike: r.strikeScore,
+  Surface: r.surfaceScore,
+  Notes: r.notes,
+  Obverse: r.obverseUrl,
+  Reverse: r.reverseUrl,
+  'Date Graded': r.dateGraded,
+});
+const codaRows = (...recs: (typeof record)[]) =>
+  okResponse({ items: recs.map((r, i) => ({ id: `i-${i}`, values: codaValues(r), updatedAt: '2026-10-30T00:00:00Z' })) });
+
 function liveDeps(fetchImpl: (url: string, init?: RequestInit) => Promise<Response>, over: Partial<VerifyDeps> = {}) {
   let t = Date.UTC(2026, 10, 2, 12, 0, 0);
   const fetchMock = vi.fn(fetchImpl);
   const logs: string[] = [];
   const deps: VerifyDeps = {
-    adapter: getCertAdapter({ CERT_API_URL: BASE, CERT_API_KEY: KEY }, fetchMock as unknown as typeof fetch),
+    adapter: createCodaAdapter({
+      config: readCodaConfig(CODA_ENV),
+      fetch: fetchMock as unknown as typeof fetch,
+      sleep: async () => {},
+      log: (m) => logs.push(m),
+    }),
     store: new MemoryStore(),
     limiter: new RateLimiter(20, 300),
     now: () => t,
@@ -85,7 +107,7 @@ describe('Certificate schema', () => {
 });
 
 describe('mock adapter', () => {
-  it('is used when CERT_API_URL is unset and returns only DEMO records', async () => {
+  it('is used when no CODA_* setting is present and returns only DEMO records', async () => {
     const a = getCertAdapter({});
     expect(a.mode).toBe('demo');
     expect(await a.getCertificate('DEMO-0002')).toMatchObject({ certNumber: 'DEMO-0002', demo: true });
@@ -100,36 +122,27 @@ describe('mock adapter', () => {
   });
 });
 
-describe('registry API adapter', () => {
-  it('maps common field spellings and envelopes', () => {
-    expect(mapRecord({ data: { cert_number: 'A1', Description: 'Coin', Grade: 'AU 55', obverse: [{ url: 'https://i/a.jpg' }] } })).toMatchObject({
-      certNumber: 'A1',
-      coinDescription: 'Coin',
-      grade: 'AU 55',
-      obverseUrl: 'https://i/a.jpg',
-    });
-    expect(mapRecord({ records: [{ fields: { certNumber: 'B2', name: 'Coin', grade: 'VF 20' } }] })?.certNumber).toBe('B2');
-  });
-  it('sends the key in the Authorization header only, never in the URL', async () => {
-    const { deps, fetchMock } = liveDeps(async () => okResponse(record));
+describe('adapter choice', () => {
+  it('uses Coda when CODA_* is set, and sends the token in the Authorization header only', async () => {
+    const fetchMock = vi.fn(async () => codaRows(record));
+    const a = getCertAdapter(CODA_ENV, fetchMock as unknown as typeof fetch);
+    expect(a.mode).toBe('live');
+    expect(a.id).toMatch(/^coda-/);
+    const deps: VerifyDeps = { adapter: a, store: new MemoryStore(), limiter: new RateLimiter(), now: () => 0 };
     const { text, body } = await read(await handleVerify(req('cert=pna-1001'), '1.1.1.1', deps));
     expect(body).toMatchObject({ ok: true, mode: 'live', found: true, cached: false });
     expect(body.certificate).toMatchObject({ certNumber: 'PNA-1001', grade: 'MS 64' });
-    const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe(`${BASE}/certificates/PNA-1001`);
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url.startsWith('https://coda.io/apis/v1/docs/AbCDeFGH/tables/Certificates/rows?')).toBe(true);
     expect(url).not.toContain(KEY);
-    expect((init?.headers as Record<string, string>).Authorization).toBe(`Bearer ${KEY}`);
+    expect((init.headers as Record<string, string>).Authorization).toBe(`Bearer ${KEY}`);
     expect(text).not.toContain(KEY);
-  });
-  it('has no listAll until we know the database can list certificates', () => {
-    const a = createRegistryApiAdapter({ baseUrl: BASE, apiKey: KEY, fetch: vi.fn() as unknown as typeof fetch });
-    expect(a.listAll).toBeUndefined();
   });
 });
 
 describe('/api/verify', () => {
   it('rejects bad input without calling the database', async () => {
-    const { deps, fetchMock } = liveDeps(async () => okResponse(record));
+    const { deps, fetchMock } = liveDeps(async () => codaRows(record));
     expect((await handleVerify(req('cert='), 'ip', deps)).status).toBe(400);
     expect((await handleVerify(req('cert=' + encodeURIComponent('-- ../')), 'ip', deps)).status).toBe(400);
     expect((await handleVerify(req('cert=' + 'A'.repeat(101)), 'ip', deps)).status).toBe(400);
@@ -137,16 +150,18 @@ describe('/api/verify', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('answers not found for 404 and for an empty reply', async () => {
-    const { deps } = liveDeps(async (url) => (url.endsWith('NOPE') ? new Response('', { status: 404 }) : okResponse([])));
+  it('answers not found for no matching row, but an error when Coda says the doc/table is missing (404)', async () => {
+    const { deps } = liveDeps(async () => okResponse({ items: [] }));
     const a = await read(await handleVerify(req('cert=NOPE'), 'ip', deps));
     expect(a.body).toMatchObject({ ok: true, found: false, query: 'NOPE' });
-    const b = await read(await handleVerify(req('cert=EMPTY'), 'ip', deps));
-    expect(b.body).toMatchObject({ ok: true, found: false });
+    const b = liveDeps(async () => new Response('', { status: 404 }));
+    const res = await handleVerify(req('cert=NOPE'), 'ip', b.deps);
+    expect(res.status).toBe(502);
+    expect(b.logs.join(' ')).toMatch(/CODA_DOC_ID and CODA_TABLE_ID/);
   });
 
   it('treats a reply for a different number as not found', async () => {
-    const { deps } = liveDeps(async () => okResponse({ ...record, certNumber: 'OTHER-1' }));
+    const { deps } = liveDeps(async () => codaRows({ ...record, certNumber: 'OTHER-1' }));
     const { body } = await read(await handleVerify(req('cert=PNA-1001'), 'ip', deps));
     expect(body).toMatchObject({ ok: true, found: false });
     expect(body.certificate).toBeUndefined();
@@ -180,10 +195,10 @@ describe('/api/verify', () => {
     expect((await handleVerify(req('cert=A1'), 'ip', b.deps)).status).toBe(503);
   });
 
-  it('fails safely when the key is missing', async () => {
+  it('fails safely (never demo data) when the token is missing', async () => {
     const fetchMock = vi.fn();
     const deps: VerifyDeps = {
-      adapter: getCertAdapter({ CERT_API_URL: BASE }, fetchMock as unknown as typeof fetch),
+      adapter: getCertAdapter({ CODA_DOC_ID: 'AbCDeFGH', CODA_TABLE_ID: 'Certificates' }, fetchMock as unknown as typeof fetch),
       store: new MemoryStore(),
       limiter: new RateLimiter(),
       now: () => 0,
@@ -195,7 +210,7 @@ describe('/api/verify', () => {
 
 describe('cache', () => {
   it('serves a found certificate from cache for an hour, then asks again', async () => {
-    const { deps, fetchMock, advance } = liveDeps(async () => okResponse(record));
+    const { deps, fetchMock, advance } = liveDeps(async () => codaRows(record));
     await handleVerify(req('cert=PNA-1001'), 'ip', deps);
     advance(CACHE_TTL_FOUND_MS - 1000);
     const second = await read(await handleVerify(req('cert=%20pna-1001%20'), 'ip', deps));
@@ -208,7 +223,7 @@ describe('cache', () => {
 
   it('remembers "not found" for only a few minutes', async () => {
     expect(CACHE_TTL_MISS_MS).toBeLessThanOrEqual(10 * 60 * 1000);
-    const { deps, fetchMock, advance } = liveDeps(async () => new Response('', { status: 404 }));
+    const { deps, fetchMock, advance } = liveDeps(async () => okResponse({ items: [] }));
     await handleVerify(req('cert=NEW-1'), 'ip', deps);
     await handleVerify(req('cert=NEW-1'), 'ip', deps);
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -221,14 +236,15 @@ describe('cache', () => {
     const { deps, fetchMock } = liveDeps(async () => new Response('', { status: 500 }));
     await handleVerify(req('cert=A1'), 'ip', deps);
     await handleVerify(req('cert=A1'), 'ip', deps);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    // Each lookup tries twice (one retry on a 5xx), and nothing is cached in between.
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 
   it('keeps demo and live answers apart', async () => {
     const store = new MemoryStore();
     const demo: VerifyDeps = { adapter: createMockAdapter(), store, limiter: new RateLimiter(), now: () => 0 };
     await handleVerify(req('cert=DEMO-0001'), 'ip', demo);
-    const { deps } = liveDeps(async () => new Response('', { status: 404 }), { store, now: () => 0 });
+    const { deps } = liveDeps(async () => okResponse({ items: [] }), { store, now: () => 0 });
     const { body } = await read(await handleVerify(req('cert=DEMO-0001'), 'ip', deps));
     expect(body.found).toBe(false);
   });
@@ -236,7 +252,7 @@ describe('cache', () => {
 
 describe('rate limit', () => {
   it('allows 20 a minute per visitor, then 429 with Retry-After; other visitors are unaffected', async () => {
-    const { deps, advance } = liveDeps(async () => okResponse(record));
+    const { deps, advance } = liveDeps(async () => codaRows(record));
     for (let i = 0; i < 20; i++) expect((await handleVerify(req('cert=PNA-1001'), '9.9.9.9', deps)).status).toBe(200);
     const blocked = await handleVerify(req('cert=PNA-1001'), '9.9.9.9', deps);
     expect(blocked.status).toBe(429);
