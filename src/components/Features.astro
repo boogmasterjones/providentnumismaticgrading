@@ -1,0 +1,21 @@
+---
+/** A ruled grid of blocks (reasons, services, holder topics), each with an engraved symbol. */
+import Mark from './Mark.astro';
+import Prose from './Prose.astro';
+import { inlineLinks } from '../lib/text';
+import type { PageSection } from '../lib/pages';
+interface Props { items: PageSection[]; columns?: 2 | 3; headingLevel?: 'h2' | 'h3' }
+const { items, columns = 3, headingLevel = 'h2' } = Astro.props;
+const H = headingLevel;
+---
+<div class:list={['features', { two: columns === 2 }]}>
+  {items.map((s, i) => (
+    <section class={`rv draw d${i % 3}`}>
+      <Mark name={s.mark} size={46} />
+      <H>{s.title}</H>
+      {s.summary && <p class="muted">{s.summary}</p>}
+      <Prose text={s.text} />
+      {s.points && s.points.length > 0 && <ul class="points">{s.points.map((p) => <li set:html={inlineLinks(p)} />)}</ul>}
+    </section>
+  ))}
+</div>

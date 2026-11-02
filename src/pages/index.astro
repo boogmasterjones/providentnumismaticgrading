@@ -1,168 +1,205 @@
 ---
+import '../styles/coin-engine.css';
 import '../styles/home.css';
 import Base from '../layouts/Base.astro';
+import Mark from '../components/Mark.astro';
+import Prose from '../components/Prose.astro';
+import LinkArrow from '../components/LinkArrow.astro';
+import HolderExplode from '../components/HolderExplode.astro';
 import { loadPage } from '../lib/pages';
-import { fees, feeGroups, gallery, lowestPrice, settings, telHref } from '../lib/site';
+import { gallery, settings } from '../lib/site';
+import { roman } from '../lib/text';
 
 const { data, Content, hasBody } = await loadPage('home');
-const tel = telHref(settings.phone);
-const [line1, ...rest] = settings.siteName.split(' ');
-// "Provident Numismatic" / "Authentication": the last word on its own line.
+const process = await loadPage('process');
+const steps = process.data.sections ?? [];
 const words = settings.siteName.split(' ');
-const titleLines = words.length > 2 ? [words.slice(0, -1).join(' '), words[words.length - 1]] : [line1, rest.join(' ')];
-const fromPrices = feeGroups(fees.tiers)
-  .map((g) => ({ category: g.category, from: lowestPrice(g.tiers), turnaround: g.tiers.map((t) => t.turnaround).filter((t) => /\d/.test(t)) }))
-  .filter((g) => g.from !== null)
-  .slice(0, 3);
-const days = (list: string[]) => {
-  const n = list.map((t) => Number(t.match(/\d+/)?.[0])).filter((x) => x > 0);
-  return n.length ? `${Math.min(...n)}–${Math.max(...n)} business days` : '';
+const first = words[0];
+const rest = words.slice(1).join(' ');
+const film = data.film ?? [];
+
+// Organization only: no people, no prices (client request, 2026-11-02).
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: settings.siteName,
+  url: settings.siteUrl,
+  description: data.metaDescription,
+  ...(settings.phone ? { telephone: settings.phone } : {}),
+  ...(settings.location ? { address: { '@type': 'PostalAddress', addressLocality: 'Venice', addressRegion: 'FL', addressCountry: 'US' } } : {}),
 };
-const marquee = ['US coins', 'World coins', 'Ancient coins', 'Tokens', 'Medals'];
 ---
-<Base title={data.metaTitle} description={data.metaDescription} home>
-  <section class="hero" aria-labelledby="hero-title">
-    <div class="river" id="river" aria-hidden="true"></div>
-    <div class="lightsweep" aria-hidden="true"></div>
-    <div class="veil" aria-hidden="true"></div>
-    <div class="hero-copy">
-      <div class="hero-panel">
-        <p class="eyebrow center">{settings.tagline || 'Coin grading and authentication'}</p>
-        <h1 class="hero-title" id="hero-title">{titleLines.map((l) => <span class="goldtext">{l}</span>)}</h1>
-        <p class="hero-tag">{data.heading}</p>
-        {data.intro && <p class="hero-intro">{data.intro}</p>}
-        <div class="actions">
-          <a class="btn" href="/submit">{data.primaryButton || 'Submit your coins'}</a>
-          <a class="btn ghost" href="/contact">{data.secondaryButton || 'Talk to a professional'}</a>
+<Base title={data.metaTitle} description={data.metaDescription} home jsonLd={jsonLd}>
+  <!-- HERO: pinned while the title lifts away and the frame closes in (after rolex.com's opening scroll) -->
+  <section class="hero-pin" data-progress="pin" aria-labelledby="hero-title">
+    <div class="hero">
+      <div class="hero-media" aria-hidden="true">
+        <div class="river" id="river"></div>
+        <div class="rosette turn hero-rosette"></div>
+        <div class="veil"></div>
+      </div>
+      <div class="hero-frame deco-frame" aria-hidden="true"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
+      <div class="hero-copy">
+        {data.eyebrow && <p class="eyebrow center hero-in" style="--d:.2s">{data.eyebrow}</p>}
+        <h1 class="wordmark" id="hero-title">
+          <span class="wm-top hero-in" style="--d:.35s">{first}</span>
+          {rest && <span class="wm-rest hero-in" style="--d:.6s">{rest}</span>}
+        </h1>
+        <div class="deco-rule center hero-in in" style="--d:.8s" aria-hidden="true"><i></i><i></i><i></i></div>
+        <p class="hero-statement hero-in" style="--d:.95s">{data.heading}</p>
+        <div class="links hero-links hero-in" style="--d:1.15s">
+          <LinkArrow href="/process">{data.primaryButton || 'Our process'}</LinkArrow>
+          <LinkArrow href="/verify">{data.secondaryButton || 'Verify a certificate'}</LinkArrow>
         </div>
       </div>
+      <p class="hero-second" aria-hidden="true">Examined <i></i> Recorded <i></i> Sealed</p>
     </div>
-    <p class="hero-hint" aria-hidden="true"><span class="mouse">Hover a coin to turn it over · hover a row to slow it</span><span class="touch">Tap a coin to turn it over</span></p>
-    <a class="scroll-cue" href="#how" aria-label="Scroll to how it works"><span></span></a>
   </section>
 
-  <div class="marquee" aria-label="What we grade: US coins, world coins, ancient coins, tokens and medals">
-    <div class="mq-track" aria-hidden="true">
-      {[0, 1, 2].map(() => marquee.map((m) => <><span>{m}</span><i></i></>))}
-    </div>
-  </div>
-
-  <section class="sec how" id="how" aria-labelledby="how-title">
+  <!-- SCOPE -->
+  <section class="sec scope rake" aria-labelledby="scope-title">
     <div class="container">
-      <p class="eyebrow rv">How it works</p>
-      <h2 id="how-title" class="rv">From your hands to a certificate anyone can check.</h2>
-      <ol class="steps">
-        <li class="rv">
-          <span class="num">01</span>
-          <h3>Tell us what you're sending</h3>
-          <p>Fill in the submission form with your coins and the service you want. We reply with a quote and where to ship.</p>
-        </li>
-        <li class="rv d1">
-          <span class="num">02</span>
-          <h3>Pack and ship</h3>
-          <p>Ship insured: we recommend insurance at 1% of the value, and orders over $750 need a signature.</p>
-        </li>
-        <li class="rv d2">
-          <span class="num">03</span>
-          <h3>Examined and graded</h3>
-          <p>Each coin is authenticated, attributed and graded, then sealed in a tamper-evident holder with its label.</p>
-        </li>
-        <li class="rv d3">
-          <span class="num">04</span>
-          <h3>Back to you, on record</h3>
-          <p>Your coins come home, and every certificate number can be checked on this website by anyone.</p>
-        </li>
-      </ol>
-      <div class="sec-cta rv">
-        <a class="btn" href="/submit">Start a submission</a>
-        <a href="/how-to-submit">The full steps, packing and shipping →</a>
+      <div class="sec-head">
+        <p class="eyebrow">What we grade</p>
+        <h2 id="scope-title" class="rake-t">{data.gradeTitle}</h2>
+        <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
+        {data.gradeIntro && <p class="lead">{data.gradeIntro}</p>}
       </div>
+      <ul class="scope-list">
+        {(data.grades ?? []).map((g, i) => (
+          <li class={`rv draw d${i}`}>
+            <span class="medallion"><Mark name={g.mark} /></span>
+            <h3>{g.title}</h3>
+            <Prose text={g.text} />
+          </li>
+        ))}
+      </ul>
     </div>
   </section>
 
-  <section class="sec" aria-labelledby="why-title">
-    <div class="container">
-      <p class="eyebrow rv">Why collectors send coins to us</p>
-      <h2 id="why-title" class="rv">Careful grading, presented like it matters.</h2>
-      <div class="why-cards">
-        <a class="card rv" href="/about">
-          <span data-coin="laureate:gold:31" data-d="56" data-noflip aria-hidden="true"></span>
-          <h3>Who grades your coin</h3>
-          <p>What we grade, how every coin is examined, and the standards behind every label we seal.</p>
-        </a>
-        <a class="card rv d1" href="/grading-standards">
-          <span data-coin="owl:silver:12" data-d="56" data-noflip aria-hidden="true"></span>
-          <h3>US, world and ancient</h3>
-          <p>US and world coins from 1600 to today, most tokens and medals, Roman and select Greek coins.</p>
-        </a>
-        <a class="card rv d2" href="/fees">
-          <span data-coin="wreath:copper:44" data-d="56" data-noflip aria-hidden="true"></span>
-          <h3>A label made for the coin</h3>
-          <p>Every service includes a ready-made label design for US, world, Roman or Greek coins, or have one designed for your collection.</p>
-        </a>
-        <a class="card rv d3" href="/verify">
-          <span data-coin="eagle:toned:5" data-d="56" data-noflip aria-hidden="true"></span>
-          <h3>Every certificate checks out</h3>
-          <p>Type the number from any of our labels into the registry and see the coin, grade and photos on record.</p>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <section class="sec verify-sec" aria-labelledby="verify-title">
-    <div class="container two">
-      <div class="slab-stage">
-        <div class="slab" id="slab">
-          <div class="slab-label">
-            <div class="sl-top"><span class="sl-brand">{titleLines[0]}<br />{titleLines[1]}</span><span class="holo" aria-hidden="true"></span></div>
-            <div class="sl-mid"><span class="sl-desc">Roman Empire · denarius</span><span class="sl-grade">VF 30</span></div>
-            <div class="sl-bot"><span class="sl-cert">Cert <b>DEMO-0001</b></span><span class="barcode" aria-hidden="true"></span></div>
-          </div>
-          <div class="slab-well"><span data-coin="laureate:silver:23" data-d="200" data-glint></span></div>
-          <span class="slab-foot">Illustration. Our real label designs vary by coin.</span>
-        </div>
-      </div>
-      <div>
-        <p class="eyebrow rv">Certificate registry</p>
-        <h2 id="verify-title" class="rv">Verify a certificate we issued.</h2>
-        <p class="lead rv d1">Buying a coin in one of our holders? Type the certificate number from the label to see the record we keep for that coin.</p>
-        <form class="verify-form rv d2" action="/verify" method="get" role="search">
-          <label class="sr-only" for="home-cert">Certificate number</label>
-          <div class="inrow">
-            <input id="home-cert" name="cert" type="text" required maxlength="100" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Number on the label" />
-            <button class="btn" type="submit">Verify</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  {fromPrices.length > 0 && (
-    <section class="sec" aria-labelledby="fees-title">
-      <div class="container">
-        <p class="eyebrow rv">Fees and turnaround</p>
-        <h2 id="fees-title" class="rv">Clear prices, per coin.</h2>
-        <div class="from-prices">
-          {fromPrices.map((g, i) => (
-            <a class={`card rv d${i}`} href="/fees">
-              <p class="k">{g.category}</p>
-              <p class="v"><span class="goldtext">${g.from}</span><small>from, per coin</small></p>
-              {days(g.turnaround) && <p class="s">{days(g.turnaround)}, approximate</p>}
-            </a>
+  <!-- FILM: scroll scrubs through footage (after patek.com's scroll-driven video) -->
+  {film.length > 0 && (
+    <section class="film" data-progress="pin" aria-label="How a coin is examined" style={`--n:${film.length}`}>
+      <div class="film-stage">
+        <canvas class="film-canvas" data-scrub="/media/scrub/coins/" data-frames="80" aria-hidden="true"></canvas>
+        <div class="film-grade" aria-hidden="true"></div>
+        <div class="film-frame deco-frame" aria-hidden="true"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
+        <ol class="film-captions">
+          {film.map((f, i) => (
+            <li style={`--i:${i}`}>
+              <span class="numeral">{roman(i + 1)}</span>
+              <h2>{f.title}</h2>
+              <Prose text={f.text} />
+            </li>
           ))}
-        </div>
-        <div class="sec-cta rv"><a class="btn secondary" href="/fees">See every service and fee</a></div>
+        </ol>
+        <div class="film-meter" aria-hidden="true"><span></span></div>
       </div>
     </section>
   )}
+
+  <!-- PROCESS AT A GLANCE -->
+  <section class="sec glance rake" aria-labelledby="glance-title">
+    <div class="container">
+      <div class="glance-grid">
+        <div class="sec-head">
+          <p class="eyebrow">Our process</p>
+          <h2 id="glance-title" class="rake-t">{data.processTitle}</h2>
+          <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
+          {data.processText && <p class="lead">{data.processText}</p>}
+          <LinkArrow href="/process">Read the full process</LinkArrow>
+        </div>
+        <ol class="glance-list">
+          {steps.map((s, i) => (
+            <li class="rv">
+              <span class="numeral">{roman(i + 1)}</span>
+              <div>
+                <h3>{s.title}</h3>
+                {s.summary && <p>{s.summary}</p>}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPROACH -->
+  <section class="sec approach rake" aria-labelledby="approach-title">
+    <div class="sunburst approach-sun" aria-hidden="true"></div>
+    <div class="container">
+      <div class="approach-grid">
+        <div>
+          <p class="eyebrow">Our approach</p>
+          <h2 id="approach-title" class="rake-t">{data.approachTitle}</h2>
+          <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
+        </div>
+        <div class="approach-text rv">
+          <Prose text={data.approachText} />
+          <LinkArrow href="/why-provident">Why Provident</LinkArrow>
+        </div>
+      </div>
+      <ul class="principles">
+        {(data.principles ?? []).map((p, i) => (
+          <li class={`rv draw d${i}`}>
+            <Mark name={p.mark} size={40} />
+            <h3>{p.title}</h3>
+            <Prose text={p.text} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- HOLDER: an exploded view that assembles as it scrolls in (after a watch movement) -->
+  <section class="sec holder-sec rake" aria-labelledby="holder-title">
+    <div class="container holder-grid">
+      <HolderExplode />
+      <div class="holder-copy">
+        <p class="eyebrow">The holder and label</p>
+        <h2 id="holder-title" class="rake-t">{data.holderTitle}</h2>
+        <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="rv"><Prose text={data.holderText} /></div>
+        <LinkArrow href="/holder">About the holder and label</LinkArrow>
+      </div>
+    </div>
+  </section>
+
+  <!-- VERIFY -->
+  <section class="sec verify-sec rake" aria-labelledby="verify-title">
+    <div class="container">
+      <div class="cert-panel foil verify-panel deco-frame draw">
+        <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+        <div class="rosette" aria-hidden="true"></div>
+        <div class="verify-inner">
+          <div class="verify-head">
+            <span class="foil-seal" aria-hidden="true"></span>
+            <div>
+              <p class="eyebrow">Certificate registry</p>
+              <h2 id="verify-title" class="rake-t">{data.verifyTitle}</h2>
+            </div>
+          </div>
+          {data.verifyText && <p class="lead">{data.verifyText}</p>}
+          <form class="verify-form" action="/verify" method="get" role="search">
+            <label class="sr-only" for="home-cert">Certificate number</label>
+            <div class="inrow">
+              <input id="home-cert" name="cert" type="text" required maxlength="100" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Certificate number" />
+              <button class="btn" type="submit">Verify</button>
+            </div>
+          </form>
+        </div>
+        <div class="microtext" aria-hidden="true"></div>
+      </div>
+    </div>
+  </section>
 
   {hasBody && <section class="sec"><div class="container prose"><Content /></div></section>}
 
   {gallery.photos.length > 0 && (
     <section class="sec" aria-labelledby="gallery-heading">
       <div class="container">
-        <h2 id="gallery-heading">Photos</h2>
-        <div class="grid">
+        <h2 id="gallery-heading">From the grading room</h2>
+        <div class="photo-grid">
           {gallery.photos.map((p) => (
             <figure>
               <img src={p.image} alt={p.alt} loading="lazy" decoding="async" />
@@ -174,73 +211,45 @@ const marquee = ['US coins', 'World coins', 'Ancient coins', 'Tokens', 'Medals']
     </section>
   )}
 
-  <section class="sec talk" aria-labelledby="talk-title">
-    <div class="container two-col">
-      <div>
-        <p class="eyebrow rv">Contact</p>
-        <h2 id="talk-title" class="rv">Talk to a professional.</h2>
-        <p class="lead rv d1">Questions about a coin, or about sending one in? Call or text, or send a message. A trial submission is welcome too.</p>
-        <div class="actions rv d2">
-          <a class="btn" href="/contact">Send a message</a>
-          {tel && <a class="btn secondary" href={tel}>Call {settings.phone}</a>}
-        </div>
+  <!-- CODA -->
+  <section class="coda home-coda rake" aria-labelledby="coda-title">
+    <div class="sunburst coda-sun" aria-hidden="true"></div>
+    <div class="rosette turn" aria-hidden="true"></div>
+    <div class="container">
+      <h2 id="coda-title" class="rake-t">{data.closingTitle}</h2>
+      <div class="deco-rule center" aria-hidden="true"><i></i><i></i><i></i></div>
+      {data.closingText && <p>{data.closingText}</p>}
+      <div class="links">
+        <LinkArrow href="/submit">Submissions</LinkArrow>
+        <LinkArrow href="/contact">Contact</LinkArrow>
       </div>
-      <ul class="ways rv d1">
-        {settings.phone && <li><span>Phone, calls and texts</span>{tel ? <a href={tel}>{settings.phone}</a> : <b>{settings.phone}</b>}</li>}
-        {settings.hours && <li><span>Hours</span><b>{settings.hours}</b></li>}
-        {settings.location && <li><span>Based in</span><b>{settings.location}</b></li>}
-      </ul>
     </div>
   </section>
 </Base>
 
 <script>
   import '../scripts/coin-engine.js';
+  import '../scripts/scrub';
 
-  // Hero: a tilted river at three depths; rows lean with the pointer (from prototype A, "Coin River").
+  // The hero's coin river: slow, faint, purely ambient. No pointer effects, no flips.
   const host = document.getElementById('river');
   if (host && window.CoinEngine) {
     const phone = innerWidth < 600;
     window.CoinEngine.river(host, {
       seed: 2026,
-      scale: phone ? 0.66 : innerWidth < 1100 ? 0.8 : 1,
-      pool: phone ? 10 : 16,
+      scale: phone ? 0.62 : innerWidth < 1100 ? 0.78 : 0.95,
+      pool: phone ? 8 : 12,
       rotate: -7,
       bleed: [0.14, 0.2],
       fill: true,
-      rowGap: 26,
-      lean: [70, 44],
+      rowGap: 30,
       rows: [
-        { d: 92, dir: -1, speed: 20, depth: 'far' },
-        { d: 146, dir: 1, speed: 32, depth: 'mid' },
-        { d: 214, dir: -1, speed: 46, depth: 'near' },
-        { d: 140, dir: 1, speed: 30, depth: 'mid' },
-        { d: 100, dir: -1, speed: 22, depth: 'far' },
+        { d: 92, dir: -1, speed: 7, depth: 'far' },
+        { d: 146, dir: 1, speed: 10, depth: 'mid' },
+        { d: 200, dir: -1, speed: 14, depth: 'near' },
+        { d: 140, dir: 1, speed: 10, depth: 'mid' },
+        { d: 100, dir: -1, speed: 7, depth: 'far' },
       ],
-    });
-  }
-
-  // The slab tilts toward the pointer (transform only, one write per frame).
-  const slab = document.getElementById('slab');
-  if (slab && matchMedia('(pointer: fine)').matches) {
-    let raf = 0;
-    let rect: DOMRect | null = null;
-    slab.addEventListener('pointerenter', () => (rect = slab.getBoundingClientRect()));
-    slab.addEventListener('pointermove', (e) => {
-      if (!rect) rect = slab.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        slab.style.setProperty('--ry', `${(x * 16).toFixed(2)}deg`);
-        slab.style.setProperty('--rx', `${(-y * 12).toFixed(2)}deg`);
-      });
-    });
-    slab.addEventListener('pointerleave', () => {
-      rect = null;
-      cancelAnimationFrame(raf);
-      slab.style.setProperty('--ry', '0deg');
-      slab.style.setProperty('--rx', '0deg');
     });
   }
 </script>

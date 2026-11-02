@@ -8,20 +8,24 @@ const { data, Content, hasBody } = await loadPage('blog');
 const posts = await publishedPosts();
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow="Notes from the grading room" />
-  {hasBody && <div class="prose"><Content /></div>}
-  {posts.length === 0 ? (
-    <p>No posts yet.</p>
-  ) : (
-    <ul class="grid post-list">
-      {posts.map((p) => (
-        <li class="card rv">
-          {p.data.cover && <img src={p.data.cover} alt={p.data.coverAlt ?? ''} loading="lazy" decoding="async" />}
-          <h2><a href={`/blog/${p.id}`}>{p.data.title}</a></h2>
-          <p class="muted"><time datetime={p.data.date.toISOString().slice(0, 10)}>{formatDate(p.data.date)}</time></p>
-          <p>{p.data.description}</p>
-        </li>
-      ))}
-    </ul>
-  )}
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <div class="page-body">
+    {hasBody && <div class="prose"><Content /></div>}
+    {posts.length === 0 ? (
+      <p class="muted">The first articles are in preparation.</p>
+    ) : (
+      <ul class="post-list">
+        {posts.map((p) => (
+          <li class="rv">
+            <time datetime={p.data.date.toISOString().slice(0, 10)}>{formatDate(p.data.date)}</time>
+            <div>
+              {p.data.cover && <img src={p.data.cover} alt={p.data.coverAlt ?? ''} loading="lazy" decoding="async" />}
+              <h2><a href={`/blog/${p.id}`}>{p.data.title}</a></h2>
+              <p class="muted">{p.data.description}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
 </Base>

@@ -1,4 +1,32 @@
 ---
-import SimplePage from '../components/SimplePage.astro';
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import Features from '../components/Features.astro';
+import Coda from '../components/Coda.astro';
+import { loadPage } from '../lib/pages';
+
+const { data, Content, hasBody } = await loadPage('about');
+const services = data.sections ?? [];
 ---
-<SimplePage id="about" />
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <div class="page-body">
+    {hasBody && (
+      <div class="about-body">
+        <div class="prose about-prose rv"><Content /></div>
+      </div>
+    )}
+    {services.length > 0 && (
+      <section class="about-services rake" aria-labelledby="services-title">
+        <p class="eyebrow">What we offer</p>
+        <h2 id="services-title" class="rake-t">Services</h2>
+        <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
+        <Features items={services} columns={3} headingLevel="h3" />
+      </section>
+    )}
+  </div>
+  <Coda
+    title="Why collectors choose us."
+    links={[{ href: '/why-provident', label: 'Why Provident' }, { href: '/contact', label: 'Contact' }]}
+  />
+</Base>

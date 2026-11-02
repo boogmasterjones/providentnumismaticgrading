@@ -1,4 +1,51 @@
 ---
-import SimplePage from '../components/SimplePage.astro';
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import Features from '../components/Features.astro';
+import Coda from '../components/Coda.astro';
+import { loadPage } from '../lib/pages';
+import { paragraphs } from '../lib/site';
+
+const { data, Content, hasBody } = await loadPage('grading-standards');
+const scale = data.scale ?? [];
+const sections = data.sections ?? [];
+// position each band on a 1-70 rule by its first number (bands are evenly spaced so short ones stay readable)
+const first = (r: string) => Number(r.match(/\d+/)?.[0] ?? 0);
 ---
-<SimplePage id="grading-standards" />
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <div class="page-body">
+    {scale.length > 0 && (
+      <section class="scale rake" aria-labelledby="scale-title">
+        <div class="scale-head">
+          <p class="eyebrow">The 1 to 70 scale</p>
+          <h2 id="scale-title" class="rake-t">From Poor to Mint State.</h2>
+          <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
+        </div>
+        <div class="scale-rule draw" aria-hidden="true">
+          <svg class="engrave" viewBox="0 0 700 40" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M0 30H700" pathLength="1" />
+            {Array.from({ length: 71 }, (_, i) => <path pathLength="1" d={`M${i * 10} ${i % 10 === 0 ? 14 : i % 5 === 0 ? 20 : 25}V30`} />)}
+          </svg>
+          <div class="scale-nums">{[1, 10, 20, 30, 40, 50, 60, 70].map((n) => <span style={`--x:${((n - 1) / 69) * 100}%`}>{n}</span>)}</div>
+        </div>
+        <ol class="scale-list">
+          {scale.map((b) => (
+            <li class="rv" style={`--x:${((first(b.range) - 1) / 69) * 100}%`}>
+              <span class="scale-range">{b.range}</span>
+              <span class="scale-code">{b.code}</span>
+              <span class="scale-name">{b.name}</span>
+              {b.text && <span class="scale-text">{paragraphs(b.text).join(' ')}</span>}
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
+    <Features items={sections} columns={2} />
+    {hasBody && <div class="prose rv" style="margin-top: var(--space-6)"><Content /></div>}
+  </div>
+  <Coda
+    title="Every grade, reviewed before it is sealed."
+    links={[{ href: '/process', label: 'Our process' }, { href: '/holder', label: 'The holder and label' }]}
+  />
+</Base>

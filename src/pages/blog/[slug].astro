@@ -10,6 +10,7 @@ export async function getStaticPaths() {
 }
 const { post } = Astro.props;
 const { Content } = await render(post);
+// The publisher is the company; no personal author (anonymity rule).
 const ld = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
@@ -20,13 +21,13 @@ const ld = {
   ...(post.data.cover ? { image: new URL(post.data.cover, settings.siteUrl).href } : {}),
 };
 ---
-<Base title={post.data.title} description={post.data.description}>
-  <article class="prose">
-    <p><a href="/blog">← All posts</a></p>
+<Base title={post.data.title} description={post.data.description} jsonLd={ld}>
+  <article class="post prose">
+    <a class="back link-arrow" href="/blog">Journal</a>
+    <p class="post-meta"><time datetime={post.data.date.toISOString().slice(0, 10)}>{formatDate(post.data.date)}</time></p>
     <h1>{post.data.title}</h1>
-    <p class="muted"><time datetime={post.data.date.toISOString().slice(0, 10)}>{formatDate(post.data.date)}</time></p>
+    <div class="deco-rule in" aria-hidden="true"><i></i><i></i><i></i></div>
     {post.data.cover && <img src={post.data.cover} alt={post.data.coverAlt ?? ''} decoding="async" />}
     <Content />
   </article>
-  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
 </Base>

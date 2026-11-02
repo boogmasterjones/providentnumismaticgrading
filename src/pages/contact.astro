@@ -11,12 +11,12 @@ const tel = telHref(settings.phone);
 const mailto = mailtoHref(settings.email);
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow="Contact" />
-  <div class="two-col">
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <div class="page-body two-col">
     <section aria-labelledby="direct" class="rv">
-      <h2 id="direct" class="sr-only">Call, text or email</h2>
+      <h2 id="direct" class="section-title">Directly</h2>
       <ul class="ways">
-        {settings.phone && <li><span>Phone, calls and texts</span>{tel ? <a href={tel}>{settings.phone}</a> : <b>{settings.phone}</b>}</li>}
+        {settings.phone && <li><span>Telephone, calls and texts</span>{tel ? <a href={tel}>{settings.phone}</a> : <b>{settings.phone}</b>}</li>}
         {settings.email && <li><span>Email</span>{mailto ? <a href={mailto}>{settings.email}</a> : <b>{settings.email}</b>}</li>}
         {settings.hours && <li><span>Hours</span><b>{settings.hours}</b></li>}
         {settings.location && <li><span>Based in</span><b>{settings.location}</b></li>}
@@ -25,12 +25,12 @@ const mailto = mailtoHref(settings.email);
       {hasBody && <div class="prose"><Content /></div>}
     </section>
     <section aria-labelledby="msg" class="rv d1">
-      <h2 id="msg" class="sr-only">Send a message</h2>
-      <NetlifyForm name="contact" submitLabel="Send message">
-        <Field name="name" label="Your name" required autocomplete="name" />
+      <h2 id="msg" class="section-title">Write to us</h2>
+      <NetlifyForm name="contact" submitLabel="Send message" label="Contact">
+        <Field name="name" label="Name" required autocomplete="name" />
         <Field name="email" label="Email" type="email" required autocomplete="email" />
-        <Field name="phone" label="Phone" type="tel" autocomplete="tel" />
-        <Field name="message" label="Message" type="textarea" required rows={6} hint="What are you thinking of sending? A rough count and the kind of coins helps." />
+        <Field name="phone" label="Phone" type="tel" autocomplete="tel" wide />
+        <Field name="message" label="Message" type="textarea" required rows={6} />
       </NetlifyForm>
     </section>
   </div>

@@ -6,26 +6,84 @@ Netlify account**: the owner owns everything.
 
 **Anonymity rule (client request, 2026-11-02): the owner stays anonymous.** No name, title ("President",
 "founder"), personal bio, photo of him, "he/his" phrasing about a specific person, schema.org Person data or personal
-author name anywhere on the site, in meta tags or in structured data. The site speaks as the company ("we"). Blog
-posts carry no author name (the publisher is the company Organization). Credentials go in company voice and only if
-they can't identify him and he has OK'd them; see CONTENT_TO_CONFIRM.md.
+author name anywhere on the site, in meta tags or in structured data. The site speaks as the company ("we", "our
+graders"). Journal posts carry no author name (the publisher is the company Organization).
 
-**Status: build steps 1–4 done (structure, editor, forms, certificate verification from the owner's own certificate database, optional population report).**
-The look is design **"A, Coin River"** from the homepage prototype (branch `build/alex-prototype` in the Biggify repo):
-dark, warm gold, Cormorant Garamond / Cinzel / Inter, with an endless sideways river of drawn coins behind the home
-headline and a faint one behind every page title. The text is **draft copy** taken from the owner's current website; every
-fact still to confirm is listed in [CONTENT_TO_CONFIRM.md](CONTENT_TO_CONFIRM.md) (no placeholder text on the pages).
+**Not a lead-generation site (client, 2026-11-02).** Its job is to make the company look serious, rigorous and
+state-of-the-art to a collector who holds one of its slabs or hears the name. Submission and contact stay available
+but quiet: no sticky call button, no shouting "Submit" button, no price lists. **There is no fee model**: fees depend
+on the coin and the service and are quoted per submission ("coins don't work that way"). The old `/fees` and
+`/how-to-submit` addresses redirect to `/submit`.
 
-### Design notes
+**Status (2026-11-02): full site built**, draft text throughout. Every statement still to confirm is listed in
+[CONTENT_TO_CONFIRM.md](CONTENT_TO_CONFIRM.md); while the site is not launched each page shows "Preview: draft text".
 
-- Tokens (colours, fonts, spacing) are in `src/styles/theme.css`; components in `src/styles/global.css`; the home
-  page in `src/styles/home.css` and `src/pages/index.astro`.
-- Coins are drawn by the coin engine (`src/scripts/coin-engine.js` + `src/styles/coin-engine.css`), ported from the
-  prototype's fast version (commit 1bb0973): each face is drawn once to a canvas sprite and reused; rows move by one
-  compositor animation; rivers pause offscreen. No photos, no downloaded images, no AI images.
-- **Animations always play** (owner's rule): the engine's reduced-motion switch is fixed off. Add `?shot` to a URL to
-  freeze the rivers for screenshots.
-- Small site behaviour (header on scroll, phone menu, reveals, gold shimmer, page-title river): `src/scripts/site.ts`.
+## Pages
+
+| Page | Address | Editable in Keystatic as |
+|---|---|---|
+| Home | `/` | Pages → Home (headline, links, four fields, film captions, approach and principles, holder, verify and closing text) |
+| Our process (9 steps) | `/process` | Pages → Our process (Steps) |
+| Grading standards (1–70 scale, details grades, designations, ancients, label) | `/grading-standards` | Pages → Grading standards (the scale rows and Sections) |
+| The holder and label | `/holder` | Pages → The holder and label |
+| Verify a certificate | `/verify` | Pages → Verify a certificate (the lookup itself is code) |
+| Why Provident | `/why-provident` | Pages → Why Provident |
+| About the company | `/about` | Pages → About (text, and the "What we offer" services) |
+| Submissions (steps, fees note, request form) | `/submit` | Pages → Submissions |
+| Questions | `/faq` | Site → FAQ, and Pages → FAQ page |
+| Contact | `/contact` | Site → Site settings (phone, hours, location) and Pages → Contact |
+| Journal | `/blog`, `/blog/<post>` | Journal → Journal posts |
+| Privacy, Terms of use, Thank you | `/privacy`, `/terms`, `/thank-you` | Pages → … |
+| Population report (hidden until switched on) | `/population` | Site settings → Show the population report |
+| 404 | any unknown address | code |
+
+Every structured block (steps, sections, reasons, services) has a **Symbol** drop-down: one of the site's own line
+drawings (`src/components/Mark.astro`, names in `src/lib/marks.ts`). Text fields take a blank line between paragraphs
+and `[text](/path)` links.
+
+## Design
+
+Dark, warm ivory and a restrained gold; Cormorant Garamond (display), Cinzel (wordmark and numerals), Inter (text).
+Approved references (owner, 2026-11-02): security printing, Art Deco, coin engraving, raking light, film titles,
+watch movements, plus two effects from patek.com and rolex.com (below). No loupe, no hover flips, no pointer-driven
+toys. **Animations always play** (owner's rule: no reduced-motion opt-out). Coins never flip, so they never show an edge.
+
+| Effect | Where | How |
+|---|---|---|
+| Hero hold-and-release (after rolex.com's opening scroll: the hero media stays pinned full-screen while the headline scrolls up and away, then the page moves on) | Home hero | `.hero-pin` is 210% of the screen tall; the hero inside is sticky. As you scroll, the title lifts and fades, the coin river pushes in and darkens, an Art Deco frame closes in, and "Examined · Recorded · Sealed" rises in its place. Driven by `--p` from `src/scripts/scrollfx.ts`. |
+| Scroll-scrubbed footage (after patek.com's scroll-driven video) | Home, between "What we grade" and "The process at a glance" | `.film` is pinned for four screens; scrolling scrubs 80 frames of real coin footage drawn to a canvas (`src/scripts/scrub.ts`), with three captions that change in turn and a fade through black where the clips change. Phones load every second frame. |
+| Coin river (the one ambient signature) | Home hero | Slow, dimmed, desaturated; no interaction. `src/scripts/coin-engine.js`. |
+| Guilloche rosettes, turning very slowly | Page titles, home hero, closing bands, certificate panels | `/guilloche.svg` is generated at build time (`src/lib/guilloche.ts`, about 20 KB) and rotated by CSS (4 minutes per turn). |
+| Microtext borders | Footer edge, certificate panels | `.microtext` in `src/styles/deco.css`. |
+| Holographic foil | Verify seal, label seal, certificate panels | Gradients that shift with scroll (`--scroll`). |
+| Art Deco | Stepped corners, stepped rules under titles, sunbursts behind closing sections | `src/styles/deco.css`. |
+| Raking light | Section titles | A light band sweeps once across each title when it scrolls into view. |
+| Engraved line drawings | Steps, scope, principles, the grading scale rule | Inline SVG that draws itself once (stroke dash). |
+| Exploded holder (after a watch-movement drawing) | Home and `/holder` | Back shell, insert, coin, label and front shell float apart in perspective and slide together as the section scrolls in (`src/components/HolderExplode.astro`). |
+
+### Footage (stock, free licence, real footage only)
+
+Both clips are from Pexels under the [Pexels licence](https://www.pexels.com/license/) (free for commercial use, no
+attribution required; not to be resold as stock). They were reduced to stills in the browser and are served as
+`public/media/scrub/coins/000.webp`–`079.webp` (80 frames, 1280×720, about 1.4 MB in total). The original videos are
+not in the repository.
+
+| Frames | Clip | Author | Downloaded file (size) |
+|---|---|---|---|
+| 000–043 | [Metal money silver macro](https://www.pexels.com/video/metal-money-silver-macro-5651766/) (0:00.15–0:07.35) | Tima Miroshnichenko | `5651766-hd_1280_720_25fps.mp4` (2.4 MB) |
+| 044–079 | [Bronze coins on a turntable](https://www.pexels.com/video/bronze-coins-on-a-turntable-7348172/) (0:03–0:17) | Charlie Mounsey | `7348172-sd_960_506_30fps.mp4` (1.0 MB) |
+
+A third clip was downloaded to look at and not used: [Close-up of ancient Turkish coins](https://www.pexels.com/video/close-up-of-ancient-turkish-coins-12848317/)
+(`12848317-hd_1280_720_25fps.mp4`, 3.7 MB; it shows modern pocket change). When the owner sends real footage of his
+own grading room, replace the frames (same names) and the film captions.
+
+### Code map
+
+- Tokens: `src/styles/theme.css`. Site styles: `global.css`; decorative system: `deco.css`; inner pages: `pages.css`;
+  home: `home.css`; exploded holder: `explode.css`; coins: `coin-engine.css`.
+- Scroll-linked values: `src/scripts/scrollfx.ts` (one rAF per scroll, layout measured only on load/resize).
+- Header, phone menu, reveals: `src/scripts/site.ts`.
+- Add `?shot` to a URL to freeze the coin river for screenshots.
 
 ## Stack
 
@@ -60,11 +118,12 @@ Without `CERT_API_URL` the Verify page runs in **demo mode** with three clearly 
 |---|---|
 | Editor schema (what the owner can edit) | `keystatic.config.ts` |
 | Site settings: name, phone, email, location, hours, social links, **population switch**, **launched switch** | `content/settings.json` |
-| Fees table, FAQ, photo library | `content/fees.json`, `content/faq.json`, `content/gallery.json` |
+| FAQ, photo library | `content/faq.json`, `content/gallery.json` |
 | Each page's title, description, heading, intro and text | `content/pages/*.mdoc` |
 | Blog posts | `content/blog/*.mdoc` (photos in `public/images/blog/`) |
-| Theme tokens / site styles / home page styles | `src/styles/theme.css`, `global.css`, `home.css` |
-| Coin engine (drawn coins, rivers, flips) | `src/scripts/coin-engine.js`, `src/styles/coin-engine.css` |
+| Styles | `src/styles/` (see Design above) |
+| Coin engine (drawn coins, the hero river) | `src/scripts/coin-engine.js`, `src/styles/coin-engine.css` |
+| Scroll effects, film scrubber | `src/scripts/scrollfx.ts`, `src/scripts/scrub.ts`, frames in `public/media/scrub/coins/` |
 | Draft text still to confirm with the owner | `CONTENT_TO_CONFIRM.md` |
 | Certificate shape + schema | `src/lib/certs/certificate.ts` |
 | Adapter interface (website ↔ the owner's database) | `src/lib/certs/adapter.ts` |
@@ -112,7 +171,7 @@ website edit or rebuild.
 ## How the owner edits the site (after launch)
 
 1. Go to `https://<his domain>/admin` and sign in with his GitHub account.
-2. Change text, prices, FAQ, photos, blog posts or certificates, and press **Save**. Saves go to an edits branch
+2. Change text, FAQ, photos or journal posts, and press **Save**. Saves go to an edits branch
    (named `edits/…`) and are **not live yet**.
 3. When he's done, he publishes: in the editor's branch menu, **Create pull request**, then **Merge** it on GitHub.
    Netlify rebuilds once (about a minute) and the changes are live. One build per publish keeps Netlify's free
@@ -150,9 +209,10 @@ website edit or rebuild.
 - [ ] `CERT_API_URL` + read-only `CERT_API_KEY` set in Netlify; one real certificate and one wrong number tested (the
       DEMO records disappear by themselves once `CERT_API_URL` is set).
 - [ ] Population report switch: on only if the owner's database can list every certificate and the figures look right.
-- [ ] Every item in `CONTENT_TO_CONFIRM.md` confirmed by the owner (name, headline, fees and turnaround, grading scale
+- [ ] Every item in `CONTENT_TO_CONFIRM.md` confirmed by the owner (name, headline, process claims, grading scale
       and standards, About text, FAQ answers, phone, email, hours, location, privacy text) and the text updated.
-- [ ] Delete any demo blog posts.
+- [ ] Delete any demo journal posts.
+- [ ] Replace the stock-footage frames with the owner's own footage if he has some (optional; the Pexels licence allows the current ones).
 - [ ] No credential or claim (years at another grading service, memberships, guarantees, "best", "industry accepted") unless the owner confirms
       it and can back it up.
 - [ ] Real photos only (the owner's slabs and coins; never a photo of him). No stock or AI images. The coins in the moving background are drawn by the site.

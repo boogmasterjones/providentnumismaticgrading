@@ -5,22 +5,24 @@ import { loadPage } from '../lib/pages';
 import { faq } from '../lib/site';
 
 const { data, Content, hasBody } = await loadPage('faq');
+// FAQ structured data: answers carry no prices (client, 2026-11-02).
 const ld = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
   mainEntity: faq.items.map((i) => ({ '@type': 'Question', name: i.question, acceptedAnswer: { '@type': 'Answer', text: i.answer } })),
 };
 ---
-<Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow="Questions" />
-  <div class="faq-list rv">
-    {faq.items.map((i) => (
-      <details>
-        <summary>{i.question}</summary>
-        <p style="white-space: pre-line">{i.answer}</p>
-      </details>
-    ))}
+<Base title={data.metaTitle} description={data.metaDescription} jsonLd={faq.items.length ? ld : undefined}>
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <div class="page-body">
+    <div class="faq-list rv">
+      {faq.items.map((i) => (
+        <details>
+          <summary>{i.question}</summary>
+          <p style="white-space: pre-line">{i.answer}</p>
+        </details>
+      ))}
+    </div>
+    {hasBody && <div class="prose" style="margin-top: var(--space-6)"><Content /></div>}
   </div>
-  {hasBody && <div class="prose"><Content /></div>}
-  {faq.items.length > 0 && <script type="application/ld+json" set:html={JSON.stringify(ld)} />}
 </Base>

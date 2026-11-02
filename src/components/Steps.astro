@@ -1,0 +1,30 @@
+---
+/** Numbered steps (process, submissions): numeral and engraved symbol, title and summary, then the text. */
+import Mark from './Mark.astro';
+import Prose from './Prose.astro';
+import { inlineLinks, roman } from '../lib/text';
+import type { PageSection } from '../lib/pages';
+interface Props { items: PageSection[]; compact?: boolean; headingLevel?: 'h2' | 'h3' }
+const { items, compact = false, headingLevel = 'h2' } = Astro.props;
+const H = headingLevel;
+---
+<ol class:list={['steps', { compact }]}>
+  {items.map((s, i) => (
+    <li class="rv draw" id={`step-${i + 1}`}>
+      <div class="step-n">
+        <span class="numeral">{roman(i + 1)}</span>
+        {s.mark && s.mark !== 'none' && <span class="medallion"><Mark name={s.mark} /></span>}
+      </div>
+      <div class="step-head">
+        <H>{s.title}</H>
+        {s.summary && <p>{s.summary}</p>}
+      </div>
+      <div class="step-body">
+        <Prose text={s.text} />
+        {s.points && s.points.length > 0 && (
+          <ul class="points">{s.points.map((p) => <li set:html={inlineLinks(p)} />)}</ul>
+        )}
+      </div>
+    </li>
+  ))}
+</ol>

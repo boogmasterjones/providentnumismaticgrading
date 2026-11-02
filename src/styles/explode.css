@@ -1,0 +1,24 @@
+/* The exploded holder (src/components/HolderExplode.astro). --p comes from scrollfx.ts. */
+/* ---------- exploded holder ---------- */
+.explode { margin: 0; --q: clamp(0, calc((var(--p, 0) - 0.3) / 0.65), 1); --o: calc(1 - var(--q)); }
+.ex-scene { position: relative; height: 560px; perspective: 1500px; display: grid; place-items: center; }
+.ex-stack { position: relative; width: 250px; height: 380px; transform-style: preserve-3d; transform: rotateX(calc(var(--o) * 54deg)) rotateZ(calc(var(--o) * -34deg)) translateY(calc(var(--o) * 20px)); will-change: transform; }
+.ex-layer { position: absolute; inset: 0; border-radius: 14px; transform: translateZ(calc(var(--z) * (var(--o) * 78px + 1px))); }
+.ex-back { background: linear-gradient(160deg, #1d1c20, #0d0d0f); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 50px 80px -40px rgba(0, 0, 0, 0.95); }
+.ex-insert span { position: absolute; left: 50%; top: 63%; width: 200px; height: 200px; margin: -100px 0 0 -100px; border-radius: 50%; border: 1px solid rgba(201, 164, 92, 0.5); background: radial-gradient(circle, rgba(0, 0, 0, 0.55) 60%, rgba(201, 164, 92, 0.06)); box-shadow: inset 0 0 0 6px rgba(255, 255, 255, 0.025); }
+.ex-coin .coin { position: absolute; left: 50%; top: 63%; margin: -84px 0 0 -84px; filter: brightness(0.78) sepia(0.18) contrast(1.08); }
+.ex-label { pointer-events: none; }
+.exl { position: absolute; left: 14px; right: 14px; top: 14px; height: 100px; border-radius: 6px; background: linear-gradient(180deg, #f6eedb, #e4d5b5); color: #2a2214; padding: 10px 12px; display: grid; align-content: space-between; box-shadow: 0 10px 20px -12px rgba(0, 0, 0, 0.7); }
+.exl-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 9.5px; letter-spacing: 0.06em; }
+.exl-row b { font: 600 10.5px/1 var(--font-caps); letter-spacing: 0.22em; }
+.exl-mid span { font-size: 10.5px; line-height: 1.25; }
+.exl-mid em { font-family: var(--font-heading); font-size: 12.5px; }
+.exl-mid strong { font: 600 24px/1 var(--font-heading); color: #2a2214; }
+.exl-seal { width: 22px; height: 22px; border-radius: 50%; background: conic-gradient(from calc(var(--scroll, 0) * 0.2deg), #e9d3a0, #b9c9b6, #a9b4d6, #d8b4c4, #e9d3a0); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6); }
+.ex-front { background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.02) 38%, rgba(255, 255, 255, 0.08) 66%, rgba(255, 255, 255, 0.02)); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: inset 0 0 0 7px rgba(255, 255, 255, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.45); }
+.ex-legend { list-style: none; margin: 0; padding: 0; position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: grid; gap: 26px; opacity: calc(var(--o) * 1.5); }
+.ex-legend li { font: 500 0.66rem/1 var(--font-body); letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-muted); display: flex; align-items: center; gap: 10px; transform: translateX(calc(var(--o) * 0px + var(--q) * 20px)); }
+.ex-legend li::before { content: ''; width: 28px; height: 1px; background: var(--gold-line); }
+.explode figcaption { text-align: center; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-faint); margin-top: var(--space-2); }
+@media (max-width: 1100px) { .ex-legend { display: none; } }
+@media (max-width: 560px) { .ex-scene { height: 440px; } .ex-stack { scale: 0.78; } }

@@ -28,5 +28,8 @@ export default defineConfig({
   ],
   redirects: {
     '/admin': '/keystatic',
+    // Old addresses: fee tables were removed (fees are quoted per submission); the submit steps moved to /submit.
+    '/fees': '/submit',
+    '/how-to-submit': '/submit',
   },
 });

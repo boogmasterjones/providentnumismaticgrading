@@ -1,7 +1,7 @@
 /*
- * THEME TOKENS: design "A, Coin River" (dark, warm gold, classical serif), from the homepage prototype on branch
- * build/alex-prototype. Components only use these variables, so a different look means changing this file.
- * Fonts load in src/layouts/Base.astro (Google Fonts, display=swap); the fallbacks below keep the same feel offline.
+ * THEME TOKENS: dark, warm ivory and a restrained gold, classical serif display type (design "A, Coin River",
+ * refined 2026-11-02 after the client's feedback: quieter, editorial, no gimmicks). Components use only these variables.
+ * Fonts load in src/layouts/Base.astro (Google Fonts, display=swap); the fallbacks keep the same feel offline.
  */
 :root {
   color-scheme: dark;
@@ -14,37 +14,40 @@
   --font: var(--font-body);
   --serif: var(--font-heading);
 
-  --color-bg: #07080b;
-  --color-bg-2: #0d0f14;
-  --color-surface: #11141a;
-  --color-surface-2: #0b0d11;
-  --color-text: #ece6d9;
-  --color-muted: #a69f90;
-  --color-border: rgba(236, 226, 200, 0.12);
-  --color-border-strong: rgba(236, 226, 200, 0.22);
-  --color-accent: #d4a843;
-  --color-accent-text: #1a1205;
-  --color-link: #e8c56a;
-  --color-focus: #f6dd92;
+  --color-bg: #0a0a0b;
+  --color-bg-2: #0e0e10;
+  --color-surface: #121214;
+  --color-surface-2: #0c0c0e;
+  --color-text: #ebe5d8;
+  --color-text-2: #cfc8b9;
+  --color-muted: #948d80;
+  --color-faint: #6b665e;
+  --color-border: rgba(235, 229, 216, 0.09);
+  --color-border-strong: rgba(235, 229, 216, 0.18);
+  --color-accent: #c9a45c;
+  --color-accent-text: #15110a;
+  --color-link: #d9bd82;
+  --color-focus: #e9d3a0;
 
-  --gold: #d4a843;
-  --gold-hi: #f6dd92;
-  --gold-lo: #8a6420;
-  --gold-gradient: linear-gradient(135deg, #f6dd92, #d4a843 45%, #a87a26);
-  --gold-text: linear-gradient(100deg, #9c7124 0%, #e8c56a 22%, #fff1c2 32%, #d4a843 44%, #8a6420 62%, #e8c56a 80%, #fff1c2 88%, #b88a35 100%);
+  --gold: #c9a45c;
+  --gold-hi: #e3cb94;
+  --gold-lo: #8b6d36;
+  --gold-line: rgba(201, 164, 92, 0.38);
 
-  --color-warning-bg: rgba(212, 168, 67, 0.1);
-  --color-warning-text: #f6dd92;
-  --color-success-bg: rgba(120, 190, 140, 0.1);
-  --color-success-text: #a9e2b8;
-  --color-error-bg: rgba(240, 140, 110, 0.1);
-  --color-error-text: #f4b49c;
+  --color-warning-bg: rgba(201, 164, 92, 0.08);
+  --color-warning-text: #e3cb94;
+  --color-success-bg: rgba(140, 190, 150, 0.08);
+  --color-success-text: #a9d6b4;
+  --color-error-bg: rgba(230, 150, 120, 0.08);
+  --color-error-text: #eeb59f;
 
-  --radius: 14px;
-  --radius-lg: 22px;
+  --radius: 3px;
+  --radius-lg: 4px;
   --radius-pill: 999px;
-  --shadow-card: 0 40px 80px -40px rgba(0, 0, 0, 0.85);
-  --shadow-gold: 0 10px 30px -10px rgba(212, 168, 67, 0.6);
+  --shadow-card: 0 40px 80px -48px rgba(0, 0, 0, 0.9);
+
+  --ease: cubic-bezier(0.22, 0.61, 0.24, 1);
+  --slow: 1.4s;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -52,9 +55,13 @@
   --space-4: 1.5rem;
   --space-5: 2.5rem;
   --space-6: 4.5rem;
-  --space-7: 7rem;
-  --content-width: 74rem;
-  --text-width: 44rem;
-  --gutter: 1.25rem;
-  --header-h: 76px;
+  --space-7: 7.5rem;
+  --space-8: 10rem;
+  --content-width: 78rem;
+  --text-width: 40rem;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+  --header-h: 84px;
+}
+@media (max-width: 720px) {
+  :root { --header-h: 68px; --space-7: 5rem; --space-8: 6.5rem; }
 }

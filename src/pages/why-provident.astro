@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import PageIntro from '../components/PageIntro.astro';
+import Features from '../components/Features.astro';
+import Coda from '../components/Coda.astro';
+import { loadPage } from '../lib/pages';
+
+const { data, Content, hasBody } = await loadPage('why-provident');
+---
+<Base title={data.metaTitle} description={data.metaDescription}>
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <div class="page-body">
+    <Features items={data.sections ?? []} columns={3} />
+    {hasBody && <div class="prose rv" style="margin-top: var(--space-6)"><Content /></div>}
+  </div>
+  <Coda
+    title="See the work for yourself."
+    text="A small trial submission is welcome."
+    links={[{ href: '/submit', label: 'Submissions' }, { href: '/process', label: 'Our process' }]}
+  />
+</Base>

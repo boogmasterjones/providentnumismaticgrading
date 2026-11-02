@@ -1,4 +1,5 @@
 import { config, collection, fields, singleton } from '@keystatic/core';
+import { MARKS } from './src/lib/marks';
 
 /**
  * Keystatic editor config (the owner edits at /admin, which redirects to /keystatic).
@@ -9,6 +10,8 @@ import { config, collection, fields, singleton } from '@keystatic/core';
  *   variables listed in README.md). Every save then becomes a commit in that repository, and Netlify rebuilds.
  *   Edits are made on a branch whose name starts with "edits/" and go live when the owner presses "publish"
  *   (merges the branch), so a day of edits is one Netlify build instead of one per save.
+ *
+ * There is deliberately no fee or price model: fees are quoted per submission (client, 2026-11-02).
  */
 const githubRepo = import.meta.env.PUBLIC_KEYSTATIC_GITHUB_REPO as string | undefined;
 
@@ -21,7 +24,7 @@ const storage =
       } as const)
     : ({ kind: 'local' } as const);
 
-/** Fields every page has: search-engine title and description, the page heading, an intro and a free body. */
+/** Fields every page has: search-engine title and description, a small label, the heading, an intro and free text. */
 const pageFields = {
   metaTitle: fields.text({
     label: 'Search title',
@@ -34,6 +37,7 @@ const pageFields = {
     multiline: true,
     validation: { isRequired: true, length: { max: 200 } },
   }),
+  eyebrow: fields.text({ label: 'Small label above the heading', description: 'Optional, e.g. "Our process".' }),
   heading: fields.text({ label: 'Page heading', validation: { isRequired: true } }),
   intro: fields.text({ label: 'Intro paragraph', multiline: true }),
   body: fields.markdoc({
@@ -44,35 +48,55 @@ const pageFields = {
   }),
 };
 
-function page(label: string, file: string, extra: Record<string, ReturnType<typeof fields.text>> = {}) {
-  return singleton({
-    label,
-    path: `content/pages/${file}`,
-    format: { contentField: 'body' },
-    schema: { ...pageFields, ...extra },
-  });
+const markField = fields.select({
+  label: 'Symbol',
+  description: 'A small line drawing shown with this item.',
+  options: MARKS.map((m) => ({ label: m.label, value: m.value })),
+  defaultValue: 'none',
+});
+
+/** A repeatable block: a step, a principle, a section. Text: leave a blank line between paragraphs. */
+function sections(label: string, itemLabel: string) {
+  return fields.array(
+    fields.object({
+      mark: markField,
+      title: fields.text({ label: 'Title', validation: { isRequired: true } }),
+      summary: fields.text({ label: 'One-line summary', multiline: true }),
+      text: fields.text({ label: 'Text', description: 'Leave a blank line between paragraphs.', multiline: true }),
+      points: fields.array(fields.text({ label: 'Point', multiline: true }), {
+        label: 'Points (optional list)',
+        itemLabel: (p) => p.value.slice(0, 60) || 'Point',
+      }),
+    }),
+    { label, itemLabel: (p) => p.fields.title.value || itemLabel },
+  );
 }
+
+/** A plain text field (multi-line) for the named blocks on the home and submissions pages. */
+const t = (label: string, description?: string) => fields.text({ label, description, multiline: true });
 
 export default config({
   storage,
   ui: {
     brand: { name: 'Website editor' },
     navigation: {
-      'Site': ['settings', 'fees', 'faq', 'gallery'],
-      'Blog': ['blog'],
+      'Site': ['settings', 'faq', 'gallery'],
+      'Journal': ['blog'],
       'Pages': [
         'pageHome',
-        'pageHowToSubmit',
-        'pageSubmit',
-        'pageFees',
+        'pageProcess',
         'pageStandards',
-        'pageFaq',
+        'pageHolder',
+        'pageVerify',
+        'pageWhy',
         'pageAbout',
+        'pageSubmit',
+        'pageFaq',
         'pageContact',
         'pageBlog',
-        'pageVerify',
         'pagePopulation',
         'pagePrivacy',
+        'pageTerms',
         'pageThankYou',
       ],
     },
@@ -99,7 +123,7 @@ export default config({
         hours: fields.text({ label: 'Hours', multiline: true }),
         contactNote: fields.text({
           label: 'Note under contact details',
-          description: 'Optional. Shown on the Contact page and in the footer.',
+          description: 'Optional. Shown on the Contact page.',
           multiline: true,
         }),
         socialLinks: fields.array(
@@ -120,49 +144,6 @@ export default config({
           description:
             'Leave OFF until launch. While off, every page tells search engines not to index it, robots.txt blocks crawlers and a preview banner shows.',
           defaultValue: false,
-        }),
-      },
-    }),
-    fees: singleton({
-      label: 'Fees and turnaround',
-      path: 'content/fees',
-      format: { data: 'json' },
-      schema: {
-        tiers: fields.array(
-          fields.object({
-            category: fields.text({
-              label: 'Group',
-              description: 'Tiers with the same group share a table, e.g. "US coins", "World coins", "Ancient coins".',
-              validation: { isRequired: true },
-            }),
-            name: fields.text({ label: 'Service tier name', validation: { isRequired: true } }),
-            price: fields.text({ label: 'Price per coin', description: 'e.g. $25, or Call' }),
-            maxValue: fields.text({ label: 'Highest coin value covered', description: 'e.g. $2,000' }),
-            turnaround: fields.text({ label: 'Turnaround', description: 'e.g. 20 business days' }),
-            notes: fields.text({ label: 'Notes', multiline: true }),
-          }),
-          {
-            label: 'Service tiers',
-            itemLabel: (p) => [p.fields.category.value, p.fields.name.value].filter(Boolean).join(': ') || 'Tier',
-          },
-        ),
-        extras: fields.array(
-          fields.object({
-            name: fields.text({ label: 'Service', validation: { isRequired: true } }),
-            price: fields.text({ label: 'Price', description: 'e.g. Tier + $5' }),
-          }),
-          { label: 'Other services and fees', itemLabel: (p) => p.fields.name.value || 'Service' },
-        ),
-        shipping: fields.array(
-          fields.object({
-            name: fields.text({ label: 'Number of coins', description: 'e.g. 1–2 coins', validation: { isRequired: true } }),
-            price: fields.text({ label: 'Price' }),
-          }),
-          { label: 'Shipping rates', itemLabel: (p) => p.fields.name.value || 'Rate' },
-        ),
-        extraNotes: fields.array(fields.text({ label: 'Note', multiline: true }), {
-          label: 'Shipping, insurance and other notes',
-          itemLabel: (p) => p.value.slice(0, 60) || 'Note',
         }),
       },
     }),
@@ -209,26 +190,93 @@ export default config({
       format: { contentField: 'body' },
       schema: {
         ...pageFields,
-        primaryButton: fields.text({ label: 'Main button text', defaultValue: 'Submit coins' }),
-        secondaryButton: fields.text({ label: 'Second button text', defaultValue: 'Talk to us' }),
+        primaryButton: fields.text({ label: 'First link under the headline', description: 'Goes to Our process.', defaultValue: 'Our process' }),
+        secondaryButton: fields.text({ label: 'Second link under the headline', description: 'Goes to Verify a certificate.', defaultValue: 'Verify a certificate' }),
+        gradeTitle: t('What we grade: heading'),
+        gradeIntro: t('What we grade: intro'),
+        grades: sections('What we grade: fields', 'Field'),
+        approachTitle: t('Our approach: heading'),
+        approachText: t('Our approach: text', 'Leave a blank line between paragraphs.'),
+        principles: sections('Our approach: principles', 'Principle'),
+        film: sections('Film: captions shown in turn as the footage scrubs', 'Caption'),
+        processTitle: t('Process at a glance: heading', 'The steps themselves come from the Our process page.'),
+        processText: t('Process at a glance: intro'),
+        holderTitle: t('Holder and label: heading'),
+        holderText: t('Holder and label: text', 'Leave a blank line between paragraphs.'),
+        verifyTitle: t('Verification: heading'),
+        verifyText: t('Verification: text'),
+        closingTitle: t('Closing statement'),
+        closingText: t('Closing line under the statement'),
       },
     }),
-    pageHowToSubmit: page('How to submit', 'how-to-submit'),
-    pageSubmit: page('Submission form', 'submit'),
-    pageFees: page('Fees & turnaround', 'fees'),
-    pageStandards: page('Grading standards', 'grading-standards'),
-    pageFaq: page('FAQ page', 'faq'),
-    pageAbout: page('About', 'about'),
-    pageContact: page('Contact', 'contact'),
-    pageBlog: page('Blog (list page)', 'blog'),
-    pageVerify: page('Verify a certificate', 'verify'),
-    pagePopulation: page('Population report', 'population'),
-    pagePrivacy: page('Privacy', 'privacy'),
-    pageThankYou: page('Thank-you page', 'thank-you'),
+    pageProcess: singleton({
+      label: 'Our process',
+      path: 'content/pages/process',
+      format: { contentField: 'body' },
+      schema: { ...pageFields, sections: sections('Steps', 'Step') },
+    }),
+    pageStandards: singleton({
+      label: 'Grading standards',
+      path: 'content/pages/grading-standards',
+      format: { contentField: 'body' },
+      schema: {
+        ...pageFields,
+        scale: fields.array(
+          fields.object({
+            range: fields.text({ label: 'Numbers', description: 'e.g. 60–70', validation: { isRequired: true } }),
+            code: fields.text({ label: 'Abbreviation', description: 'e.g. MS' }),
+            name: fields.text({ label: 'Name', description: 'e.g. Mint State', validation: { isRequired: true } }),
+            text: fields.text({ label: 'What it means', multiline: true }),
+          }),
+          {
+            label: 'The scale (one row per grade band)',
+            itemLabel: (p) => [p.fields.range.value, p.fields.name.value].filter(Boolean).join(' ') || 'Band',
+          },
+        ),
+        sections: sections('Sections', 'Section'),
+      },
+    }),
+    pageHolder: singleton({
+      label: 'The holder and label',
+      path: 'content/pages/holder',
+      format: { contentField: 'body' },
+      schema: { ...pageFields, sections: sections('Sections', 'Section') },
+    }),
+    pageVerify: singleton({ label: 'Verify a certificate', path: 'content/pages/verify', format: { contentField: 'body' }, schema: pageFields }),
+    pageWhy: singleton({
+      label: 'Why Provident',
+      path: 'content/pages/why-provident',
+      format: { contentField: 'body' },
+      schema: { ...pageFields, sections: sections('Reasons', 'Reason') },
+    }),
+    pageAbout: singleton({
+      label: 'About',
+      path: 'content/pages/about',
+      format: { contentField: 'body' },
+      schema: { ...pageFields, sections: sections('What we offer', 'Service') },
+    }),
+    pageSubmit: singleton({
+      label: 'Submissions',
+      path: 'content/pages/submit',
+      format: { contentField: 'body' },
+      schema: {
+        ...pageFields,
+        sections: sections('Steps', 'Step'),
+        feesTitle: t('Fees note: heading'),
+        feesText: t('Fees note: text', 'Leave a blank line between paragraphs. No price lists: fees are quoted per submission.'),
+      },
+    }),
+    pageFaq: singleton({ label: 'FAQ page', path: 'content/pages/faq', format: { contentField: 'body' }, schema: pageFields }),
+    pageContact: singleton({ label: 'Contact', path: 'content/pages/contact', format: { contentField: 'body' }, schema: pageFields }),
+    pageBlog: singleton({ label: 'Journal (list page)', path: 'content/pages/blog', format: { contentField: 'body' }, schema: pageFields }),
+    pagePopulation: singleton({ label: 'Population report', path: 'content/pages/population', format: { contentField: 'body' }, schema: pageFields }),
+    pagePrivacy: singleton({ label: 'Privacy', path: 'content/pages/privacy', format: { contentField: 'body' }, schema: pageFields }),
+    pageTerms: singleton({ label: 'Terms of use', path: 'content/pages/terms', format: { contentField: 'body' }, schema: pageFields }),
+    pageThankYou: singleton({ label: 'Thank-you page', path: 'content/pages/thank-you', format: { contentField: 'body' }, schema: pageFields }),
   },
   collections: {
     blog: collection({
-      label: 'Blog posts',
+      label: 'Journal posts',
       path: 'content/blog/*',
       slugField: 'title',
       format: { contentField: 'body' },
@@ -238,7 +286,7 @@ export default config({
         title: fields.slug({ name: { label: 'Title', validation: { isRequired: true } } }),
         date: fields.date({ label: 'Date', defaultValue: { kind: 'today' }, validation: { isRequired: true } }),
         description: fields.text({
-          label: 'Short summary (for the blog list and Google)',
+          label: 'Short summary (for the list and Google)',
           multiline: true,
           validation: { isRequired: true, length: { max: 200 } },
         }),

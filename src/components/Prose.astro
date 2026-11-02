@@ -1,0 +1,9 @@
+---
+/** Editor text as paragraphs (blank line = new paragraph), with [text](link) links. Nothing else is treated as HTML. */
+import { paragraphs } from '../lib/site';
+import { inlineLinks } from '../lib/text';
+interface Props { text?: string | null; class?: string; as?: 'p' | 'span' }
+const { text, class: cls } = Astro.props;
+const paras = paragraphs(text);
+---
+{paras.map((p) => <p class={cls} set:html={inlineLinks(p)} />)}

@@ -1,19 +1,23 @@
 ---
 import '../styles/theme.css';
-import '../styles/coin-engine.css';
 import '../styles/global.css';
+import '../styles/deco.css';
+import '../styles/pages.css';
+import BrandMark from '../components/BrandMark.astro';
 import { settings, telHref, mailtoHref } from '../lib/site';
-import { NAV } from '../lib/nav';
+import { NAV, FOOTER_NAV } from '../lib/nav';
 
 interface Props {
   title: string;
   description: string;
   /** Set for pages that must never be indexed (thank-you, 404). */
   noindex?: boolean;
-  /** The home page: full-width hero under a transparent header. */
+  /** The home page: full-height hero under a transparent header. */
   home?: boolean;
+  /** Extra JSON-LD for this page (no people, no prices). */
+  jsonLd?: Record<string, unknown>;
 }
-const { title, description, noindex = false, home = false } = Astro.props;
+const { title, description, noindex = false, home = false, jsonLd } = Astro.props;
 const fullTitle = title.includes(settings.siteName) ? title : `${title} | ${settings.siteName}`;
 // One switch for the whole site: until "launched" is ticked in Site settings, nothing is indexed.
 const blockIndexing = noindex || !settings.launched;
@@ -23,8 +27,11 @@ const mailto = mailtoHref(settings.email);
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const year = new Date().getFullYear();
 const nav = NAV.filter((l) => l.href !== '/population' || settings.showPopulation);
-const [nameTop, ...nameRest] = settings.siteName.split(' ');
-const bodyClass = [home && 'home', !settings.launched && 'has-banner', tel && 'has-call'].filter(Boolean).join(' ');
+const words = settings.siteName.split(' ');
+const nameTop = words[0];
+const nameRest = words.slice(1).join(' ');
+const bodyClass = [home && 'home', !settings.launched && 'has-banner'].filter(Boolean).join(' ');
+const current = (href: string) => (path === href || path.startsWith(href + '/') ? 'page' : undefined);
 ---
 <!doctype html>
 <html lang="en">
@@ -39,83 +46,79 @@ const bodyClass = [home && 'home', !settings.launched && 'has-banner', tel && 'h
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
-    <meta name="theme-color" content="#07080b" />
+    <meta property="og:site_name" content={settings.siteName} />
+    <meta name="theme-color" content="#0a0a0b" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap"
     />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
   </head>
   <body class={bodyClass || undefined}>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
-      {!settings.launched && (
-        <div class="preview-banner" role="note">
-          <div class="container">Preview: draft text, not yet confirmed.</div>
-        </div>
-      )}
+      {!settings.launched && <div class="preview-banner" role="note">Preview: draft text, not yet confirmed.</div>}
       <div class="container bar">
         <a class="brand" href="/" aria-label={`${settings.siteName}, home`}>
-          <span class="brand-mark" data-coin="crown:gold:8" data-d="40" data-noflip></span>
-          <span class="brand-name">{nameTop}<br />{nameRest.slice(0, 1).join(' ')}</span>
+          <BrandMark />
+          <span class="brand-name" aria-hidden="true"><b>{nameTop.toUpperCase()}</b>{nameRest && <small>{nameRest}</small>}</span>
         </a>
         <nav class="nav" id="site-nav" aria-label="Main">
           <ul>
-            {nav.map((l) => (
-              <li><a href={l.href} aria-current={path === l.href || path.startsWith(l.href + '/') ? 'page' : undefined}>{l.label}</a></li>
-            ))}
-            <li class="nav-submit"><a href="/submit">Submit your coins</a></li>
+            {nav.map((l) => <li><a href={l.href} aria-current={current(l.href)}>{l.label}</a></li>)}
+            <li class="nav-contact"><a href="/contact" aria-current={current('/contact')}>Contact</a></li>
           </ul>
         </nav>
-        <a class="btn header-cta" href="/submit">Submit your coins</a>
-        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+        <a class="header-contact" href="/contact">Contact</a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu <i aria-hidden="true"></i></button>
       </div>
     </header>
     <main id="main">
       {home ? <slot /> : <div class="container"><slot /></div>}
     </main>
     <footer class="site-footer">
+      <div class="microtext" aria-hidden="true"></div>
       <div class="container">
-        <p class="footer-mark" aria-hidden="true">{nameTop.toUpperCase()}</p>
-        <div class="cols">
-          <div>
-            <p><strong>{settings.siteName}</strong></p>
-            {settings.tagline && <p>{settings.tagline}</p>}
-            {settings.location && <p>{settings.location}</p>}
+        <div class="footer-top">
+          <div class="footer-brand">
+            <a class="brand" href="/" aria-label={`${settings.siteName}, home`}>
+              <BrandMark />
+              <span class="brand-name" aria-hidden="true"><b>{nameTop.toUpperCase()}</b>{nameRest && <small>{nameRest}</small>}</span>
+            </a>
+            <p>Independent authentication, attribution and grading of coins, tokens and medals.</p>
           </div>
+          <nav aria-labelledby="f-grading">
+            <h2 id="f-grading">Grading</h2>
+            <ul>{FOOTER_NAV.grading.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+          </nav>
+          <nav aria-labelledby="f-company">
+            <h2 id="f-company">The company</h2>
+            <ul>{FOOTER_NAV.company.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+          </nav>
           <div>
+            <h2>Contact</h2>
             <ul>
+              {settings.location && <li>{settings.location}</li>}
               {settings.phone && <li>{tel ? <a href={tel}>{settings.phone}</a> : settings.phone}</li>}
               {settings.email && <li>{mailto ? <a href={mailto}>{settings.email}</a> : settings.email}</li>}
               {settings.hours && <li>{settings.hours}</li>}
-            </ul>
-            {settings.contactNote && <p class="small">{settings.contactNote}</p>}
-            {settings.socialLinks.length > 0 && (
-              <ul>
-                {settings.socialLinks.map((s) => <li><a href={s.url} rel="noopener">{s.label}</a></li>)}
-              </ul>
-            )}
-          </div>
-          <div>
-            <ul>
-              <li><a href="/submit">Submit your coins</a></li>
-              <li><a href="/how-to-submit">How to submit</a></li>
-              <li><a href="/fees">Fees and turnaround</a></li>
-              <li><a href="/verify">Verify a certificate</a></li>
-              <li><a href="/faq">FAQ</a></li>
+              {settings.socialLinks.map((s) => <li><a href={s.url} rel="noopener">{s.label}</a></li>)}
             </ul>
           </div>
         </div>
         <div class="footer-legal">
           <span>© {year} {settings.siteName}</span>
-          <a href="/privacy">Privacy</a>
+          <nav aria-label="Legal">
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms of use</a>
+          </nav>
         </div>
       </div>
     </footer>
-    {tel && <a class="sticky-call" href={tel}>Call or text {settings.phone}</a>}
     <script>
       import '../scripts/site';
     </script>

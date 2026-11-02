@@ -11,17 +11,15 @@
 //    animation (transform only). Depth is row opacity, so a river needs one sprite per design.
 //  - A flip is a 2D turn (scaleX follows cos(angle)), faces swapped edge-on in the same timeline, no edge band.
 //  - One shine at a time; every animation is transform or opacity.
-//  - Loops (speed easing, pointer lean, loupe) run in requestAnimationFrame only while needed,
-//    read nothing from layout, and write transforms only.
-//  - Rivers and loupes pause when offscreen or when the tab is hidden.
-//  - Reduced motion: no animation, no flips, no shine, no loupe; rivers become still mosaics.
+//  - No pointer-driven effects (client, 2026-11-02): no hover/tap flips, no lean, no loupe, no hover slow-down.
+//    The river simply drifts; glints only when a river asks for them (glint: true).
+//  - Rivers pause when offscreen or when the tab is hidden.
 //
 // API (window.CoinEngine; full notes and examples in the prototype README):
 //   spec(seed, type?, metal?)          -> a coin description {front, back, m, anc}
-//   coin(spec, sizePx, {priority, direct, noflip}) -> <div class="coin"> (flips on hover or tap)
+//   coin(spec, sizePx, {priority, direct, noflip}) -> <div class="coin"> (static; flip() can turn it from code, never edge-on)
 //   river(host, options)               -> endless rows of coins inside host
 //   grid(host, {count, size, seed})    -> a static grid of coins
-//   loupe(host, river, options)        -> a magnifier drawn from cached sprites
 //   flip(el, on), shine(el), sprite(face, px, opts), watch(el, onVisibleChange)
 //   <span data-coin="type:metal:seed" data-d="80"> placeholders are filled on load
 //
@@ -361,32 +359,7 @@
     (e.firstChild || e).appendChild(s);
     setTimeout(function () { s.remove(); }, 1050 + (delay || 0));
   }
-  // Hover (mouse) or tap (touch) flips any .coin in the page, unless it or an ancestor has data-noflip.
-  // Hover intent: the pointer must rest on a coin for 70 ms, and nothing flips while the page scrolls
-  // (coins moving under a still pointer would otherwise flip one after another).
-  var cur = null, pend = null, pendT = 0, lastScroll = -1e9;
-  addEventListener("scroll", function () { lastScroll = performance.now(); }, { passive: true });
-  function flipTarget(t) { var c = t && t.closest && t.closest(".coin"); return c && !c.closest("[data-noflip]") ? c : null; }
-  if (!reduce && !shot) {
-    if (fine) {
-      document.addEventListener("pointerover", function (ev) {
-        var c = flipTarget(ev.target);
-        if (c === cur && !pend) return;
-        clearTimeout(pendT); pend = c;
-        if (cur && cur !== c) { flip(cur, false); cur = null; }
-        if (!c) return;
-        ensureBack(c); // start loading the back face during the hover-intent wait
-        pendT = setTimeout(function () {
-          pend = null;
-          if (performance.now() - lastScroll < 250) return;
-          cur = c; flip(c, true);
-        }, 70);
-      }, { passive: true });
-      document.documentElement.addEventListener("pointerleave", function () { clearTimeout(pendT); pend = null; if (cur) flip(cur, false); cur = null; });
-    } else {
-      document.addEventListener("click", function (ev) { var c = flipTarget(ev.target); if (c) flip(c, !c._want); });
-    }
-  }
+  // No hover or tap flips (client, 2026-11-02: no toy interactions). flip() stays available to code; it never shows an edge.
 
   // =====================================================================================
   // 5. PAUSE OFFSCREEN: anything registered here stops when its host leaves the screen
@@ -472,16 +445,12 @@
           if (shot || !api.playing) R.anim.pause();
         } else { R.staticX = -Math.round(R.phase * setW); track.style.transform = "translateX(" + R.staticX + "px)"; }
         Promise.all(coins.slice(0, n).map(function (ce) { return sprite(ce._o.front, maxD, so); })).then(function () { row.classList.add("in"); });
-        if (!reduce && !shot) {
-          row.addEventListener("pointerenter", function () { R.target = hoverRate; kick(); });
-          row.addEventListener("pointerleave", function () { R.target = 1; kick(); });
-        }
         rows.push(R);
         y += d + rowGap;
       });
       host.appendChild(stage);
 
-      // geometry: plane coordinates -> host pixels (the same transform the CSS applies; used by the loupe)
+      // geometry: plane coordinates -> host pixels (the same transform the CSS applies)
       var Mx = new DOMMatrix().translate(rect.x, rect.y).translate(org[0] * rect.w, org[1] * rect.h).rotateAxisAngle(0, 0, 1, rot).rotateAxisAngle(1, 0, 0, tilt).translate(-org[0] * rect.w, -org[1] * rect.h);
       if (tilt) { var pm = new DOMMatrix(); pm.m34 = -1 / P; Mx = new DOMMatrix().translate(po[0] * W, po[1] * H).multiply(pm).translate(-po[0] * W, -po[1] * H).multiply(Mx); }
       api.project = function (u, v) { var w = Mx.m14 * u + Mx.m24 * v + Mx.m44; return [(Mx.m11 * u + Mx.m21 * v + Mx.m41) / w, (Mx.m12 * u + Mx.m22 * v + Mx.m42) / w]; };
@@ -531,24 +500,8 @@
       addEventListener("scroll", function () { if (!api.playing) { lastY = scrollY; return; } boost = Math.min(4, boost + Math.abs(scrollY - lastY) / 40); lastY = scrollY; kick(); }, { passive: true });
     }
 
-    // lean: rows drift with the pointer (by depth), transform only; the loop stops when settled
-    if (o.lean && fine) {
-      var tx = 0, ty = 0, cx = 0, cy = 0, leaning = false;
-      var lean = function () {
-        cx += (tx - cx) * 0.08; cy += (ty - cy) * 0.08;
-        var settled = Math.abs(tx - cx) < 0.001 && Math.abs(ty - cy) < 0.001;
-        api.rows.forEach(function (R) { R.ox = -cx * o.lean[0] * R.lean; R.oy = -cy * o.lean[1] * R.lean; R.el.style.transform = "translate(" + R.ox.toFixed(1) + "px," + R.oy.toFixed(1) + "px)"; });
-        leaning = !settled && api.playing;
-        if (leaning) requestAnimationFrame(lean);
-      };
-      addEventListener("pointermove", function (e) {
-        tx = e.clientX / innerWidth - 0.5; ty = e.clientY / innerHeight - 0.5;
-        if (!leaning && api.playing) { leaning = true; requestAnimationFrame(lean); }
-      }, { passive: true });
-    }
-
     // glints: every so often one visible coin catches the light (one animated element at a time)
-    if (o.glint !== false) setInterval(function () {
+    if (o.glint === true) setInterval(function () {
       if (!api.playing) return;
       var cand = api.rows.filter(function (R) { return R.lean > 0.3; }); if (!cand.length) cand = api.rows;
       var R = cand[Math.floor(Math.random() * cand.length)], x0 = -api.trackX(R) - api.rect.x - R.ox;
@@ -556,8 +509,6 @@
       shine(R.coins[j0 + Math.floor(Math.random() * Math.max(1, jn - j0))]);
     }, o.glintEvery || 1400);
 
-    // backs: drawn ahead of time, when the browser is idle, for the rows people hover most
-    idle(function () { pool.forEach(function (p) { api.rows.forEach(function (R) { if (R.lean > 0.3) sprite(p.back, R.so.px, { dim: R.so.dim, blur: R.so.blur, priority: 3 }); }); }); });
     return api;
   }
   function debounce(fn, ms) { var t; return function () { clearTimeout(t); t = setTimeout(fn, ms); }; }
@@ -572,94 +523,6 @@
     if (o.gap != null) host.style.gap = o.gap + "px";
     for (var i = 0; i < (o.count || 12); i++) { var c = coin(spec(r, o.type, o.metal), o.size || 96); host.appendChild(c); out.push(c); }
     return out;
-  }
-
-  // =====================================================================================
-  // 8. LOUPE: a magnifier over a river. It is one small canvas: each frame it redraws the
-  //    few coins under it from cached sprites (no second copy of the DOM). It is moved by
-  //    transform only, follows the pointer, and wanders by itself when the pointer rests.
-  // =====================================================================================
-  function loupe(host, rv, o) {
-    o = o || {};
-    if (reduce) return null;
-    var R0 = o.radius || 120, Z = o.zoom || 2.3, bg = o.background || "#0c0b09";
-    var wrap = document.createElement("div"); wrap.className = "cl-loupe"; wrap.setAttribute("aria-hidden", "true");
-    wrap.style.setProperty("--lr", R0 + "px");
-    wrap.innerHTML = '<canvas></canvas><span class="cl-glass"></span><span class="cl-ring"></span>' + (o.label ? '<span class="cl-tag"></span>' : "");
-    if (o.label) wrap.querySelector(".cl-tag").textContent = o.label;
-    host.appendChild(wrap);
-    var cv = wrap.firstChild, cx = cv.getContext("2d"), CS = Math.round(2 * R0 * DPR);
-    cv.width = cv.height = CS;
-    var W = rv.W, H = rv.H, minY = (o.minY || 0) * H;
-    rv.onbuild = function () { W = rv.W; H = rv.H; minY = (o.minY || 0) * H; };
-    var x = W * (o.start ? o.start[0] : 0.6), y = H * (o.start ? o.start[1] : 0.75), tx = x, ty = y, last = -1e9;
-    var zoomSprites = {};
-    function zs(R, coinEl, back) {
-      var f = back ? coinEl._o.back : coinEl._o.front, key = f.id;
-      if (zoomSprites[key]) return zoomSprites[key];
-      zoomSprites[key] = null;
-      sprite(f, Math.min(512 / DPR, R.d * Z), { priority: 0 }).then(function (s) { zoomSprites[key] = s.canvas; });
-      return null;
-    }
-    function draw() {
-      cx.setTransform(1, 0, 0, 1, 0, 0);
-      cx.fillStyle = bg; cx.fillRect(0, 0, CS, CS);
-      var reach = R0 / Z, now = performance.now();
-      rv.rows.forEach(function (R) {
-        var tX = rv.trackX(R), half = R.d / 2, vRow = R.top + R.oy + half;
-        // cull: skip rows far from the loupe; along a row, screen x is linear in u, so solve for the coins under it
-        var p0 = rv.project(0, vRow), p1 = rv.project(1000, vRow), sc = (p1[0] - p0[0]) / 1000;
-        if (!sc) return;
-        var yAt = p0[1] + (p1[1] - p0[1]) / 1000 * ((x - p0[0]) / sc);
-        if (Math.abs(yAt - y) > reach + R.d * Math.abs(sc) * 1.2) return;
-        var uA = (x - reach - p0[0]) / sc, uB = (x + reach - p0[0]) / sc, base = R.ox + tX + half;
-        var j0 = Math.max(0, Math.floor((Math.min(uA, uB) - base) / R.step) - 1), j1 = Math.min(R.coins.length - 1, Math.ceil((Math.max(uA, uB) - base) / R.step) + 1);
-        for (var j = j0; j <= j1; j++) {
-          var ce = R.coins[j], u = R.ox + tX + ce._u, v = R.top + R.oy + ce._v;
-          var c = rv.project(u, v);
-          if (Math.abs(c[0] - x) > reach + R.d || Math.abs(c[1] - y) > reach + R.d) continue;
-          var ex = rv.project(u + half, v), ey = rv.project(u, v + half);
-          var ang = 0;
-          if (ce._fpos) ang = ce._fpos() * Math.PI; // the same turn the coin element shows
-          var back = ang > Math.PI / 2, sx = Math.abs(Math.cos(ang)) || 0.001;
-          var img = zs(R, ce, back) || (back ? ce._bs && ce._bs.canvas : ce._fs && ce._fs.canvas);
-          if (!img) continue;
-          var kk = Z * DPR / half;
-          cx.setTransform((ex[0] - c[0]) * kk * sx, (ex[1] - c[1]) * kk * sx, (ey[0] - c[0]) * kk, (ey[1] - c[1]) * kk, (c[0] - x) * Z * DPR + CS / 2, (c[1] - y) * Z * DPR + CS / 2);
-          var full = half * (1 + 2 * PAD);
-          cx.drawImage(img, -full, -full, 2 * full, 2 * full);
-        }
-      });
-    }
-    var on = false;
-    if (shot) { x = tx; y = ty; }
-    function frame(t) {
-      if (!on) return;
-      if (!shot && t - last > 2500 && o.wander !== false) {
-        var s = t / 1000;
-        tx = W * (0.5 + 0.34 * Math.sin(s * 0.33)); ty = minY + (H - minY) * (0.45 + 0.3 * Math.sin(s * 0.51 + 1));
-      }
-      x += (tx - x) * 0.09; y += (ty - y) * 0.09;
-      wrap.style.transform = "translate3d(" + (x - R0).toFixed(1) + "px," + (y - R0).toFixed(1) + "px,0)";
-      draw();
-      if (!shot) requestAnimationFrame(frame);
-    }
-    // the host's page position is measured once (and on resize), so pointer moves never read layout
-    var hx = 0, hy = 0, place = function () { var b = host.getBoundingClientRect(); hx = b.left + scrollX; hy = b.top + scrollY; };
-    place(); addEventListener("resize", debounce(place, 200)); addEventListener("load", place);
-    if (fine) host.addEventListener("pointermove", function (e) {
-      if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
-      tx = e.pageX - hx; ty = Math.max(minY, e.pageY - hy); last = performance.now();
-    }, { passive: true });
-    watch(host, function (v) { var was = on; on = v; if (on && !was) requestAnimationFrame(frame); });
-    // screenshots: centre the loupe on the coin nearest its start, a little up and left, so it shows detail
-    function snap() {
-      var best = null, bd = 1e9;
-      rv.rows.forEach(function (R) { var tX = rv.trackX(R); R.coins.forEach(function (ce) { var c = rv.project(R.ox + tX + ce._u, R.top + R.oy + ce._v), dd = Math.hypot(c[0] - x, c[1] - y); if (dd < bd && c[1] > minY + R0) { bd = dd; best = [c, R]; } }); });
-      if (best) { x = tx = best[0][0] - best[1].d * 0.12; y = ty = best[0][1]; }
-    }
-    if (shot) { snap(); on = true; Promise.all(rv.rows.map(function (R) { return sprite(R.coins[0]._o.front, R.d, {}); })).then(function () { setTimeout(function () { frame(0); }, 50); setTimeout(function () { frame(0); }, 400); }); }
-    return { el: wrap, moveTo: function (px, py) { tx = px; ty = py; last = performance.now(); } };
   }
 
   // =====================================================================================
@@ -678,6 +541,6 @@
   }
   fillPlaceholders();
 
-  window.CoinEngine = { version: 2, flags: { shot: shot, reduce: reduce, fine: fine }, rng: rng, spec: spec, svg: svg, sprite: sprite, coin: coin, flip: flip, shine: shine, ensureBack: ensureBack, river: river, rivers: rivers, grid: grid, loupe: loupe, watch: watch, fillPlaceholders: fillPlaceholders, PAD: PAD };
+  window.CoinEngine = { version: 2, flags: { shot: shot, reduce: reduce, fine: fine }, rng: rng, spec: spec, svg: svg, sprite: sprite, coin: coin, flip: flip, shine: shine, ensureBack: ensureBack, river: river, rivers: rivers, grid: grid, watch: watch, fillPlaceholders: fillPlaceholders, PAD: PAD };
   window.Coins = window.CoinEngine; // old name, kept for the existing pages
 })();

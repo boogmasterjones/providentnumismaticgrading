@@ -1,36 +1,52 @@
 {
   "items": [
     {
-      "question": "What kinds of coins do you grade?",
-      "answer": "US and world coins from 1600 to the present, most tokens and medals, and ancient Roman and select Greek coins."
+      "question": "What do you grade?",
+      "answer": "United States and world coins from 1600 to the present, including colonial issues, errors and fractional gold; most tokens and medals; and ancient Roman Republican and Imperial coins and select Greek types."
     },
     {
       "question": "How much does grading cost?",
-      "answer": "From $18 per coin, depending on the type of coin, its value and the service. Every tier is on the Fees and turnaround page. For coins worth over $7,500, call for pricing."
+      "answer": "Fees depend on the coin and on the service it needs, so we quote each submission individually, before anything is sent. Contact us with a list of what you would like to submit."
     },
     {
       "question": "How long does grading take?",
-      "answer": "10 to 30 business days, depending on the service. Turnaround times are approximate and not guaranteed."
+      "answer": "It depends on the service. We give an estimate with your quote. Turnaround times are approximate and not guaranteed."
     },
     {
-      "question": "How do I ship my coins?",
-      "answer": "Send the submission form first: we reply with a quote and the address to ship to. Coins travel at your risk, so insurance is recommended (1% of the order's total value), and orders over $750 need signature delivery."
+      "question": "How do I send coins?",
+      "answer": "Send a submission request first. We reply with a quote and the address to ship to. Pack each coin in its own holder or flip, pad the package so nothing can move, and ship insured: coins travel at the sender's risk until they reach us. Signature delivery is required for orders valued over $750."
     },
     {
-      "question": "Can I try you with a few coins first?",
-      "answer": "Yes. A small trial submission is welcome, so you can see the grading, the holder and the label before you send more."
+      "question": "Can I send a few coins first?",
+      "answer": "Yes. A small trial submission is welcome, so you can see the grading, the holder and the label before sending more."
+    },
+    {
+      "question": "How are ancient coins graded?",
+      "answer": "Ancient coins receive a descriptive grade, such as Very Fine or Extremely Fine, with separate subgrades for strike and surface on a scale of one to five. At the services that include it, the identification is expanded and the weight is recorded. The Grading standards page explains more."
+    },
+    {
+      "question": "What is a details grade?",
+      "answer": "A coin can be genuine and still have a problem, such as cleaning, tooling or damage. Such a coin may be described with the grade its wear corresponds to, together with a plain note of the problem, in place of a numeric grade."
     },
     {
       "question": "Can I choose the label?",
-      "answer": "Every service includes a ready-made label design for US, world, Roman or Greek coins. A custom label design costs $100, and is free on orders of 200 coins or more."
+      "answer": "Yes. Every service includes a choice of our ready-made label designs for United States, world, Roman and Greek coins. Custom designs can be created for a collection; ask when you request your quote."
     },
     {
-      "question": "Can I send coins already in another company's holder?",
-      "answer": "Yes: a crossover costs the same as the service tier. A reholder into our holder is $5."
+      "question": "Can you grade a coin already in another company's holder?",
+      "answer": "Yes. Coins graded elsewhere can be submitted for crossover into our holder. A coin in one of our own holders that has been scratched or damaged can be reholdered."
     },
     {
-      "question": "How can I check a certificate you issued?",
-      "answer": "Use the Verify a certificate page and type the certificate number from the label. You'll see the coin, grade and photos we keep on record. If a number isn't found, contact us before buying or selling the coin."
+      "question": "Is the holder sealed?",
+      "answer": "Yes. The holder is sonically welded around the coin, forming a permanent, tamper-evident seal."
+    },
+    {
+      "question": "How do I verify a certificate?",
+      "answer": "Type the certificate number from the label on the Verify a certificate page. You will see the record we keep for that coin. Compare it with the coin and label in your hand."
+    },
+    {
+      "question": "What if a certificate number is not found?",
+      "answer": "Check the number against the label character by character; 0 and O, or 1 and I, are easily confused. A coin graded in the last few days may not be in the registry yet. If the number is correct and still not found, contact us before buying or selling the coin."
     }
   ]
 }

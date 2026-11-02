@@ -20,12 +20,13 @@ const pop = outcome?.kind === 'report' ? outcome.report : null;
 ---
 {!enabled ? (
   <Base title="Page not found" description="This page is not available." noindex>
-    <h1>Page not found</h1>
+    <h1 style="margin-top: var(--space-7)">Page not found</h1>
     <p>This page isn't available. Try the <a href="/">home page</a>, or <a href="/verify">verify a certificate</a>.</p>
   </Base>
 ) : (
   <Base title={data.metaTitle} description={data.metaDescription}>
-    <PageIntro heading={data.heading} intro={data.intro} />
+    <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+    <div class="page-body">
     {outcome?.kind === 'report' && outcome.demo && (
       <p class="notice warning"><span class="badge demo">DEMO</span> These figures come from made-up DEMO records. The certificate database is not connected yet.</p>
     )}
@@ -56,5 +57,6 @@ const pop = outcome?.kind === 'report' ? outcome.report : null;
       </div>
     )}
     {hasBody && <div class="prose"><Content /></div>}
+    </div>
   </Base>
 )}

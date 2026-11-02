@@ -1,29 +1,60 @@
 ---
 import Base from '../layouts/Base.astro';
 import PageIntro from '../components/PageIntro.astro';
+import Steps from '../components/Steps.astro';
+import Prose from '../components/Prose.astro';
 import NetlifyForm from '../components/NetlifyForm.astro';
 import Field from '../components/Field.astro';
+import LinkArrow from '../components/LinkArrow.astro';
 import { loadPage } from '../lib/pages';
-import { fees } from '../lib/site';
 
 const { data, Content, hasBody } = await loadPage('submit');
-const tiers = [...fees.tiers.map((t) => `${t.category}: ${t.name} (${t.price})`), 'Not sure, please advise'];
+// No price tiers: fees are quoted per submission (client, 2026-11-02).
+const coinTypes = ['United States', 'World', 'Ancient Roman', 'Ancient Greek', 'Tokens and medals', 'A mix'];
+const services = ['Grading and encapsulation', 'Crossover from another holder', 'Reholder', 'Not sure, please advise'];
+const labels = ['A ready-made design', 'A custom design', 'No preference'];
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow="Submit your coins" />
-  {hasBody && <div class="prose"><Content /></div>}
-  <NetlifyForm name="submission" submitLabel="Send submission">
-    <Field name="name" label="Your name" required autocomplete="name" />
-    <Field name="email" label="Email" type="email" required autocomplete="email" />
-    <Field name="phone" label="Phone" type="tel" autocomplete="tel" />
-    <Field name="coin-count" label="Number of coins" type="number" required min={1} inputmode="numeric" />
-    <Field name="coin-list" label="List of coins" type="textarea" required rows={6}
-      hint="One coin per line: year, country, denomination and anything else you know." />
-    <Field name="declared-value" label="Total declared value (US$)" inputmode="decimal"
-      hint="Sets the service tier and the optional insurance (1% of the total value)." />
-    <Field name="service-tier" label="Service" type="select" required options={tiers}
-      hint="See Fees & turnaround for what each service includes." />
-    <Field name="shipping-notes" label="Shipping and insurance notes" type="textarea" rows={3} />
-    <Field name="message" label="Anything else?" type="textarea" rows={4} />
-  </NetlifyForm>
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <div class="page-body">
+    <Steps items={data.sections ?? []} compact />
+
+    {data.feesTitle && (
+      <section id="fees" class="cert-panel fees-note deco-frame draw rake" aria-labelledby="fees-title">
+        <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
+        <div class="rosette" aria-hidden="true"></div>
+        <div class="fees-inner">
+          <p class="eyebrow">Fees</p>
+          <h2 id="fees-title" class="rake-t">{data.feesTitle}</h2>
+          <Prose text={data.feesText} />
+          <LinkArrow href="/contact">Ask for a quote</LinkArrow>
+        </div>
+        <div class="microtext" aria-hidden="true"></div>
+      </section>
+    )}
+
+    {hasBody && <div class="prose rv"><Content /></div>}
+
+    <section class="request" aria-labelledby="request-title">
+      <div class="request-head">
+        <p class="eyebrow">Submission request</p>
+        <h2 id="request-title">Tell us about your coins.</h2>
+        <p class="muted">We reply with a quote and shipping details. Nothing needs to be sent until then.</p>
+      </div>
+      <NetlifyForm name="submission" submitLabel="Send request" label="Submission request">
+        <Field name="name" label="Name" required autocomplete="name" />
+        <Field name="email" label="Email" type="email" required autocomplete="email" />
+        <Field name="phone" label="Phone" type="tel" autocomplete="tel" />
+        <Field name="coin-count" label="Number of coins" type="number" required min={1} inputmode="numeric" />
+        <Field name="coin-type" label="Kind of coins" type="select" options={coinTypes} />
+        <Field name="service" label="Service" type="select" required options={services} />
+        <Field name="coin-list" label="The coins" type="textarea" required rows={6}
+          hint="One per line: date, country or issuer, denomination, and anything else you know." />
+        <Field name="declared-value" label="Approximate total value (US$)" inputmode="decimal"
+          hint="Helps us advise on the service and on insurance." />
+        <Field name="label-design" label="Label" type="select" options={labels} />
+        <Field name="message" label="Anything else" type="textarea" rows={3} />
+      </NetlifyForm>
+    </section>
+  </div>
 </Base>

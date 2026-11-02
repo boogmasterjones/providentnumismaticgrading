@@ -1,0 +1,55 @@
+---
+/**
+ * Fine-line symbols, drawn on a 48-unit grid with one hairline stroke so they read like engraving.
+ * Decorative: always aria-hidden. Colour follows `currentColor`.
+ */
+import type { MarkName } from '../lib/marks';
+interface Props { name?: string | null; size?: number; class?: string }
+const { name, size = 44, class: cls } = Astro.props;
+const n = (name ?? 'none') as MarkName;
+---
+{n !== 'none' && (
+  <svg class:list={['mark', cls]} width={size} height={size} viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    {n === 'intake' && <>
+      <path d="M8 17 24 10l16 7v18l-16 7-16-7z" /><path d="M8 17l16 7 16-7M24 24v18" /><path d="M16 13.5l16 7v6" /></>}
+    {n === 'authenticate' && <>
+      <path d="M24 6 39 11v11c0 9.5-6.3 16.6-15 20-8.7-3.4-15-10.5-15-20V11z" /><path d="M24 10.5 35 14.2v8c0 7.2-4.6 12.6-11 15.4-6.4-2.8-11-8.2-11-15.4v-8z" opacity=".55" /><path d="m18 23.5 4.2 4.2L30.5 19" /></>}
+    {n === 'attribute' && <>
+      <path d="M24 13c-4-2.6-9.5-3.4-16-2.6v25c6.5-.8 12 0 16 2.6 4-2.6 9.5-3.4 16-2.6v-25c-6.5-.8-12 0-16 2.6z" /><path d="M24 13v25" /><path d="M12 17c3-.3 6 0 8 1M12 22c3-.3 6 0 8 1M12 27c3-.3 6 0 8 1M28 18c2-1 5-1.3 8-1M28 23c2-1 5-1.3 8-1" /></>}
+    {n === 'grade' && <>
+      <path d="M8 31a16 16 0 0 1 32 0" /><path d="M11.5 31a12.5 12.5 0 0 1 25 0" opacity=".5" />
+      <path d="M8.6 25.4l2.4.9M12.6 18.6l1.9 1.6M18.6 13.9l1 2.3M24 12.5V15M29.4 13.9l-1 2.3M35.4 18.6l-1.9 1.6M39.4 25.4l-2.4.9" />
+      <path d="M24 31l8.5-10" /><circle cx="24" cy="31" r="1.8" /><path d="M8 36h32" opacity=".55" /></>}
+    {n === 'review' && <>
+      <circle cx="19" cy="24" r="11" /><circle cx="29" cy="24" r="11" opacity=".55" /><path d="m19.5 24.5 3.5 3.5 7-8" /></>}
+    {n === 'holder' && <>
+      <rect x="12" y="5" width="24" height="38" rx="3" /><rect x="15" y="8" width="18" height="9" rx="1" /><path d="M18 11.2h8M18 13.8h12" opacity=".6" /><circle cx="24" cy="30" r="8" /><circle cx="24" cy="30" r="5.6" opacity=".5" /></>}
+    {n === 'label' && <>
+      <rect x="6" y="14" width="36" height="20" rx="2" /><path d="M11 20h14M11 24h18M11 28h10" /><path d="M33 20v8M35 20v8M37 20v8" opacity=".6" /></>}
+    {n === 'registry' && <>
+      <ellipse cx="24" cy="11" rx="14" ry="4.5" /><path d="M10 11v26c0 2.5 6.3 4.5 14 4.5s14-2 14-4.5V11" /><path d="M10 19.7c0 2.5 6.3 4.5 14 4.5s14-2 14-4.5M10 28.4c0 2.5 6.3 4.5 14 4.5s14-2 14-4.5" opacity=".6" /></>}
+    {n === 'return' && <>
+      <rect x="6" y="12" width="36" height="24" rx="2" /><path d="m6.5 13 17.5 13 17.5-13" /><path d="M6.5 35.5 19 24.5M41.5 35.5 29 24.5" opacity=".55" /></>}
+    {n === 'balance' && <>
+      <path d="M24 8v32M15 40h18M11 13h26" /><circle cx="24" cy="8" r="1.6" />
+      <path d="M11 13 5.5 26h11zM37 13l-5.5 13h11z" /><path d="M5.5 26a5.5 3 0 0 0 11 0M31.5 26a5.5 3 0 0 0 11 0" /></>}
+    {n === 'coin' && <>
+      <circle cx="24" cy="24" r="17" /><circle cx="24" cy="24" r="13.5" opacity=".55" /><path d="M24 15.5v17M20 19.5c0-2 1.8-3 4-3s4 1 4 3-1.8 2.8-4 3.3-4 1.3-4 3.4 1.8 3.3 4 3.3 4-1 4-3" opacity=".9" /></>}
+    {n === 'laurel' && <>
+      <path d="M24 41c-8-2-14-9-14-18 0-4 1-7.5 3-10.5M24 41c8-2 14-9 14-18 0-4-1-7.5-3-10.5" />
+      <path d="M12 31c-3 0-5-1.5-6-4 3-.6 5.3.4 6.5 2.6M11 24c-2.7-.8-4.2-2.7-4.4-5.4 2.8.2 4.7 1.8 5.2 4.2M12.4 17.4c-2-1.6-2.7-4-2-6.5 2.4 1 3.6 3.2 3.4 5.6M17 34.8c-2.7 1-5.2.6-7-1.3 2.6-1.2 5-.8 6.8 1M31 31c3 0 5-1.5 6-4-3-.6-5.3.4-6.5 2.6M37 24c2.7-.8 4.2-2.7 4.4-5.4-2.8.2-4.7 1.8-5.2 4.2M35.6 17.4c2-1.6 2.7-4 2-6.5-2.4 1-3.6 3.2-3.4 5.6M31 34.8c2.7 1 5.2.6 7-1.3-2.6-1.2-5-.8-6.8 1" opacity=".75" /></>}
+    {n === 'globe' && <>
+      <circle cx="24" cy="24" r="17" /><ellipse cx="24" cy="24" rx="7.5" ry="17" opacity=".6" /><path d="M7 24h34M9.3 15.5h29.4M9.3 32.5h29.4" opacity=".6" /></>}
+    {n === 'medal' && <>
+      <path d="M17 5h14l-3.5 14h-7z" opacity=".6" /><path d="M17 5l4.5 14M31 5l-4.5 14" /><circle cx="24" cy="30.5" r="11.5" /><circle cx="24" cy="30.5" r="8" opacity=".55" /><path d="m24 25.5 1.5 3.2 3.4.4-2.5 2.4.7 3.4-3.1-1.7-3.1 1.7.7-3.4-2.5-2.4 3.4-.4z" /></>}
+    {n === 'seal' && <>
+      <path d="M24 6l3.3 2.6 4.1-.8 1.6 3.9 3.9 1.6-.8 4.1L38.7 21l-2.6 3.3 2.6 3.3-2.6 3.3.8 4.1-3.9 1.6-1.6 3.9-4.1-.8L24 42l-3.3-2.6-4.1.8-1.6-3.9-3.9-1.6.8-4.1L9.3 27.3 11.9 24 9.3 20.7l2.6-3.3-.8-4.1 3.9-1.6 1.6-3.9 4.1.8z" /><circle cx="24" cy="24" r="9" opacity=".6" /><path d="m20 24.3 2.8 2.8 5.4-6" /></>}
+    {n === 'aperture' && <>
+      <circle cx="24" cy="24" r="17" /><circle cx="24" cy="24" r="6.5" opacity=".6" />
+      <path d="M24 7l4.8 11.2M38.7 15.5l-12.1 1.4M38.7 32.5l-7.3-9.8M24 41l-4.8-11.2M9.3 32.5l12.1-1.4M9.3 15.5l7.3 9.8" opacity=".85" /></>}
+    {n === 'column' && <>
+      <path d="M8 14 24 6l16 8z" /><path d="M8 14h32M10 40h28M7 43h34" /><path d="M13 18v19M19.5 18v19M28.5 18v19M35 18v19" opacity=".75" /><path d="M11 17h26M11 37.5h26" opacity=".5" /></>}
+    {n === 'pen' && <>
+      <path d="M33 6l9 9-21 21-11 2 2-11z" /><path d="M29 10l9 9" opacity=".6" /><path d="M12 27l9 9" opacity=".6" /><path d="M8 43h20" opacity=".5" /></>}
+  </svg>
+)}

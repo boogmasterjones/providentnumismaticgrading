@@ -7,3 +7,11 @@ export async function loadPage(id: string) {
   const { Content } = await render(entry);
   return { data: entry.data, Content, hasBody: Boolean(entry.body && entry.body.trim()) };
 }
+
+export type PageSection = {
+  mark?: string | null;
+  title: string;
+  summary?: string | null;
+  text?: string | null;
+  points?: string[] | null;
+};

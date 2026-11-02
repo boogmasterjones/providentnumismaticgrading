@@ -1,0 +1,35 @@
+---
+/**
+ * The holder as an exploded view (like a watch movement drawing): back shell, insert, coin, label and front shell
+ * float apart in perspective, then slide together and turn to face the viewer as the section scrolls into view.
+ * Scroll progress comes from scrollfx.ts (--p). An illustration, not a photograph or the real label design.
+ * The coin is a flat drawing: it never flips and never shows an edge.
+ */
+import '../styles/coin-engine.css';
+import '../styles/explode.css';
+const parts = ['Front shell', 'Label', 'Coin', 'Insert', 'Back shell'];
+---
+<figure class="explode" data-progress="view">
+  <div class="ex-scene" role="img" aria-label="Illustration of the holder's parts coming together: back shell, insert, coin, label and front shell, sealed into one holder.">
+    <div class="ex-stack">
+      <div class="ex-layer ex-back" style="--z:-2"></div>
+      <div class="ex-layer ex-insert" style="--z:-1"><span></span></div>
+      <div class="ex-layer ex-coin" style="--z:0"><span data-coin="laureate:silver:23" data-d="168" data-noflip></span></div>
+      <div class="ex-layer ex-label" style="--z:1">
+        <div class="exl">
+          <div class="exl-row"><b>PROVIDENT</b><span>No. DEMO-0001</span></div>
+          <div class="exl-row exl-mid"><span>Roman Empire<br /><em>Silver denarius</em></span><strong>VF 30</strong></div>
+          <div class="exl-row"><span>Strike 4/5 · Surface 3/5</span><i class="exl-seal"></i></div>
+        </div>
+      </div>
+      <div class="ex-layer ex-front" style="--z:2"></div>
+    </div>
+    <ol class="ex-legend" aria-hidden="true">
+      {parts.map((p, i) => <li style={`--i:${i}`}><span>{p}</span></li>)}
+    </ol>
+  </div>
+  <figcaption>Illustration. Label designs vary by coin.</figcaption>
+</figure>
+<script>
+  import '../scripts/coin-engine.js';
+</script>

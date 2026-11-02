@@ -1,6 +1,5 @@
 /** Singleton data edited in Keystatic (Site section), read at build time. */
 import settingsJson from '../../content/settings.json';
-import feesJson from '../../content/fees.json';
 import faqJson from '../../content/faq.json';
 import galleryJson from '../../content/gallery.json';
 
@@ -19,29 +18,6 @@ export interface SiteSettings {
   launched: boolean;
 }
 
-export interface FeeTier {
-  /** Group heading on the Fees page, e.g. "US coins". */
-  category: string;
-  name: string;
-  price: string;
-  /** Highest coin value the tier covers, e.g. "$2,000". */
-  maxValue: string;
-  turnaround: string;
-  notes: string;
-}
-
-export interface FeeExtra {
-  name: string;
-  price: string;
-}
-
-export interface Fees {
-  tiers: FeeTier[];
-  extras: FeeExtra[];
-  shipping: FeeExtra[];
-  extraNotes: string[];
-}
-
 export const settings: SiteSettings = {
   tagline: '',
   phone: '',
@@ -54,14 +30,6 @@ export const settings: SiteSettings = {
   launched: false,
   ...(settingsJson as Partial<SiteSettings>),
 } as SiteSettings;
-
-export const fees: Fees = {
-  tiers: [],
-  extras: [],
-  shipping: [],
-  extraNotes: [],
-  ...(feesJson as object),
-};
 
 export const faq: { items: { question: string; answer: string }[] } = { items: [], ...(faqJson as object) };
 
@@ -87,25 +55,10 @@ export function mailtoHref(email: string | undefined | null): string | null {
   return /^[^\s@\[\]]+@[^\s@\[\]]+\.[^\s@\[\]]+$/.test(e) ? `mailto:${e}` : null;
 }
 
-
-/** Fee tiers grouped by category, in the order they appear. */
-export function feeGroups(tiers: FeeTier[]): { category: string; tiers: FeeTier[] }[] {
-  const out: { category: string; tiers: FeeTier[] }[] = [];
-  for (const t of tiers) {
-    const cat = (t.category || 'Grading').trim();
-    let g = out.find((x) => x.category === cat);
-    if (!g) out.push((g = { category: cat, tiers: [] }));
-    g.tiers.push({ ...t, category: cat });
-  }
-  return out;
-}
-
-/** Lowest dollar price in a group ("$18" -> 18), or null when no tier has a number (e.g. "Call"). */
-export function lowestPrice(tiers: FeeTier[]): number | null {
-  const nums: number[] = [];
-  for (const t of tiers) {
-    const m = (t.price ?? '').match(/\$\s*(\d+(?:\.\d+)?)/);
-    if (m) nums.push(Number(m[1]));
-  }
-  return nums.length ? Math.min(...nums) : null;
+/** Split editor text into paragraphs on blank lines (single line breaks stay inside a paragraph). */
+export function paragraphs(text: string | undefined | null): string[] {
+  return (text ?? '')
+    .split(/\n\s*\n/)
+    .map((p) => p.replace(/\s*\n\s*/g, ' ').trim())
+    .filter(Boolean);
 }

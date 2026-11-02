@@ -1,0 +1,15 @@
+---
+/** The site's monogram: a struck-coin roundel with a serif P. A drawing, not the client's logo (to confirm). */
+interface Props { class?: string }
+const { class: cls } = Astro.props;
+const beads = Array.from({ length: 48 }, (_, i) => {
+  const a = (i / 48) * Math.PI * 2;
+  return { x: (24 + 20.2 * Math.cos(a)).toFixed(2), y: (24 + 20.2 * Math.sin(a)).toFixed(2) };
+});
+---
+<svg class:list={['brand-mark', cls]} viewBox="0 0 48 48" fill="none" stroke="currentColor" aria-hidden="true" focusable="false">
+  <circle cx="24" cy="24" r="23" stroke-width="0.9" />
+  <circle cx="24" cy="24" r="17.6" stroke-width="0.6" />
+  {beads.map((b) => <circle cx={b.x} cy={b.y} r="0.55" fill="currentColor" stroke="none" />)}
+  <text x="24" y="31.2" text-anchor="middle" fill="currentColor" stroke="none" font-family="Cormorant Garamond, Georgia, serif" font-size="22" font-weight="500">P</text>
+</svg>

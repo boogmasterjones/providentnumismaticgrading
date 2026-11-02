@@ -11,14 +11,14 @@ interface Props {
   rows?: number;
   min?: number;
   inputmode?: 'numeric' | 'decimal' | 'text' | 'tel' | 'email';
+  wide?: boolean;
 }
-const { name, label, type = 'text', required = false, hint, autocomplete, options = [], rows = 4, min, inputmode } = Astro.props;
+const { name, label, type = 'text', required = false, hint, autocomplete, options = [], rows = 4, min, inputmode, wide = false } = Astro.props;
 const id = `f-${name}`;
 const hintId = hint ? `${id}-hint` : undefined;
 ---
-<div class="field">
+<div class:list={['field', { wide: wide || type === 'textarea' }]}>
   <label for={id}>{label}{required && <span class="req" aria-hidden="true"> *</span>}</label>
-  {hint && <span class="hint" id={hintId}>{hint}</span>}
   {type === 'textarea' ? (
     <textarea id={id} name={name} rows={rows} required={required} aria-describedby={hintId} autocomplete={autocomplete}></textarea>
   ) : type === 'select' ? (
@@ -29,4 +29,5 @@ const hintId = hint ? `${id}-hint` : undefined;
   ) : (
     <input id={id} name={name} type={type} required={required} aria-describedby={hintId} autocomplete={autocomplete} min={min} inputmode={inputmode} />
   )}
+  {hint && <span class="hint" id={hintId}>{hint}</span>}
 </div>
