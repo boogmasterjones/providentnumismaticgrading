@@ -1,14 +1,17 @@
 /**
  * The small interface between the website and wherever the owner keeps the certificates.
  *
- * - providers/registry-api.ts talks to the owner's real certificate database. It is the ONLY file that knows that
- *   database's addresses, field names and login method. Once we know which system the owner uses, only that file changes.
- * - providers/mock.ts returns three clearly labelled DEMO records, used whenever CERT_API_URL is not set, so the
- *   site can be previewed.
+ * - providers/coda.ts talks to the owner's real certificate database, a table in a Coda doc. It is the ONLY file
+ *   that knows Coda's addresses, column names and login method. Setup: docs/CODA_SETUP.md.
+ * - providers/mock.ts returns three clearly labelled DEMO records, used whenever no CODA_* setting is present, so
+ *   the site can be previewed.
+ *
+ * (An earlier generic JSON-API placeholder, providers/registry-api.ts with CERT_API_URL/CERT_API_KEY, was removed
+ * once we learned the owner uses Coda. It is in the Git history if another system is ever needed.)
  */
 import type { CertificateInput } from './certificate';
 import { createMockAdapter } from './providers/mock';
-import { createRegistryApiAdapter } from './providers/registry-api';
+import { CodaConfigError, createCodaAdapter, isCodaConfigured, readCodaConfig, type CodaEnv } from './providers/coda';
 
 export interface CertAdapter {
   /** Short id, part of the cache key so demo answers are never served once the real database is connected. */
@@ -28,7 +31,7 @@ export interface CertAdapter {
 
 export type CertAdapterErrorKind = 'auth' | 'busy' | 'timeout' | 'upstream';
 
-/** The message is for our logs only and must never contain the API key; visitors only ever see a generic text. */
+/** The message is for our logs only and must never contain the API token; visitors only ever see a generic text. */
 export class CertAdapterError extends Error {
   constructor(
     public kind: CertAdapterErrorKind,
@@ -38,14 +41,27 @@ export class CertAdapterError extends Error {
   }
 }
 
-export interface CertEnv {
-  CERT_API_URL?: string;
-  CERT_API_KEY?: string;
-}
+export type CertEnv = CodaEnv;
 
-/** The real database when CERT_API_URL is set, otherwise the DEMO records. */
-export function getCertAdapter(env: CertEnv, fetchImpl: typeof fetch = globalThis.fetch): CertAdapter {
-  const url = env.CERT_API_URL?.trim();
-  if (!url) return createMockAdapter();
-  return createRegistryApiAdapter({ baseUrl: url, apiKey: env.CERT_API_KEY?.trim() ?? '', fetch: fetchImpl });
+/**
+ * Coda when any CODA_* setting is present (a missing token or doc then fails safely as an error, never as demo
+ * data), otherwise the DEMO records.
+ */
+export function getCertAdapter(
+  env: CertEnv,
+  fetchImpl: typeof fetch = globalThis.fetch,
+  log?: (msg: string) => void,
+): CertAdapter {
+  if (!isCodaConfigured(env)) return createMockAdapter();
+  try {
+    return createCodaAdapter({ config: readCodaConfig(env), fetch: fetchImpl, log });
+  } catch (e) {
+    // A setup mistake (bad doc link, column map or API address): every lookup reports an error until it's fixed.
+    const hint = e instanceof CodaConfigError ? e.message : 'Coda settings could not be read.';
+    const fail = async (): Promise<never> => {
+      log?.(`coda: ${hint}`);
+      throw new CertAdapterError('upstream', hint);
+    };
+    return { id: 'coda-misconfigured', mode: 'live', getCertificate: fail, listAll: fail };
+  }
 }

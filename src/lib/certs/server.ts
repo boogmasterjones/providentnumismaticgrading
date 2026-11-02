@@ -29,7 +29,17 @@ export function getCertStore(): KVStore {
   }
 }
 
-/** Read at request time from the server environment (Netlify site settings). The key never reaches the browser. */
+/** Read at request time from the server environment (Netlify site settings). The token never reaches the browser. */
 export function getServerCertAdapter(): CertAdapter {
-  return getCertAdapter({ CERT_API_URL: process.env.CERT_API_URL, CERT_API_KEY: process.env.CERT_API_KEY });
+  return getCertAdapter(
+    {
+      CODA_DOC_ID: process.env.CODA_DOC_ID,
+      CODA_TABLE_ID: process.env.CODA_TABLE_ID,
+      CODA_API_TOKEN: process.env.CODA_API_TOKEN,
+      CODA_COLUMN_MAP: process.env.CODA_COLUMN_MAP,
+      CODA_API_BASE: process.env.CODA_API_BASE,
+    },
+    globalThis.fetch,
+    (m) => console.warn(m),
+  );
 }
