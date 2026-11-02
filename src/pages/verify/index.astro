@@ -8,14 +8,16 @@ const { data, Content, hasBody } = await loadPage('verify');
 const tel = telHref(settings.phone);
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} />
-  <form class="stack verify-form" id="verify-form" action="/verify" method="get" role="search">
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow="Certificate registry" />
+  <form class="verify-form rv" id="verify-form" action="/verify" method="get" role="search">
     <div class="field">
       <label for="cert">Certificate number</label>
+      <div class="inrow">
+        <input id="cert" name="cert" type="text" required maxlength="100" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Number on the label" aria-describedby="cert-hint" />
+        <button class="btn" type="submit">Verify</button>
+      </div>
       <span class="hint" id="cert-hint">Exactly as printed on the label. Capitals and spaces don't matter.</span>
-      <input id="cert" name="cert" type="text" required maxlength="100" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-describedby="cert-hint" />
     </div>
-    <div><button class="btn" type="submit">Verify</button></div>
   </form>
   <div id="verify-result" aria-live="polite"></div>
   <noscript><p class="notice info">The lookup needs JavaScript. You can also <a href="/contact">contact us</a> with the certificate number.</p></noscript>
@@ -80,7 +82,7 @@ const tel = telHref(settings.phone);
     const head = el(
       'div',
       { class: 'cert-card-head' },
-      el('p', { class: 'cert-status' }, c.demo ? 'Demo record' : 'On record in our registry'),
+      el('p', { class: c.demo ? 'cert-status demo' : 'cert-status' }, c.demo ? 'Demo record' : 'On record in our registry'),
       el('h2', {}, `Certificate ${c.certNumber}`),
     );
     if (c.demo) head.append(el('span', { class: 'badge demo' }, 'DEMO'));

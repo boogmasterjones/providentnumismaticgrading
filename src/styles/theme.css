@@ -1,57 +1,60 @@
 /*
- * THEME TOKENS — the only file a design needs to replace.
- * This is a deliberately plain, neutral starting point, NOT the final design. When Alex picks one of the 7 looks,
- * swap these values (and add fonts) here; components only use these variables.
+ * THEME TOKENS: design "A, Coin River" (dark, warm gold, classical serif), from the homepage prototype on branch
+ * build/alex-prototype. Components only use these variables, so a different look means changing this file.
+ * Fonts load in src/layouts/Base.astro (Google Fonts, display=swap); the fallbacks below keep the same feel offline.
  */
 :root {
-  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: Georgia, 'Times New Roman', serif;
+  color-scheme: dark;
+
+  --font-body: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif;
+  --font-heading: 'Cormorant Garamond', 'Palatino Linotype', Palatino, Georgia, serif;
+  --font-caps: 'Cinzel', 'Times New Roman', serif;
   --font-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  /* names the coin engine reads */
+  --font: var(--font-body);
+  --serif: var(--font-heading);
 
-  --color-bg: #ffffff;
-  --color-surface: #f5f5f4;
-  --color-text: #1c1917;
-  --color-muted: #57534e;
-  --color-border: #d6d3d1;
-  --color-accent: #1f3a5f;
-  --color-accent-text: #ffffff;
-  --color-link: #1f3a5f;
-  --color-focus: #b45309;
-  --color-warning-bg: #fef3c7;
-  --color-warning-text: #78350f;
-  --color-success-bg: #dcfce7;
-  --color-success-text: #14532d;
-  --color-error-bg: #fee2e2;
-  --color-error-text: #7f1d1d;
+  --color-bg: #07080b;
+  --color-bg-2: #0d0f14;
+  --color-surface: #11141a;
+  --color-surface-2: #0b0d11;
+  --color-text: #ece6d9;
+  --color-muted: #a69f90;
+  --color-border: rgba(236, 226, 200, 0.12);
+  --color-border-strong: rgba(236, 226, 200, 0.22);
+  --color-accent: #d4a843;
+  --color-accent-text: #1a1205;
+  --color-link: #e8c56a;
+  --color-focus: #f6dd92;
 
-  --radius: 6px;
+  --gold: #d4a843;
+  --gold-hi: #f6dd92;
+  --gold-lo: #8a6420;
+  --gold-gradient: linear-gradient(135deg, #f6dd92, #d4a843 45%, #a87a26);
+  --gold-text: linear-gradient(100deg, #9c7124 0%, #e8c56a 22%, #fff1c2 32%, #d4a843 44%, #8a6420 62%, #e8c56a 80%, #fff1c2 88%, #b88a35 100%);
+
+  --color-warning-bg: rgba(212, 168, 67, 0.1);
+  --color-warning-text: #f6dd92;
+  --color-success-bg: rgba(120, 190, 140, 0.1);
+  --color-success-text: #a9e2b8;
+  --color-error-bg: rgba(240, 140, 110, 0.1);
+  --color-error-text: #f4b49c;
+
+  --radius: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --shadow-card: 0 40px 80px -40px rgba(0, 0, 0, 0.85);
+  --shadow-gold: 0 10px 30px -10px rgba(212, 168, 67, 0.6);
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 1rem;
   --space-4: 1.5rem;
   --space-5: 2.5rem;
-  --space-6: 4rem;
-  --content-width: 72rem;
-  --text-width: 42rem;
-  --gutter: 1rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #121212;
-    --color-surface: #1e1e1e;
-    --color-text: #f5f5f4;
-    --color-muted: #a8a29e;
-    --color-border: #3f3f46;
-    --color-accent: #9ab8e0;
-    --color-accent-text: #0b1320;
-    --color-link: #9ab8e0;
-    --color-focus: #fbbf24;
-    --color-warning-bg: #422006;
-    --color-warning-text: #fde68a;
-    --color-success-bg: #052e16;
-    --color-success-text: #bbf7d0;
-    --color-error-bg: #450a0a;
-    --color-error-text: #fecaca;
-  }
+  --space-6: 4.5rem;
+  --space-7: 7rem;
+  --content-width: 74rem;
+  --text-width: 44rem;
+  --gutter: 1.25rem;
+  --header-h: 76px;
 }

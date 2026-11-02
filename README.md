@@ -5,8 +5,21 @@ Alex's call). Built by Biggify. At launch the repository moves to **Alex's own G
 Netlify account**: he owns everything.
 
 **Status: build steps 1–4 done (structure, editor, forms, certificate verification from Alex's own certificate database, optional population report).**
-The look is a neutral placeholder: the design Alex picks (one of 7) is applied later in `src/styles/theme.css` plus
-the home-page coin strip. Text marked `[PLACEHOLDER — Alex to confirm]` is waiting for his facts.
+The look is design **"A, Coin River"** from the homepage prototype (branch `build/alex-prototype` in the Biggify repo):
+dark, warm gold, Cormorant Garamond / Cinzel / Inter, with an endless sideways river of drawn coins behind the home
+headline and a faint one behind every page title. The text is **draft copy** taken from Alex's current website; every
+fact still to confirm is listed in [CONTENT_TO_CONFIRM.md](CONTENT_TO_CONFIRM.md) (no placeholder text on the pages).
+
+### Design notes
+
+- Tokens (colours, fonts, spacing) are in `src/styles/theme.css`; components in `src/styles/global.css`; the home
+  page in `src/styles/home.css` and `src/pages/index.astro`.
+- Coins are drawn by the coin engine (`src/scripts/coin-engine.js` + `src/styles/coin-engine.css`), ported from the
+  prototype's fast version (commit 1bb0973): each face is drawn once to a canvas sprite and reused; rows move by one
+  compositor animation; rivers pause offscreen. No photos, no downloaded images, no AI images.
+- **Animations always play** (owner's rule): the engine's reduced-motion switch is fixed off. Add `?shot` to a URL to
+  freeze the rivers for screenshots.
+- Small site behaviour (header on scroll, phone menu, reveals, gold shimmer, page-title river): `src/scripts/site.ts`.
 
 ## Stack
 
@@ -44,7 +57,9 @@ Without `CERT_API_URL` the Verify page runs in **demo mode** with three clearly 
 | Fees table, FAQ, photo library | `content/fees.json`, `content/faq.json`, `content/gallery.json` |
 | Each page's title, description, heading, intro and text | `content/pages/*.mdoc` |
 | Blog posts | `content/blog/*.mdoc` (photos in `public/images/blog/`) |
-| Theme tokens (the only file a design must replace) | `src/styles/theme.css` |
+| Theme tokens / site styles / home page styles | `src/styles/theme.css`, `global.css`, `home.css` |
+| Coin engine (drawn coins, rivers, flips) | `src/scripts/coin-engine.js`, `src/styles/coin-engine.css` |
+| Draft text still to confirm with Alex | `CONTENT_TO_CONFIRM.md` |
 | Certificate shape + schema | `src/lib/certs/certificate.ts` |
 | Adapter interface (website ↔ Alex's database) | `src/lib/certs/adapter.ts` |
 | **Alex's database: the only provider-specific file** | `src/lib/certs/providers/registry-api.ts` |
@@ -129,17 +144,15 @@ website edit or rebuild.
 - [ ] `CERT_API_URL` + read-only `CERT_API_KEY` set in Netlify; one real certificate and one wrong number tested (the
       DEMO records disappear by themselves once `CERT_API_URL` is set).
 - [ ] Population report switch: on only if Alex's database can list every certificate and the figures look right.
-- [ ] Delete the sample blog post (`content/blog/sample-post-delete-before-launch.mdoc`).
-- [ ] Replace every `[PLACEHOLDER — Alex to confirm]` (search the `content/` folder: none may remain). This includes
-      the business name, headline, fees and turnaround, grading scale and standards, About text, FAQ answers, phone,
-      email, hours, location and privacy text.
+- [ ] Every item in `CONTENT_TO_CONFIRM.md` confirmed by Alex (name, headline, fees and turnaround, grading scale
+      and standards, About text, FAQ answers, phone, email, hours, location, privacy text) and the text updated.
+- [ ] Delete any demo blog posts.
 - [ ] No credential or claim (years at NGC, memberships, guarantees, "best", "industry accepted") unless Alex confirms
       it and can back it up.
-- [ ] Real photos only (Alex's own, or public-domain museum images with the owner's OK per source). No stock or AI
-      images.
+- [ ] Real photos only (Alex's own). No stock or AI images. The coins in the moving background are drawn by the site.
 - [ ] Site settings → **Website address** = the real domain.
 - [ ] Site settings → tick **Site is launched** (removes noindex, opens robots.txt, hides the preview banner).
-- [ ] Design applied (step 5) and PageSpeed mobile checked.
+- [ ] PageSpeed mobile checked on the live address.
 - [ ] Netlify Forms detection on + notification emails set; test both forms.
 - [ ] Keystatic GitHub app set up; Alex can sign in at /admin and publish.
 - [ ] Domain + HTTPS; Search Console verified and sitemap submitted.

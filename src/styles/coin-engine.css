@@ -1,0 +1,40 @@
+/* coin-engine.css: styles for coin-engine.js. Only transform and opacity ever animate. */
+/* a coin: one <img> sprite. The sprite has a shadow margin (12% each side), so it overhangs the box. */
+.coin{--t:calc(var(--d) * .07);width:var(--d);height:var(--d);flex:none;position:relative;-webkit-tap-highlight-color:transparent}
+.coin-in{position:absolute;inset:0;opacity:0;transition:opacity .4s,transform .75s cubic-bezier(.5,0,.25,1)}
+.coin.ready .coin-in{opacity:1}
+.coin .face{position:absolute;left:-12%;top:-12%;width:124%;height:124%;max-width:none;display:block;pointer-events:none;-webkit-user-select:none;user-select:none}
+/* the flip: a 2D turn through zero width (composited), faces swap at the midpoint */
+.coin.flip .coin-in{transform:scaleX(-1)}
+.coin .face.back{transform:scaleX(-1);opacity:0}
+.coin.showback .face.back{opacity:1}
+.coin.showback .face.front{opacity:0}
+/* the reeded edge, seen side-on for a moment mid-turn */
+.coin .edge{position:absolute;left:50%;top:2%;bottom:2%;width:var(--t);margin-left:calc(var(--t) * -.5);border-radius:45%/8%;opacity:0;pointer-events:none;
+ background:linear-gradient(90deg,rgba(0,0,0,.45),rgba(255,255,255,.25) 45%,rgba(0,0,0,.5)),repeating-linear-gradient(180deg,var(--e) 0 1.5px,var(--e2) 1.5px 3px)}
+.coin.anc .edge{top:6%;bottom:6%}
+.coin.turning .edge{animation:cedge .75s linear}
+@keyframes cedge{0%,36%{opacity:0}46%,54%{opacity:1}64%,100%{opacity:0}}
+/* one shine sweep (added by CoinEngine.shine, removed when done) */
+.coin .shine{position:absolute;inset:4%;border-radius:50%;overflow:hidden;pointer-events:none;z-index:1}
+.coin .shine::before{content:"";position:absolute;top:-15%;bottom:-15%;left:0;width:42%;background:linear-gradient(100deg,transparent 0,rgba(255,255,255,0) 22%,rgba(255,250,230,.8) 50%,rgba(255,255,255,0) 78%,transparent);transform:translateX(-130%) skewX(-16deg);animation:csweep 1s ease-out both;animation-delay:inherit}
+@keyframes csweep{from{transform:translateX(-130%) skewX(-16deg)}to{transform:translateX(280%) skewX(-16deg)}}
+/* river */
+.cr-stage{position:absolute;inset:0;overflow:hidden;pointer-events:none;isolation:isolate}
+.cr-plane{position:absolute;pointer-events:none}
+.cr-row{position:absolute;left:0;right:0;pointer-events:auto;opacity:0;transition:opacity .7s ease}
+.cr-row.in{opacity:var(--o,1)}
+.cr-row.near{z-index:2}
+.cr-track{position:absolute;left:0;top:0;height:100%;will-change:transform}
+.cr-track .coin{position:absolute}
+.cr-track .coin-in{transition:transform .75s cubic-bezier(.5,0,.25,1)}
+/* grid */
+.cr-grid{display:flex;flex-wrap:wrap;gap:24px;align-items:center}
+/* loupe: canvas + glass + knurled ring, moved as one layer */
+.cl-loupe{position:absolute;left:0;top:0;width:calc(var(--lr) * 2);height:calc(var(--lr) * 2);z-index:2;pointer-events:none;will-change:transform}
+.cl-loupe canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:50%}
+.cl-glass{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.26),rgba(255,255,255,0) 34%),radial-gradient(circle at 50% 50%,transparent 70%,rgba(0,0,0,.45));box-shadow:inset 0 0 0 2px rgba(255,240,200,.5)}
+.cl-ring{position:absolute;inset:-13px;border-radius:50%;background:repeating-conic-gradient(#d9b765 0 1.5deg,#9a7632 1.5deg 3deg);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 13px),#000 calc(100% - 12px));mask:radial-gradient(farthest-side,transparent calc(100% - 13px),#000 calc(100% - 12px))}
+.cl-tag{position:absolute;left:50%;top:calc(100% + 22px);transform:translateX(-50%);font:600 11px/1 var(--font,system-ui);letter-spacing:.2em;text-transform:uppercase;color:var(--gold-hi,#f6dd92);white-space:nowrap;text-shadow:0 1px 3px #000,0 0 12px #000}
+
+.calm .coin-in,.calm .cr-row{transition:none}

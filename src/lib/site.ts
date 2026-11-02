@@ -20,10 +20,26 @@ export interface SiteSettings {
 }
 
 export interface FeeTier {
+  /** Group heading on the Fees page, e.g. "US coins". */
+  category: string;
   name: string;
   price: string;
+  /** Highest coin value the tier covers, e.g. "$2,000". */
+  maxValue: string;
   turnaround: string;
   notes: string;
+}
+
+export interface FeeExtra {
+  name: string;
+  price: string;
+}
+
+export interface Fees {
+  tiers: FeeTier[];
+  extras: FeeExtra[];
+  shipping: FeeExtra[];
+  extraNotes: string[];
 }
 
 export const settings: SiteSettings = {
@@ -39,8 +55,10 @@ export const settings: SiteSettings = {
   ...(settingsJson as Partial<SiteSettings>),
 } as SiteSettings;
 
-export const fees: { tiers: FeeTier[]; extraNotes: string[] } = {
+export const fees: Fees = {
   tiers: [],
+  extras: [],
+  shipping: [],
   extraNotes: [],
   ...(feesJson as object),
 };
@@ -69,4 +87,25 @@ export function mailtoHref(email: string | undefined | null): string | null {
   return /^[^\s@\[\]]+@[^\s@\[\]]+\.[^\s@\[\]]+$/.test(e) ? `mailto:${e}` : null;
 }
 
-export const PLACEHOLDER_MARK = '[PLACEHOLDER';
+
+/** Fee tiers grouped by category, in the order they appear. */
+export function feeGroups(tiers: FeeTier[]): { category: string; tiers: FeeTier[] }[] {
+  const out: { category: string; tiers: FeeTier[] }[] = [];
+  for (const t of tiers) {
+    const cat = (t.category || 'Grading').trim();
+    let g = out.find((x) => x.category === cat);
+    if (!g) out.push((g = { category: cat, tiers: [] }));
+    g.tiers.push({ ...t, category: cat });
+  }
+  return out;
+}
+
+/** Lowest dollar price in a group ("$18" -> 18), or null when no tier has a number (e.g. "Call"). */
+export function lowestPrice(tiers: FeeTier[]): number | null {
+  const nums: number[] = [];
+  for (const t of tiers) {
+    const m = (t.price ?? '').match(/\$\s*(\d+(?:\.\d+)?)/);
+    if (m) nums.push(Number(m[1]));
+  }
+  return nums.length ? Math.min(...nums) : null;
+}

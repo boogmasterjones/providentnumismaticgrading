@@ -1,9 +1,13 @@
 ---
-interface Props { heading: string; intro?: string }
-const { heading, intro } = Astro.props;
+interface Props { heading: string; intro?: string; eyebrow?: string }
+const { heading, intro, eyebrow } = Astro.props;
 ---
-<header class="prose">
-  <h1>{heading}</h1>
-  {intro && <p class="lead">{intro}</p>}
-  <slot />
+<header class="page-head">
+  <div class="page-river" aria-hidden="true"></div>
+  <div class="prose">
+    {eyebrow && <p class="eyebrow rv">{eyebrow}</p>}
+    <h1 class="rv">{heading}</h1>
+    {intro && <p class="lead rv d1">{intro}</p>}
+    <slot />
+  </div>
 </header>

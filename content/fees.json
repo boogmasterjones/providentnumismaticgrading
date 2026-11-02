@@ -1,27 +1,42 @@
 {
   "tiers": [
-    {
-      "name": "Tier 1 [PLACEHOLDER — Alex to confirm]",
-      "price": "[PLACEHOLDER — Alex to confirm]",
-      "turnaround": "[PLACEHOLDER — Alex to confirm]",
-      "notes": "The current website lists fees from $18 to $120 per coin by tier. Tier names, prices and turnaround times are needed from Alex."
-    },
-    {
-      "name": "Tier 2 [PLACEHOLDER — Alex to confirm]",
-      "price": "[PLACEHOLDER — Alex to confirm]",
-      "turnaround": "[PLACEHOLDER — Alex to confirm]",
-      "notes": ""
-    },
-    {
-      "name": "Tier 3 [PLACEHOLDER — Alex to confirm]",
-      "price": "[PLACEHOLDER — Alex to confirm]",
-      "turnaround": "[PLACEHOLDER — Alex to confirm]",
-      "notes": ""
-    }
+    { "category": "US coins", "name": "Modern", "price": "$18", "maxValue": "$2,000", "turnaround": "20 business days", "notes": "5-coin minimum." },
+    { "category": "US coins", "name": "Economy", "price": "$20", "maxValue": "$300", "turnaround": "20 business days", "notes": "Non-gold coins. 5-coin minimum." },
+    { "category": "US coins", "name": "Standard", "price": "$35", "maxValue": "$2,000", "turnaround": "20 business days", "notes": "All US coins. 3-coin minimum." },
+    { "category": "US coins", "name": "Premiere", "price": "$75", "maxValue": "$7,500", "turnaround": "10 business days", "notes": "All US coins." },
+    { "category": "US coins", "name": "Unlimited", "price": "Call", "maxValue": "Over $7,500", "turnaround": "10 business days", "notes": "Call for pricing." },
+    { "category": "World coins", "name": "Economy", "price": "$23", "maxValue": "$500", "turnaround": "20 business days", "notes": "Non-gold coins. 5-coin minimum." },
+    { "category": "World coins", "name": "Standard", "price": "$40", "maxValue": "$2,000", "turnaround": "10 business days", "notes": "3-coin minimum." },
+    { "category": "World coins", "name": "Premiere", "price": "$80", "maxValue": "$7,500", "turnaround": "10 business days", "notes": "" },
+    { "category": "World coins", "name": "Unlimited", "price": "Call", "maxValue": "Over $7,500", "turnaround": "Call", "notes": "Call for pricing." },
+    { "category": "Ancient coins", "name": "Bulk", "price": "$20", "maxValue": "$200", "turnaround": "30 business days", "notes": "As Economy, for 50 coins of the same type. No Republic, Greek or provincial coins." },
+    { "category": "Ancient coins", "name": "Economy", "price": "$28", "maxValue": "$300", "turnaround": "30 business days", "notes": "Basic identification and grade. Roman Republic and Imperial only (no provincial or Greek). 5-coin minimum." },
+    { "category": "Ancient coins", "name": "Standard", "price": "$45", "maxValue": "$2,000", "turnaround": "30 business days", "notes": "Expanded identification, weight and subgrades. Greek coins included. 5-coin minimum." },
+    { "category": "Ancient coins", "name": "Premiere", "price": "$120", "maxValue": "$7,500", "turnaround": "10 business days", "notes": "Same service as Standard. All Roman coins and select Greek types." },
+    { "category": "Ancient coins", "name": "Unlimited", "price": "Call", "maxValue": "Over $7,500", "turnaround": "10 business days", "notes": "Call for pricing." }
+  ],
+  "extras": [
+    { "name": "Special issues (colonials, errors, fractional gold, tokens and medals)", "price": "Tier + $5" },
+    { "name": "Oversize holder", "price": "Tier + $20" },
+    { "name": "Pedigree on the label", "price": "Tier + $5" },
+    { "name": "Crossover from another holder", "price": "Same as tier" },
+    { "name": "Reholder", "price": "$5" },
+    { "name": "Specific gravity test", "price": "$25" },
+    { "name": "Custom label design", "price": "$100, free on orders of 200+ coins" }
+  ],
+  "shipping": [
+    { "name": "1–2 coins", "price": "$6" },
+    { "name": "3–15 coins", "price": "$10" },
+    { "name": "16–30 coins", "price": "$16" },
+    { "name": "31–100 coins", "price": "$25" },
+    { "name": "101–400 coins", "price": "$45" },
+    { "name": "Over 400 coins", "price": "Call" }
   ],
   "extraNotes": [
-    "Insurance: [PLACEHOLDER — Alex to confirm] (the current website says 1% of declared value).",
-    "Signature on delivery: [PLACEHOLDER — Alex to confirm] (the current website says it is required for packages over $750).",
-    "Return shipping: [PLACEHOLDER — Alex to confirm]"
+    "Coins travel at the sender's risk. Insurance is optional and recommended: 1% of the order's total value.",
+    "Signature on delivery is required for orders over $750.",
+    "Every service includes one of our ready-made label designs (US, world, Roman or Greek) at no charge.",
+    "Please don't mix Greek and Roman coins on one invoice.",
+    "Turnaround times are approximate and not guaranteed."
   ]
 }

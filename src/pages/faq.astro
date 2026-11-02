@@ -12,15 +12,15 @@ const ld = {
 };
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} />
-  <div class="prose">
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow="Questions" />
+  <div class="faq-list rv">
     {faq.items.map((i) => (
       <details>
-        <summary><strong>{i.question}</strong></summary>
+        <summary>{i.question}</summary>
         <p style="white-space: pre-line">{i.answer}</p>
       </details>
     ))}
-    {hasBody && <Content />}
   </div>
+  {hasBody && <div class="prose"><Content /></div>}
   {faq.items.length > 0 && <script type="application/ld+json" set:html={JSON.stringify(ld)} />}
 </Base>

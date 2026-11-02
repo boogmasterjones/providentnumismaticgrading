@@ -1,12 +1,12 @@
 {
   "siteName": "Provident Numismatic Authentication",
-  "tagline": "Coin grading and authentication [PLACEHOLDER — Alex to confirm]",
+  "tagline": "Coin grading and authentication",
   "siteUrl": "https://www.example.com",
   "phone": "(941) 800-1585",
   "email": "",
   "location": "Venice, Florida",
-  "hours": "Monday to Saturday, 9am to 8pm [PLACEHOLDER — Alex to confirm]",
-  "contactNote": "[PLACEHOLDER — Alex to confirm] Business name, phone, email, hours and location are taken from the current website and need Alex's OK for the new site.",
+  "hours": "Monday to Saturday, 9am to 8pm",
+  "contactNote": "Calls and texts welcome. Coins are received by mail; we send the shipping address with your quote.",
   "socialLinks": [],
   "showPopulation": false,
   "launched": false

@@ -7,10 +7,10 @@ import { loadPage } from '../lib/pages';
 import { fees } from '../lib/site';
 
 const { data, Content, hasBody } = await loadPage('submit');
-const tiers = [...fees.tiers.map((t) => t.name), 'Not sure, please advise'];
+const tiers = [...fees.tiers.map((t) => `${t.category}: ${t.name} (${t.price})`), 'Not sure, please advise'];
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} />
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow="Submit your coins" />
   {hasBody && <div class="prose"><Content /></div>}
   <NetlifyForm name="submission" submitLabel="Send submission">
     <Field name="name" label="Your name" required autocomplete="name" />
@@ -20,7 +20,7 @@ const tiers = [...fees.tiers.map((t) => t.name), 'Not sure, please advise'];
     <Field name="coin-list" label="List of coins" type="textarea" required rows={6}
       hint="One coin per line: year, country, denomination and anything else you know." />
     <Field name="declared-value" label="Total declared value (US$)" inputmode="decimal"
-      hint="Used for insurance while your coins are with us." />
+      hint="Sets the service tier and the optional insurance (1% of the total value)." />
     <Field name="service-tier" label="Service" type="select" required options={tiers}
       hint="See Fees & turnaround for what each service includes." />
     <Field name="shipping-notes" label="Shipping and insurance notes" type="textarea" rows={3} />

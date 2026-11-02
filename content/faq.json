@@ -1,8 +1,36 @@
 {
   "items": [
-    { "question": "What kinds of coins do you grade?", "answer": "[PLACEHOLDER — Alex to confirm] The current website mentions US, world and ancient coins, plus tokens and medals." },
-    { "question": "How long does grading take?", "answer": "[PLACEHOLDER — Alex to confirm] See the Fees & turnaround page once Alex confirms the times." },
-    { "question": "How do I ship my coins to you safely?", "answer": "[PLACEHOLDER — Alex to confirm] Packing, insurance and shipping instructions to come from Alex." },
-    { "question": "How can I check a certificate you issued?", "answer": "Use the Verify a certificate page and type the certificate number exactly as it appears on the label." }
+    {
+      "question": "What kinds of coins do you grade?",
+      "answer": "US and world coins from 1600 to the present, most tokens and medals, and ancient Roman and select Greek coins."
+    },
+    {
+      "question": "How much does grading cost?",
+      "answer": "From $18 per coin, depending on the type of coin, its value and the service. Every tier is on the Fees and turnaround page. For coins worth over $7,500, call for pricing."
+    },
+    {
+      "question": "How long does grading take?",
+      "answer": "10 to 30 business days, depending on the service. Turnaround times are approximate and not guaranteed."
+    },
+    {
+      "question": "How do I ship my coins?",
+      "answer": "Send the submission form first: we reply with a quote and the address to ship to. Coins travel at your risk, so insurance is recommended (1% of the order's total value), and orders over $750 need signature delivery."
+    },
+    {
+      "question": "Can I try you with a few coins first?",
+      "answer": "Yes. A small trial submission is welcome, so you can see the grading, the holder and the label before you send more."
+    },
+    {
+      "question": "Can I choose the label?",
+      "answer": "Every service includes a ready-made label design for US, world, Roman or Greek coins. A custom label design costs $100, and is free on orders of 200 coins or more."
+    },
+    {
+      "question": "Can I send coins already in another company's holder?",
+      "answer": "Yes: a crossover costs the same as the service tier. A reholder into our holder is $5."
+    },
+    {
+      "question": "How can I check a certificate you issued?",
+      "answer": "Use the Verify a certificate page and type the certificate number from the label. You'll see the coin, grade and photos we keep on record. If a number isn't found, contact us before buying or selling the coin."
+    }
   ]
 }

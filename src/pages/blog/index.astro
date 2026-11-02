@@ -8,16 +8,16 @@ const { data, Content, hasBody } = await loadPage('blog');
 const posts = await publishedPosts();
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} />
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow="Notes from the grading room" />
   {hasBody && <div class="prose"><Content /></div>}
   {posts.length === 0 ? (
     <p>No posts yet.</p>
   ) : (
-    <ul class="grid" style="list-style:none;padding:0">
+    <ul class="grid post-list">
       {posts.map((p) => (
-        <li class="card">
+        <li class="card rv">
           {p.data.cover && <img src={p.data.cover} alt={p.data.coverAlt ?? ''} loading="lazy" decoding="async" />}
-          <h2 style="font-size:1.25rem"><a href={`/blog/${p.id}`}>{p.data.title}</a></h2>
+          <h2><a href={`/blog/${p.id}`}>{p.data.title}</a></h2>
           <p class="muted"><time datetime={p.data.date.toISOString().slice(0, 10)}>{formatDate(p.data.date)}</time></p>
           <p>{p.data.description}</p>
         </li>

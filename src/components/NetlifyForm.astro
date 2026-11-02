@@ -7,12 +7,12 @@
 interface Props { name: string; submitLabel: string }
 const { name, submitLabel } = Astro.props;
 ---
-<form class="stack" name={name} method="POST" action="/thank-you" data-netlify="true" netlify-honeypot="bot-field">
+<form class="stack form-panel" name={name} method="POST" action="/thank-you" data-netlify="true" netlify-honeypot="bot-field">
   <input type="hidden" name="form-name" value={name} />
   <p class="hidden-field" aria-hidden="true">
     <label>Leave this empty: <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
   </p>
-  <p class="muted">Fields marked <span class="req">*</span> are required.</p>
+  <p class="muted small">Fields marked <span class="req">*</span> are required.</p>
   <slot />
   <div><button class="btn" type="submit">{submitLabel}</button></div>
 </form>

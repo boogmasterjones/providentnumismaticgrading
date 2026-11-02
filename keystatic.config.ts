@@ -130,12 +130,35 @@ export default config({
       schema: {
         tiers: fields.array(
           fields.object({
+            category: fields.text({
+              label: 'Group',
+              description: 'Tiers with the same group share a table, e.g. "US coins", "World coins", "Ancient coins".',
+              validation: { isRequired: true },
+            }),
             name: fields.text({ label: 'Service tier name', validation: { isRequired: true } }),
-            price: fields.text({ label: 'Price per coin', description: 'e.g. $25' }),
-            turnaround: fields.text({ label: 'Turnaround', description: 'e.g. 15 business days' }),
+            price: fields.text({ label: 'Price per coin', description: 'e.g. $25, or Call' }),
+            maxValue: fields.text({ label: 'Highest coin value covered', description: 'e.g. $2,000' }),
+            turnaround: fields.text({ label: 'Turnaround', description: 'e.g. 20 business days' }),
             notes: fields.text({ label: 'Notes', multiline: true }),
           }),
-          { label: 'Service tiers', itemLabel: (p) => p.fields.name.value || 'Tier' },
+          {
+            label: 'Service tiers',
+            itemLabel: (p) => [p.fields.category.value, p.fields.name.value].filter(Boolean).join(': ') || 'Tier',
+          },
+        ),
+        extras: fields.array(
+          fields.object({
+            name: fields.text({ label: 'Service', validation: { isRequired: true } }),
+            price: fields.text({ label: 'Price', description: 'e.g. Tier + $5' }),
+          }),
+          { label: 'Other services and fees', itemLabel: (p) => p.fields.name.value || 'Service' },
+        ),
+        shipping: fields.array(
+          fields.object({
+            name: fields.text({ label: 'Number of coins', description: 'e.g. 1–2 coins', validation: { isRequired: true } }),
+            price: fields.text({ label: 'Price' }),
+          }),
+          { label: 'Shipping rates', itemLabel: (p) => p.fields.name.value || 'Rate' },
         ),
         extraNotes: fields.array(fields.text({ label: 'Note', multiline: true }), {
           label: 'Shipping, insurance and other notes',
