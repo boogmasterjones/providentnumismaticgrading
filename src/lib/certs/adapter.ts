@@ -1,8 +1,8 @@
 /**
- * The small interface between the website and wherever Alex keeps his certificates.
+ * The small interface between the website and wherever the owner keeps the certificates.
  *
- * - providers/registry-api.ts talks to Alex's real certificate database. It is the ONLY file that knows that
- *   database's addresses, field names and login method. Once we know which system Alex uses, only that file changes.
+ * - providers/registry-api.ts talks to the owner's real certificate database. It is the ONLY file that knows that
+ *   database's addresses, field names and login method. Once we know which system the owner uses, only that file changes.
  * - providers/mock.ts returns three clearly labelled DEMO records, used whenever CERT_API_URL is not set, so the
  *   site can be previewed.
  */

@@ -2,7 +2,7 @@ import type { CertAdapter } from '../adapter';
 import type { CertificateInput } from '../certificate';
 
 /**
- * Made-up DEMO records so the Verify and Population pages can be previewed before Alex's database is connected.
+ * Made-up DEMO records so the Verify and Population pages can be previewed before the owner's database is connected.
  * Every record says DEMO, so nobody can mistake one for a real certificate. No photos (real photos only).
  */
 export const DEMO_CERTIFICATES: CertificateInput[] = [

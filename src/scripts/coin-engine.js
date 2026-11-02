@@ -9,7 +9,7 @@
 //    queue, one per task, so the page keeps painting while they are prepared.
 //  - A river row is one track of plain <img> coins, laid out twice, moved by one compositor
 //    animation (transform only). Depth is row opacity, so a river needs one sprite per design.
-//  - A flip is a 2D turn (scaleX through zero) plus a reeded-edge band: composited, no 3D layers.
+//  - A flip is a 2D turn (scaleX follows cos(angle)), faces swapped edge-on in the same timeline, no edge band.
 //  - One shine at a time; every animation is transform or opacity.
 //  - Loops (speed easing, pointer lean, loupe) run in requestAnimationFrame only while needed,
 //    read nothing from layout, and write transforms only.
@@ -261,8 +261,11 @@
 
   // =====================================================================================
   // 4. COIN ELEMENTS: a coin is a <div class="coin"> holding one <img> (its sprite).
-  //    A flip is a 2D turn (scaleX through zero, composited) with a reeded edge band showing
-//    mid-turn: no 3D layers, so it stays cheap inside a moving row.
+  //    A flip is a 2D turn: the inner layer's scaleX follows cos(angle), so it narrows like a
+  //    real coin seen in perspective and passes edge-on in a single fast frame or two. No edge
+  //    band is drawn. The faces swap inside the same Web Animation timeline exactly where the
+  //    scale crosses zero, so the wrong face can never show. A light/shade layer follows the
+  //    angle to sell the turn. All of it is transform and opacity on compositor animations.
   //    coin(spec, sizePx, {px, priority, dim, blur, noflip, direct}); px = sprite size, if not sizePx
   // =====================================================================================
   function coin(sp, d, o) {
@@ -279,33 +282,83 @@
     if (o.noflip) e.setAttribute("data-noflip", "");
     return e;
   }
+  // ensureBack(el) -> Promise that resolves once the back face is loaded and decoded (so a flip never shows a blank face)
   function ensureBack(e) {
-    if (!e || e._b || !e._o) return;
-    e._b = 1;
-    var M3 = M[e._o.m];
-    e.style.setProperty("--e", M3[3]); e.style.setProperty("--e2", M3[2]);
-    e.insertAdjacentHTML("beforeend", '<i class="edge"></i>');
-    e.firstChild.insertAdjacentHTML("beforeend", '<img class="face back" alt="" draggable="false" decoding="async">');
-    sprite(e._o.back, e._px, { dim: e._so.dim, blur: e._so.blur, priority: 0 }).then(function (s) { e.querySelector(".back").src = s.url; e._bs = s; });
+    if (!e || !e._o) return Promise.resolve();
+    if (e._bp) return e._bp;
+    e.firstChild.insertAdjacentHTML("beforeend", '<img class="face back" alt="" draggable="false" decoding="async"><i class="lite"></i>');
+    var img = e.querySelector(".back");
+    e._bp = sprite(e._o.back, e._px, { dim: e._so.dim, blur: e._so.blur, priority: 0 }).then(function (s) {
+      img.src = s.url; e._bs = s;
+      // decode first so the swap frame has pixels; capped so a stalled decode can never hold up the flip
+      return img.decode ? Promise.race([img.decode().catch(function () {}), new Promise(function (r) { setTimeout(r, 150); })]) : null;
+    });
+    return e._bp;
   }
-  // flip(el, on): turn a coin over (true) or back (false)
+  var FLIP_MS = 560;                                   // a full turn
+  function ease(t) { return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t); } // quad in-out: eases off the faces, fastest edge-on
+  // the turn as a function of p (0 = front up, 1 = back up)
+  function turnAt(p) {
+    var a = p * Math.PI, sx = Math.cos(a), lift = 1 + 0.035 * Math.sin(a);
+    return { transform: "scale(" + (sx * lift).toFixed(4) + "," + lift.toFixed(4) + ")", lite: (0.9 * Math.sin(a)).toFixed(3) };
+  }
+  // where a coin is in its turn right now (0..1), from the running animation's clock: no style or layout read
+  function flipPos(e) {
+    var F = e._fa;
+    if (!F) return e.classList.contains("flip") ? 1 : 0;
+    var t = Math.min(1, Math.max(0, (F.anims[0].currentTime || 0) / F.T));
+    return F.p0 + (F.p1 - F.p0) * ease(t);
+  }
+  // flip(el, on): turn a coin over (true) or back (false). Reversing mid-turn continues from where it is.
   function flip(e, on) {
-    if (!e || reduce || e.classList.contains("flip") === on) return;
-    if (on) ensureBack(e);
-    e.classList.toggle("flip", on);
-    e.classList.remove("turning");
-    e._ft = performance.now(); e._fon = on;
-    clearTimeout(e._ftm); clearTimeout(e._fsw);
-    e._fsw = setTimeout(function () { e.classList.toggle("showback", on); }, 370); // faces swap at the midpoint of the turn
-    requestAnimationFrame(function () { e.classList.add("turning"); e._ftm = setTimeout(function () { e.classList.remove("turning"); }, 760); });
-    if (on) shine(e, 380);
+    if (!e || reduce) return;
+    if (e._want === on) return;
+    e._want = on;
+    if (!e._fpos) e._fpos = function () { return flipPos(e); };
+    ensureBack(e).then(function () { if (e._want === on) run(e, on); });
   }
-  // shine(el, delay): one light sweep across a coin
+  function run(e, on) {
+    var p0 = flipPos(e), p1 = on ? 1 : 0;
+    if (e._fa) { e._fa.anims.forEach(function (a) { a.cancel(); }); e._fa = null; }
+    if (p0 === p1) { settle(e, on); return; }
+    var inner = e.firstChild, front = inner.querySelector(".front"), back = inner.querySelector(".back"), lite = inner.querySelector(".lite");
+    var T = Math.max(180, FLIP_MS * Math.abs(p1 - p0)), N = 40;
+    var tk = [], fk = [], bk = [], lk = [], shown = p0 >= 0.5 ? 1 : 0;
+    var vis = function (off, b) { fk.push({ offset: off, opacity: b ? 0 : 1 }); bk.push({ offset: off, opacity: b ? 1 : 0 }); };
+    for (var i = 0; i <= N; i++) {
+      var off = i / N, p = p0 + (p1 - p0) * ease(off), k = turnAt(p);
+      var side = p > 0.5 ? 1 : p < 0.5 ? 0 : shown;
+      if (side !== shown) {
+        // crossed edge-on between the last sample and this one: find the exact moment and swap faces there
+        var lo = (i - 1) / N, hi = off;
+        for (var j = 0; j < 30; j++) { var mid = (lo + hi) / 2, pm = p0 + (p1 - p0) * ease(mid); if ((pm > 0.5 ? 1 : 0) === shown) lo = mid; else hi = mid; }
+        var z = turnAt(0.5);
+        tk.push({ offset: lo, transform: z.transform }); lk.push({ offset: lo, opacity: z.lite });
+        vis(lo, shown); vis(lo, side); shown = side;
+      }
+      tk.push({ offset: off, transform: k.transform }); lk.push({ offset: off, opacity: k.lite });
+      vis(off, shown);
+    }
+    var opt = { duration: T, fill: "both" };
+    var F = { p0: p0, p1: p1, T: T, anims: [inner.animate(tk, opt), front.animate(fk, opt), back.animate(bk, opt), lite.animate(lk, opt)] };
+    e._fa = F;
+    F.anims[0].onfinish = function () {
+      if (e._fa !== F) return;
+      settle(e, on);                                   // the resting classes match the last keyframe, so cancelling shows no change
+      F.anims.forEach(function (a) { a.cancel(); });
+      e._fa = null;
+    };
+    if (on && Math.abs(p1 - p0) > 0.6) shine(e, T * 0.55); // a sweep of light across the face as it lands
+  }
+  function settle(e, on) {
+    e.classList.toggle("flip", on); e.classList.toggle("showback", on);
+  }
+  // shine(el, delay): one light sweep across a coin (inside the turning layer, so it is clipped to the coin as it turns)
   function shine(e, delay) {
     if (reduce || shot || !e || e.querySelector(".shine")) return;
     var s = document.createElement("i"); s.className = "shine";
     if (delay) s.style.animationDelay = delay + "ms";
-    e.appendChild(s);
+    (e.firstChild || e).appendChild(s);
     setTimeout(function () { s.remove(); }, 1050 + (delay || 0));
   }
   // Hover (mouse) or tap (touch) flips any .coin in the page, unless it or an ancestor has data-noflip.
@@ -322,6 +375,7 @@
         clearTimeout(pendT); pend = c;
         if (cur && cur !== c) { flip(cur, false); cur = null; }
         if (!c) return;
+        ensureBack(c); // start loading the back face during the hover-intent wait
         pendT = setTimeout(function () {
           pend = null;
           if (performance.now() - lastScroll < 250) return;
@@ -330,7 +384,7 @@
       }, { passive: true });
       document.documentElement.addEventListener("pointerleave", function () { clearTimeout(pendT); pend = null; if (cur) flip(cur, false); cur = null; });
     } else {
-      document.addEventListener("click", function (ev) { var c = flipTarget(ev.target); if (c) flip(c, !c.classList.contains("flip")); });
+      document.addEventListener("click", function (ev) { var c = flipTarget(ev.target); if (c) flip(c, !c._want); });
     }
   }
 
@@ -566,7 +620,7 @@
           if (Math.abs(c[0] - x) > reach + R.d || Math.abs(c[1] - y) > reach + R.d) continue;
           var ex = rv.project(u + half, v), ey = rv.project(u, v + half);
           var ang = 0;
-          if (ce._ft) { var p = Math.min(1, (now - ce._ft) / 750); p = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; ang = ce._fon ? p * Math.PI : (1 - p) * Math.PI; }
+          if (ce._fpos) ang = ce._fpos() * Math.PI; // the same turn the coin element shows
           var back = ang > Math.PI / 2, sx = Math.abs(Math.cos(ang)) || 0.001;
           var img = zs(R, ce, back) || (back ? ce._bs && ce._bs.canvas : ce._fs && ce._fs.canvas);
           if (!img) continue;

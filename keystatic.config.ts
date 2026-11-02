@@ -1,13 +1,13 @@
 import { config, collection, fields, singleton } from '@keystatic/core';
 
 /**
- * Keystatic editor config (Alex edits at /admin, which redirects to /keystatic).
+ * Keystatic editor config (the owner edits at /admin, which redirects to /keystatic).
  *
  * Storage:
  * - Local mode (default, for development): edits are written straight to the files in this folder.
  * - GitHub mode (production): set PUBLIC_KEYSTATIC_GITHUB_REPO=owner/repo in Netlify (plus the Keystatic GitHub app
  *   variables listed in README.md). Every save then becomes a commit in that repository, and Netlify rebuilds.
- *   Edits are made on a branch whose name starts with "edits/" and go live when Alex presses "publish"
+ *   Edits are made on a branch whose name starts with "edits/" and go live when the owner presses "publish"
  *   (merges the branch), so a day of edits is one Netlify build instead of one per save.
  */
 const githubRepo = import.meta.env.PUBLIC_KEYSTATIC_GITHUB_REPO as string | undefined;

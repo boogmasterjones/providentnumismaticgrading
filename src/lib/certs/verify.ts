@@ -1,7 +1,7 @@
 /**
  * Certificate verification, server side only (/api/verify runs as a Netlify Function).
  *
- * Flow: check the typed number → per-visitor limit → cache → adapter (Alex's database, or DEMO records) →
+ * Flow: check the typed number → per-visitor limit → cache → adapter (the owner's database, or DEMO records) →
  * validate with CertificateSchema → cache → reply. The API key lives only in the adapter; replies and logs carry
  * nothing from the database except the validated certificate fields.
  */
@@ -33,7 +33,7 @@ interface CacheEntry<T> {
   value: T;
 }
 
-/** Found: 1 hour, so a correction in Alex's database shows on the site within the hour. */
+/** Found: 1 hour, so a correction in the owner's database shows on the site within the hour. */
 export const CACHE_TTL_FOUND_MS = 60 * 60 * 1000;
 /** Not found: 5 minutes, so a newly entered certificate shows up quickly. */
 export const CACHE_TTL_MISS_MS = 5 * 60 * 1000;
@@ -65,7 +65,7 @@ export const certCacheKey = (adapter: CertAdapter, n: string) => `v1/${adapter.i
 
 /**
  * Fixed windows in memory, per running copy of the function: enough to stop one visitor hammering the lookup
- * (and through it Alex's database).
+ * (and through it the owner's database).
  */
 export class RateLimiter {
   private hits = new Map<string, { minute: number; minuteCount: number; day: number; dayCount: number }>();

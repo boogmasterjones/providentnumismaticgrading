@@ -1,11 +1,14 @@
-# Content to confirm with Alex
+# Content to confirm with the owner
 
-The site carries **draft text**, written from Alex's current website (pncgrading.com: home, about, pricing, contact,
-read 2026-11-02) and our audit notes. Nothing below may go live until Alex says it is right. While the site is not
-launched, every page shows "Preview: draft text, waiting on Alex to confirm".
+The site carries **draft text**, written from the owner's current website (pncgrading.com: home, about, pricing,
+contact, read 2026-11-02) and our audit notes. Nothing below may go live until the owner says it is right. While the
+site is not launched, every page shows "Preview: draft text, not yet confirmed".
 
-Rule: no claim, stat, testimonial or guarantee goes on the site unless Alex confirms it and can back it up. Claims about
-Alex himself appear **only on the About page**, in his own phrasing.
+Rule: no claim, stat, testimonial or guarantee goes on the site unless the owner confirms it and can back it up.
+
+**Anonymity rule (owner's request, 2026-11-02): the owner stays anonymous.** His name, title, face, personal bio and
+personal history never appear on the site, in meta tags, in structured data or as a blog author. The site speaks as
+the company. Anything that could point to him (even without his name) is left out unless he OKs it below.
 
 ## Name and contact (Site settings)
 
@@ -28,23 +31,29 @@ Alex himself appear **only on the About page**, in his own phrasing.
 - [ ] The slab illustration (label text "Roman Empire · denarius, VF 30, DEMO-0001") is a drawing, not his real label.
 - [ ] "From $18 / $23 / $20 per coin" are computed from the fee table (ancient "from $20" is the 50-coin Bulk tier).
 
-## About page (claims about Alex, phrased as on his About page)
+## About page (about the company, no person)
 
-- [ ] Collecting since age 10.
-- [ ] Over a decade at NGC as a grader and numismatist, starting in high school.
-- [ ] Directed NGC's tokens and medals department (research, grading, attribution, authentication).
-- [ ] Monthly columns for NGC's newsletter; high-resolution videos of rare coins at NGC.
-- [ ] Coin club talks; ANA Summer Seminar twice as a youth and once as an adult.
-- [ ] Degrees: AS Digital Cinema (State College of Florida), BA Professional and Technical Communication, minor in
-      Business Administration (University of South Florida).
+The About page now describes the company only: what it grades, how every coin is handled, the holder and labels, the
+values, Venice FL. No personal history is on it.
+
+- [ ] "Every coin is examined by an experienced numismatist before it is sealed."
 - [ ] Company story: passion project, artistic labels on classical and historical themes; services (consultation,
       imaging, attribution, label design); works with coin shops and auction houses.
-- [ ] Values Innovation, Preservation, Excellence.
-- [ ] Wants his title shown as "President".
-- Not used (need his decision): "over two decades of experience", "hundreds of thousands of pieces" graded, the named
-  famous pieces he handled (1792 Washington pattern, Armstrong medal, etc.), his Proverbs 16:3 line, drone/music skills.
-- Not used (claims he would need to prove): "best product / pricing in the industry", "most cutting-edge technology",
-  "industry accepted", "market acceptability".
+- [ ] Values Innovation, Preservation, Excellence, plus "Records you can check" (certificate verification).
+
+**Optional credential lines (left OFF; only with the owner's explicit OK, because even unnamed they could identify
+him).** If he OKs one, it goes on the About page in company voice, never with a name or "he":
+
+- [ ] Option A: "Our lead grader spent more than ten years grading at a major grading service."
+- [ ] Option B: "Our lead grader once directed the tokens and medals department at a major grading service." (more
+      specific, so more likely to identify him)
+- [ ] Option C: "Our team has collected and studied coins for decades."
+
+Never used (personal, would identify him): his name, title ("President"), photo, age he started collecting, the name of
+his former employer, its newsletter columns and videos, coin club talks, ANA Summer Seminar, degrees and schools, the
+famous pieces he handled, his Proverbs 16:3 line, drone/music skills.
+Not used (claims he would need to prove): "best product / pricing in the industry", "most cutting-edge technology",
+"industry accepted", "market acceptability", "over two decades of experience", "hundreds of thousands of pieces".
 
 ## Fees and turnaround (content/fees.json, from his pricing page)
 
@@ -76,7 +85,7 @@ Alex himself appear **only on the About page**, in his own phrasing.
 
 ## Certificates
 
-- [ ] His certificate database details (see README, "What we need from Alex about his certificate database").
+- [ ] His certificate database details (see README, "What we need from the owner about the certificate database").
 - [ ] The certificate number format printed on his labels.
 
 ## Privacy
@@ -85,5 +94,5 @@ Alex himself appear **only on the About page**, in his own phrasing.
 
 ## Photos
 
-- [ ] Real photos only: his slabs, coins, and one of him for About. The coins in the moving background are drawn by
+- [ ] Real photos only: his slabs and coins. **Never a photo of him** (anonymity rule). The coins in the moving background are drawn by
       the site, not photos.

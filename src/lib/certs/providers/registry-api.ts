@@ -1,7 +1,7 @@
 /**
- * Alex's certificate database: THE ONLY PROVIDER-SPECIFIC FILE.
+ * The owner's certificate database: THE ONLY PROVIDER-SPECIFIC FILE.
  *
- * We don't know yet which software or service Alex keeps his certificates in. Until we do, this file assumes a
+ * We don't know yet which software or service the owner keeps the certificates in. Until we do, this file assumes a
  * plain JSON web API, which is the most common shape:
  *
  *   GET  {CERT_API_URL}/certificates/{certNumber}
@@ -9,11 +9,11 @@
  *   200  one certificate as JSON (bare, or wrapped in "data" / "certificate" / "record" / "fields")
  *   404  no such certificate
  *
- * TODO(once Alex tells us the system): replace the address, the login header and mapRecord() below with that
+ * TODO(once the owner tells us the system): replace the address, the login header and mapRecord() below with that
  * system's real ones (its API docs), and implement listAll() if it can list every certificate (population report).
  * Nothing else in the site needs to change: the rest only sees the CertAdapter interface and the Certificate shape.
  *
- * Rules this file must keep: the key is only ever sent in the request to Alex's database; it never goes into a
+ * Rules this file must keep: the key is only ever sent in the request to the owner's database; it never goes into a
  * URL that could be logged, an error message, or a reply to the browser.
  */
 import { CertAdapterError, type CertAdapter } from '../adapter';
@@ -124,6 +124,6 @@ export function createRegistryApiAdapter(opts: RegistryApiOptions): CertAdapter 
       if (!mapped) throw new CertAdapterError('upstream', 'Record is missing the number, description or grade.');
       return mapped;
     },
-    // listAll: not implemented until we know whether Alex's database can list every certificate (see README).
+    // listAll: not implemented until we know whether the owner's database can list every certificate (see README).
   };
 }

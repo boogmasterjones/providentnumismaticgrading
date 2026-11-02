@@ -1,5 +1,5 @@
 /**
- * The certificate shape the website shows. Whatever Alex's certificate database sends is turned into this shape by
+ * The certificate shape the website shows. Whatever the owner's certificate database sends is turned into this shape by
  * the adapter (src/lib/certs/providers/registry-api.ts) and then checked against CertificateSchema here, so a
  * surprise from the database can never put odd data on the page.
  */
