@@ -38,3 +38,13 @@ export function parseNotable(entries: readonly (readonly [string, Partial<Notabl
 
 /** The Verify page address for a certificate number. */
 export const verifyHref = (cert: string) => `/verify?cert=${encodeURIComponent(cert)}`;
+
+/** A long grade ("Ch XF, Strike 5/5, Surface 4/5") squeezed between the sprigs stacked into five lines: the grade
+ * proper stays large between the sprigs, and what follows the first comma (subgrades, designations) sits on a
+ * small line of its own under it. A long grade without a comma is set smaller instead. */
+export function splitGrade(g: string): { main: string; sub: string; long: boolean } {
+  const i = g.indexOf(',');
+  const main = (i > 0 ? g.slice(0, i) : g).trim();
+  const sub = i > 0 ? g.slice(i + 1).split(',').map((s) => s.trim()).filter(Boolean).join(' · ') : '';
+  return { main, sub, long: main.length > 9 };
+}

@@ -70,3 +70,23 @@ if ('IntersectionObserver' in window) {
 } else {
   reveal.forEach((el) => el.classList.add('in'));
 }
+
+// Swipeable notable coins (phones): the next card peeks in under a soft fade at the right edge; once the row is
+// swiped to its end, or does not scroll at all, the fade lifts (.at-end, mobile.css). Driven by the row's own
+// sideways scroll, never by the page scroll.
+for (const row of document.querySelectorAll<HTMLElement>('.notable-grid')) {
+  let queued = false;
+  const check = () => {
+    queued = false;
+    row.classList.toggle('at-end', row.scrollLeft + row.clientWidth >= row.scrollWidth - 8);
+  };
+  const queue = () => {
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(check);
+    }
+  };
+  row.addEventListener('scroll', queue, { passive: true });
+  addEventListener('resize', queue, { passive: true });
+  check();
+}

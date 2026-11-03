@@ -77,7 +77,7 @@
   html .page-head h1 { max-width: none; }
   html .page-head h1::after { width: 120px; margin-top: var(--space-3); background-size: 120px 10px; height: 10px; }
   html .page-body { padding: var(--space-6) 0 var(--space-7); }
-  html .coda { padding: var(--space-6) 0; }
+  html .coda { padding-top: var(--space-6); padding-bottom: var(--space-6); }
   html .page-coda > .divider { margin-bottom: var(--space-5); }
   html .coda .links { flex-direction: column; gap: 4px; }
   html .coda .rosette { width: 520px; }
@@ -283,10 +283,6 @@
 /* ======================================================================================================== */
 /* pass 2 (2026-11-03): fixes found with real-looking content and a second look                              */
 /* ======================================================================================================== */
-@media (max-width: 1120px) {
-  /* a long certificate number moves to its own line whole instead of breaking at a dash ("TMP-2026- / 000123") */
-  html .coin-cert .cert-no { display: inline-block; }
-}
 @media (max-width: 720px) {
   /* the microtext line at the foot of framed panels ran under the corner ornaments (verify, home verify, fees):
      it now runs between them and fades at both ends instead of stopping mid-letter */
@@ -307,13 +303,6 @@
 }
 @media (max-width: 560px) {
   html .ex-scene { height: 330px; }
-}
-@media (max-width: 1120px) {
-  /* notable coins: a long grade ("Ch XF, Strike 5/5, Surface 4/5") wraps into balanced lines that don't touch */
-  html .coin-grade { line-height: 1.12; text-wrap: balance; }
-  /* carousel captions stay clear of the slide's edges, so the next slide's caption never shows as stray letters in
-     the sliver of it that peeks in */
-  html .car-slide figcaption { padding: 0 28px; line-height: 1.6; }
 }
 @media (max-width: 720px) {
   /* journal article: less air between the header, the back link and the date */
@@ -374,3 +363,82 @@
   html .page-body > .steps:first-child > li:first-child::before { display: none; }
 }
 @media (min-width: 721px) and (max-width: 900px) { html .page-body { padding-top: var(--space-6); } }
+
+/* ======================================================================================================== */
+/* pass 3 (2026-11-03, final): a fresh look with real-looking content                                         */
+/* (the grade, certificate number, carousel caption, microtext and numbered-list fixes are bugs and now apply  */
+/*  on every screen: home.css, deco.css and global.css)                                                       */
+/* ======================================================================================================== */
+
+/* type: no lone word on the last line of a paragraph or list item, and headings in balanced lines ("Registry record
+   and / verification" became "Registry record / and verification"); desktop keeps its own wrapping */
+@media (max-width: 1120px) {
+  html p, html li, html dd, html figcaption, html blockquote { text-wrap: pretty; }
+  html h1, html h2, html h3 { text-wrap: balance; }
+}
+
+/* touch: every control at least 44px tall. Arrow links measured 40px, a notable coin's certificate link 15px (the
+   whole link was its one line of small capitals) and the phone number on Contact 30px. */
+@media (max-width: 720px), (max-width: 1120px) and (pointer: coarse) {
+  html .link-arrow { min-height: 44px; }
+  html .coin-cert { display: inline-block; padding: 12px 4px; }
+  html .ways a { display: inline-block; padding: 7px 0; }
+}
+
+/* notable coins: cards in a row are the same height, so the certificate line now sits at the foot of every card
+   (it floated about 70px above the foot of the shorter cards) */
+@media (max-width: 1120px) {
+  html .coin-card { display: flex; flex-direction: column; }
+  html .coin-card .coin-cert { margin-top: auto; align-self: center; }
+}
+/* the next card peeks in at the right as a quiet fade instead of a hard sliver of cut-off text ("Cons", "Stru");
+   the fade lifts once the row is swiped to its end (site.ts sets .at-end) */
+@media (max-width: 720px) {
+  html .notable-grid { -webkit-mask: linear-gradient(90deg, #000 calc(100% - 64px), rgba(0, 0, 0, 0.25) calc(100% - 6px)); mask: linear-gradient(90deg, #000 calc(100% - 64px), rgba(0, 0, 0, 0.25) calc(100% - 6px)); }
+  html .notable-grid.at-end { -webkit-mask: none; mask: none; }
+}
+/* tablets (721–1120): the cards are laid out by how many there are, so there is never a lone card on a row of its
+   own (4 coins showed as 3 + 1): 1, 2 or 4 sit two to a row, 3, 5 or 6 three to a row, every row centred */
+@media (min-width: 721px) and (max-width: 1120px) {
+  html .notable-grid { --g: 14px; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--g); }
+  html .notable-grid > li { flex: 0 1 calc((100% - 2 * var(--g)) / 3); min-width: 0; }
+  html .notable-grid:is([data-count='1'], [data-count='2'], [data-count='4']) > li { flex-basis: min(calc((100% - var(--g)) / 2), 340px); }
+}
+@media (min-width: 901px) and (max-width: 1120px) { html .notable-grid { --g: 1.5rem; } }
+
+/* what we grade: four columns were about 230px wide at 1001–1120 (nine-line paragraphs); two by two, as below 1000 */
+@media (min-width: 1001px) and (max-width: 1120px) {
+  html .scope-list { grid-template-columns: 1fr 1fr; }
+  html .scope-list li:nth-child(3) { padding-left: 0; border-left: 0; }
+  html .scope-list li:nth-child(n + 3) { border-top: 1px solid var(--color-border); }
+}
+
+/* certificate page: the two notes meant to be read were 14.4px */
+@media (max-width: 720px) {
+  html .cert-card p.small, html .verify-note { font-size: 1rem; line-height: 1.6; }
+}
+
+/* footer on phones: Contact moves under Grading, beside the longer Company list, instead of a full-width block of its
+   own below both (about 55px shorter on every page, and the two columns end closer together) */
+@media (min-width: 381px) and (max-width: 720px) {
+  html .footer-top > nav:nth-of-type(2) { grid-row: span 2; }
+  html .footer-top > :last-child { grid-column: 1; }
+}
+@media (max-width: 380px) {
+  /* 148px columns broke "About the company" over two lines (Contact stays full width here: the opening hours
+     would take three lines in a column) */
+  html .footer-top { column-gap: 14px; }
+}
+
+/* the open menu on a tablet held upright (iPad portrait, 1024×1366): phone-size items left most of the screen empty;
+   they now grow with the screen's height, up to 2.4rem (landscape and short screens keep the phone size) */
+@media (min-width: 721px) and (max-width: 1120px) and (min-height: 900px) {
+  html .nav li a { font-size: clamp(1.75rem, 3.1vh, 2.4rem); padding: clamp(18px, 1.9vh, 26px) 0; }
+  html .nav ul { padding-top: var(--space-5); }
+}
+
+/* home rhythm: "What we grade" ended 150px above the next label (its 68px foot, then the microtext divider and the
+   next section's own top); now about 120px, like the other section joins */
+@media (max-width: 720px) {
+  html .scope { padding-bottom: var(--space-5); }
+}

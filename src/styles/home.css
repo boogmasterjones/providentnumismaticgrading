@@ -179,3 +179,16 @@
   .wm-top { font-size: clamp(2.2rem, 12.4vw, 3.1rem); letter-spacing: 0.08em; margin-right: -0.08em; }
   @keyframes heroTrack { from { opacity: 0; letter-spacing: 0.3em; margin-right: -0.3em; } to { opacity: 1; letter-spacing: 0.08em; margin-right: -0.08em; } }
 }
+
+/* ---------- approved bug fixes, every screen (mobile pass 3, 2026-11-03) ---------- */
+/* a long grade stacked into five touching lines between the sprigs ("CH XF, / STRIKE / 5/5, / SURFACE / 4/5"). The
+   grade proper stays between the sprigs; what follows its first comma is a small line of its own (Notable.astro). A
+   long grade without a comma is set smaller and wraps into balanced lines that don't touch. */
+.coin-grade.long { font-size: clamp(1.3rem, 1.9vw, 1.6rem); line-height: 1.2; letter-spacing: 0.08em; text-wrap: balance; }
+.grade-row:has(+ .coin-sub) { margin-bottom: 8px; }
+.coin-sub { font: 600 0.68rem/1.6 var(--font-caps); letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); opacity: 0.9; margin: 0 0 var(--space-3); text-wrap: balance; }
+/* a long certificate number moves to its own line whole instead of breaking at a dash ("TMP-2026- / 000123") */
+.coin-cert .cert-no { display: inline-block; }
+/* carousel captions stay clear of the slide's edges, so the next slide's caption never shows as stray letters in the
+   sliver of it that peeks in */
+.car-slide figcaption { padding: 0 28px; line-height: 1.6; text-wrap: balance; }

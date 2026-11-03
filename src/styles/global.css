@@ -325,3 +325,7 @@ article.post .back { display: inline-block; margin-bottom: var(--space-5); }
 .footer-legal a { color: var(--color-faint); text-decoration: none; }
 .footer-legal a:hover { color: var(--gold-hi); }
 .form-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-4); }
+/* numbered lists in journal posts hung their numerals left of the bullet column: both now share one text edge
+   (detail.css sets bulleted lists to 1.4rem) (approved bug fix, pass 3) */
+.prose ol { padding-left: 1.4rem; }
+
