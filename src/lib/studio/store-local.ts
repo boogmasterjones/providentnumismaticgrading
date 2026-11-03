@@ -67,13 +67,13 @@ export class LocalStore implements ContentStore {
     return out.sort();
   }
 
-  async write(path: string, content: string | Uint8Array) {
+  async write(path: string, content: string | Uint8Array, _message?: string) {
     assertWritable(path);
     await mkdir(dirname(this.abs(path)), { recursive: true });
     await writeFile(this.abs(path), content);
   }
 
-  async remove(path: string) {
+  async remove(path: string, _message?: string) {
     assertWritable(path);
     await rm(this.abs(path), { force: true });
   }

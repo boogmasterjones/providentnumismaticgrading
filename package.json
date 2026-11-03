@@ -12,7 +12,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
-    "astro": "astro"
+    "astro": "astro",
+    "studio:hash": "node scripts/studio-hash.mjs"
   },
   "dependencies": {
     "@astrojs/markdoc": "2.1.0",

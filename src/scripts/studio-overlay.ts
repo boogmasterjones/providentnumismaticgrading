@@ -378,6 +378,7 @@ function linkPrompt(bar: HTMLElement) {
     wrap.remove();
     editing?.el.focus();
   });
+  input.addEventListener('input', () => input.setCustomValidity(''));
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       e.stopPropagation();
