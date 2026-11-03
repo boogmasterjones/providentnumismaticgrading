@@ -522,6 +522,13 @@ p {
   font-size: 1.02rem;
   max-width: 30em;
 }
+.st-cards > li:last-child:not(.st-card-hero) {
+  grid-column: 1 / -1;
+}
+.st-cards > li:last-child .st-card {
+  grid-template-rows: auto;
+  align-items: center;
+}
 .st-card-attn .st-card {
   border-color: var(--st-gold-line);
 }
@@ -1189,8 +1196,11 @@ p {
   overflow: hidden;
 }
 .st-picker-preview img {
+  display: block;
   max-width: 100%;
-  max-height: 100%;
+  max-height: 218px;
+  width: auto;
+  height: auto;
   object-fit: contain;
 }
 .st-picker-none {
@@ -1877,5 +1887,35 @@ p {
   }
   .st-panel {
     padding: 16px;
+  }
+}
+
+/* fieldsets default to min-width: min-content, which pushes long rows past a phone's edge */
+.st-group,
+.st-subgroup,
+.st-list-item,
+.st-list-body {
+  min-width: 0;
+}
+.st-sheet-body {
+  overflow-x: hidden;
+}
+@media (max-width: 640px) {
+  .st-vbar {
+    flex-wrap: nowrap;
+  }
+  .st-vbar .st-grow,
+  .st-vbar-live {
+    display: none;
+  }
+  .st-pagepick {
+    flex: 1;
+    min-width: 0;
+  }
+  .st-pagepick select {
+    max-width: none;
+  }
+  .st-seg button {
+    padding: 0 10px;
   }
 }

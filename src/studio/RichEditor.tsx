@@ -117,6 +117,7 @@ export function RichEditor({ html, onChange, label, folder = 'blog' }: { html: s
         role="textbox"
         aria-multiline="true"
         aria-label={label}
+        onFocus={() => document.execCommand('defaultParagraphSeparator', false, 'p')}
         onInput={emit}
         onBlur={emit}
         onClick={(e) => {

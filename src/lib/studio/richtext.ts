@@ -20,7 +20,7 @@ const ELEMENT = 1;
 const kids = (n: NodeLike) => Array.from(n.childNodes);
 const tag = (n: NodeLike) => n.nodeName.toUpperCase();
 const attr = (n: NodeLike, a: string) => (n.getAttribute ? n.getAttribute(a) : null) ?? '';
-const BLOCKS = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'PRE', 'HR', 'FIGURE', 'SECTION']);
+const BLOCKS = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'LI', 'BLOCKQUOTE', 'PRE', 'HR', 'FIGURE', 'SECTION', 'ARTICLE', 'MAIN', 'HEADER', 'FOOTER', 'ASIDE']);
 const SKIP = new Set(['SCRIPT', 'STYLE', 'TEMPLATE', 'BUTTON']);
 
 /** A link target Studio accepts: a page of this site, an #anchor, https, mailto or tel. Others are dropped. */
@@ -60,7 +60,7 @@ export function paragraphText(el: NodeLike, links: boolean): string {
     if (n.nodeType === TEXT) return (n.nodeValue ?? '').replace(/[ \t\r\n]+/g, ' ');
     if (n.nodeType !== ELEMENT || SKIP.has(tag(n))) return '';
     const t = tag(n);
-    if (t === 'BR') return '\n';
+    if (t === 'BR') return attr(n, 'data-sf-p') ? '\n\n' : '\n';
     const inner = kids(n).map(walk).join('');
     if (t === 'A') {
       const href = safeHref(attr(n, 'href'));

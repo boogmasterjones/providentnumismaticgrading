@@ -88,18 +88,21 @@ export class LocalStore implements ContentStore {
   }
 
   async changes(): Promise<Change[]> {
-    const out = await this.git(['status', '--porcelain=v1', '-z', '--untracked-files=all', '--', 'content', 'public/images'], {
-      allowFail: true,
-    });
+    // Compared by content (git diff), not by file timestamps, so a file saved back to its committed text (or with
+    // different line endings) does not count as a change.
+    const roots = ['content', 'public/images'];
+    const diff = await this.git(['diff', '--name-status', '--no-renames', '-z', 'HEAD', '--', ...roots], { allowFail: true });
+    const added = await this.git(['ls-files', '--others', '--exclude-standard', '-z', '--', ...roots], { allowFail: true });
     const changes: Change[] = [];
-    const parts = out.split('\0').filter(Boolean);
-    for (let i = 0; i < parts.length; i++) {
-      const code = parts[i].slice(0, 2);
-      const path = parts[i].slice(3);
-      if (code[0] === 'R' || code[0] === 'C') i++; // the next entry is the old name
+    const parts = diff.split('\0').filter(Boolean);
+    for (let i = 0; i + 1 < parts.length; i += 2) {
+      const code = parts[i];
+      const path = parts[i + 1];
       if (!isTracked(path)) continue;
-      const status: Change['status'] = code === '??' || code.includes('A') ? 'added' : code.includes('D') ? 'deleted' : 'modified';
-      changes.push({ path, status });
+      changes.push({ path, status: code === 'A' ? 'added' : code === 'D' ? 'deleted' : 'modified' });
+    }
+    for (const path of added.split('\0').filter(Boolean)) {
+      if (isTracked(path) && !path.endsWith('/.gitkeep')) changes.push({ path, status: 'added' });
     }
     return changes.sort((a, b) => a.path.localeCompare(b.path));
   }

@@ -8,7 +8,7 @@ import { FieldForm, FieldInput } from './FieldForm';
 import { useStudio } from './state';
 import { Button, Loading, Sheet } from './ui';
 import { docType, fieldAt, type Field } from '../lib/studio/schema';
-import { getAt, setAt, validateDoc, type Data, type FieldProblem } from '../lib/studio/ops';
+import { getAt, newProblems, setAt, type Data, type FieldProblem } from '../lib/studio/ops';
 
 export function DocSheet({
   doc,
@@ -57,7 +57,7 @@ export function DocSheet({
     // a formatted body edited here arrives as data.body; it is saved separately from the fields
     const { body: newBody, ...fields } = data;
     const body = typeof newBody === 'string' ? newBody : undefined;
-    const found = validateDoc(type, fields, body ?? reply.body);
+    const found = newProblems(type, reply, fields, body ?? reply.body);
     const relevant = path ? found.filter((p) => p.path === path || p.path.startsWith(path + '.')) : found;
     setProblems(relevant);
     if (relevant.length) return;

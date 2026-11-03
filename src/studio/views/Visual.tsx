@@ -229,6 +229,10 @@ export function Visual({ page }: { page: string }) {
   }, [onMessage]);
 
   useEffect(() => setLoading(true), [page]);
+  useEffect(() => {
+    addEventListener('studio-undo', reload);
+    return () => removeEventListener('studio-undo', reload);
+  }, [reload]);
 
   const options = [
     ...(overview?.pages ?? []).map((p) => ({ value: p.path, label: p.label })),
@@ -280,7 +284,7 @@ export function Visual({ page }: { page: string }) {
             <span className="st-hide-sm">{post ? 'Post settings' : 'Page settings'}</span>
           </Button>
         )}
-        <a className="st-btn st-btn-ghost st-btn-icon" href={page} target="_blank" rel="noopener" title="Open the live page in a new tab" aria-label="Open the live page in a new tab">
+        <a className="st-btn st-btn-ghost st-btn-icon st-vbar-live" href={page} target="_blank" rel="noopener" title="Open the live page in a new tab" aria-label="Open the live page in a new tab">
           <Icon name="external" size={18} />
         </a>
       </div>

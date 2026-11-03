@@ -5,7 +5,7 @@ import { useStudio } from '../state';
 import { FieldForm } from '../FieldForm';
 import { Button, Empty, Loading, PageHead, fmtDate } from '../ui';
 import { postDoc } from '../../lib/studio/schema';
-import { validateDoc, type Data, type FieldProblem } from '../../lib/studio/ops';
+import { newProblems, type Data, type FieldProblem } from '../../lib/studio/ops';
 
 export function Journal() {
   const { overview } = useStudio();
@@ -50,7 +50,11 @@ export function Journal() {
   );
 }
 
-const today = () => new Date().toISOString().slice(0, 10);
+/** Today on the owner's own calendar (not UTC, which is already tomorrow on a Florida evening). */
+const today = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
 
 export function PostEditor({ slug }: { slug: string }) {
   const isNew = slug === 'new';
@@ -81,7 +85,7 @@ export function PostEditor({ slug }: { slug: string }) {
   const dirty = isNew ? Boolean(String(fields.title ?? '').trim() || body) : JSON.stringify(reply?.data) !== JSON.stringify(fields) || body !== undefined;
 
   async function save() {
-    const p = validateDoc(postDoc, fields, typeof body === 'string' ? body : reply?.body ?? '');
+    const p = newProblems(postDoc, reply, fields, typeof body === 'string' ? body : reply?.body ?? '');
     setProblems(p);
     if (p.length) {
       toast(p[0].message, 'error');
@@ -118,6 +122,9 @@ export function PostEditor({ slug }: { slug: string }) {
 
   return (
     <div className="st-page st-page-narrow">
+      <a className="st-back" href="#/journal">
+        ← All posts
+      </a>
       <PageHead
         title={isNew ? 'New journal post' : 'Edit journal post'}
         lead={isNew ? 'Write it here. It is saved as a draft until you publish.' : undefined}
@@ -131,9 +138,6 @@ export function PostEditor({ slug }: { slug: string }) {
           )
         }
       />
-      <a className="st-back" href="#/journal">
-        ← All posts
-      </a>
       <FieldForm
         fields={postDoc.fields}
         value={data}

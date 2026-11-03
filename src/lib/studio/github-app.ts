@@ -30,7 +30,7 @@ export function normalizePem(key: string): string {
       /* fall through */
     }
   }
-  return k.replace(/\\n/g, '\n');
+  return k.replace(/\\n/g, '\n').trim();
 }
 
 /** A JWT (RS256) that identifies the App for 9 minutes (GitHub allows at most 10). */

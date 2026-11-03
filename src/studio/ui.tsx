@@ -108,6 +108,9 @@ export function Button({ children, onClick, kind = 'secondary', icon, type = 'bu
   );
 }
 
+/** Panels open on top of each other (a photo picker over a coin form); Escape closes only the top one. */
+const openSheets: symbol[] = [];
+
 /** A side panel on large screens, a bottom sheet on phones. Escape closes; focus stays inside while open. */
 export function Sheet({
   title,
@@ -126,14 +129,20 @@ export function Sheet({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const id = useId();
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
+    // runs once per opening: a later re-render must not move the focus or re-open anything
     const prev = document.activeElement as HTMLElement | null;
     const first = ref.current?.querySelector<HTMLElement>('input, textarea, select, [contenteditable="true"], button:not(.st-sheet-close)');
     (first ?? ref.current)?.focus();
+    const me = Symbol('sheet');
+    openSheets.push(me);
     const onKey = (e: KeyboardEvent) => {
+      if (openSheets[openSheets.length - 1] !== me || document.querySelector('.st-dialog')) return; // only the top panel
       if (e.key === 'Escape') {
         e.stopPropagation();
-        onClose();
+        close.current();
       }
       if (e.key === 'Tab' && ref.current) trapFocus(e, ref.current);
     };
@@ -141,10 +150,11 @@ export function Sheet({
     document.body.classList.add('st-locked');
     return () => {
       document.removeEventListener('keydown', onKey);
-      document.body.classList.remove('st-locked');
-      prev?.focus?.();
+      openSheets.splice(openSheets.indexOf(me), 1);
+      if (!openSheets.length) document.body.classList.remove('st-locked');
+      if (prev && document.contains(prev)) prev.focus?.();
     };
-  }, [onClose]);
+  }, []);
   return (
     <div className="st-overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className={`st-sheet${wide ? ' st-sheet-wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby={id} ref={ref} tabIndex={-1}>
@@ -191,22 +201,24 @@ export interface ConfirmOptions {
 export function ConfirmDialog({ o, onDone }: { o: ConfirmOptions; onDone: (ok: boolean) => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const id = useId();
+  const done = useRef(onDone);
+  done.current = onDone;
   useEffect(() => {
     const prev = document.activeElement as HTMLElement | null;
     ref.current?.querySelector<HTMLElement>('[data-default]')?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation();
-        onDone(false);
+        done.current(false);
       }
       if (e.key === 'Tab' && ref.current) trapFocus(e, ref.current);
     };
     document.addEventListener('keydown', onKey, true);
     return () => {
       document.removeEventListener('keydown', onKey, true);
-      prev?.focus?.();
+      if (prev && document.contains(prev)) prev.focus?.();
     };
-  }, [onDone]);
+  }, []);
   return (
     <div className="st-overlay st-overlay-center">
       <div className="st-dialog" role="alertdialog" aria-modal="true" aria-labelledby={id} ref={ref}>

@@ -5,7 +5,7 @@ import { useStudio } from '../state';
 import { FieldForm } from '../FieldForm';
 import { Button, Loading, PageHead } from '../ui';
 import { docType } from '../../lib/studio/schema';
-import { validateDoc, type Data, type FieldProblem } from '../../lib/studio/ops';
+import { newProblems, type Data, type FieldProblem } from '../../lib/studio/ops';
 
 const type = docType('settings')!;
 
@@ -35,7 +35,7 @@ export function Business() {
 
   async function save() {
     if (!data) return;
-    const p = validateDoc(type, data);
+    const p = newProblems(type, reply, data);
     setProblems(p);
     if (p.length) return toast(p[0].message, 'error');
     setBusy(true);

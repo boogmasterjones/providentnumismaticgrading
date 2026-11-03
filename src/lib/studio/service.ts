@@ -3,7 +3,7 @@
  * thin wrappers). Every write is validated against the field registry (schema.ts) before it reaches the store.
  */
 import { parseFile, serializeFile } from './format';
-import { cleanValue, EditError, getAt, listOp, requireField, setAt, slugify, uniqueSlug, validateDoc, type Data, type ListOp } from './ops';
+import { cleanValue, EditError, getAt, listOp, newProblems, requireField, setAt, slugify, uniqueSlug, type Data, type ListOp } from './ops';
 import { docFile, docType, fileDoc, IMAGE_FOLDERS, notableDoc, postDoc, type DocType, type ImageFolder } from './schema';
 import { PAGES } from './pages';
 import { assertWritable, isWritable, type Change, type ContentStore, type PublishResult } from './store';
@@ -77,10 +77,18 @@ export class StudioService {
   private async writeDoc(doc: string, data: Data, body: string, what: string, opts: { mustExist?: boolean } = {}): Promise<SaveResult> {
     const type = this.type(doc);
     const file = docFile(doc);
-    const problems = validateDoc(type, data, body);
-    if (problems.length) throw new EditError(problems[0].message, 400, problems);
     const before = await this.store.read(file);
     if (opts.mustExist && before === null) throw new EditError('That item no longer exists. Reload and try again.', 404);
+    // Only what this save changes must pass the rules: text written before the rules existed (or by hand) stays
+    // as it is until someone edits it, instead of blocking every other edit on the page.
+    let old: { data: Data; body: string } = { data: {}, body: '' };
+    try {
+      if (before !== null) old = parseFile(file, before);
+    } catch {
+      /* unreadable file: validate everything */
+    }
+    const problems = newProblems(type, before === null ? null : old, data, body);
+    if (problems.length) throw new EditError(problems[0].message, 400, problems);
     const text = serializeFile(file, data, type.hasBody ? body : '');
     if (before !== null && before.replace(/\r\n/g, '\n') === text) return { file, before, doc };
     await this.store.write(file, text, `Studio: ${what}`);
@@ -271,7 +279,7 @@ export class StudioService {
     if (!doc) return `Photo: ${path.split('/').pop()}`;
     const t = docType(doc);
     if (!t) return path;
-    if (t.type === 'page') return `${t.label} page`;
+    if (t.type === 'page') return /page$/i.test(t.label) ? t.label : `${t.label} page`;
     if (t.type === 'notable' || t.type === 'post') {
       let name = '';
       try {

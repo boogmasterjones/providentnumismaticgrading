@@ -7,7 +7,7 @@ import { Button, Empty, Icon } from '../ui';
 const STATUS = { added: 'New', modified: 'Changed', deleted: 'Deleted' } as const;
 
 export function Changes({ heading = 'Not published yet' }: { heading?: string }) {
-  const { overview, confirm, toast, fail, refresh, bump } = useStudio();
+  const { overview, confirm, toast, fail, refresh, bump, forget } = useStudio();
   const [busy, setBusy] = useState<string | null>(null);
   if (!overview) return null;
   const list = overview.changes;
@@ -17,8 +17,10 @@ export function Changes({ heading = 'Not published yet' }: { heading?: string })
     setBusy(path);
     try {
       await api.undo(path);
+      forget([path]);
       toast(`“${label}” is back to the live version.`, 'info');
       bump();
+      dispatchEvent(new Event('studio-undo'));
       await refresh();
     } catch (e) {
       fail(e);
@@ -32,8 +34,10 @@ export function Changes({ heading = 'Not published yet' }: { heading?: string })
     setBusy('*');
     try {
       await api.undoAll();
+      forget();
       toast('Everything is back to the live version.', 'info');
       bump();
+      dispatchEvent(new Event('studio-undo'));
       await refresh();
     } catch (e) {
       fail(e);

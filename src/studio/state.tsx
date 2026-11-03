@@ -23,6 +23,8 @@ interface Ctx {
   saved: (label: string, r: SaveResult | SaveResult[], opts?: { quiet?: boolean }) => void;
   history: HistoryEntry[];
   undoLast: () => Promise<boolean>;
+  /** drop undo steps for these files (all when none given), after they were put back to the live version */
+  forget: (files?: string[]) => void;
   /** show an API error in a toast */
   fail: (e: unknown) => void;
   /** bumped whenever content changed, so views can reload */
@@ -96,6 +98,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     try {
       for (const it of [...last.items].reverse()) await api.restore(it.file, it.before);
       setHistory((h) => h.slice(0, -1));
+      dispatchEvent(new Event('studio-undo')); // the visual editor reloads its page
       toast(`Undone: ${last.label}`, 'info');
       bump();
       void refresh();
@@ -105,6 +108,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       return false;
     }
   }, [history, toast, bump, refresh, fail]);
+
+  const forget = useCallback((files?: string[]) => {
+    setHistory((h) => (files ? h.filter((e) => !e.items.some((i) => files.includes(i.file))) : []));
+  }, []);
 
   const undoRef = useRef(undoLast);
   undoRef.current = undoLast;
@@ -121,8 +128,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ overview, refresh, toast, confirm, saved, history, undoLast, fail, version, bump }),
-    [overview, refresh, toast, confirm, saved, history, undoLast, fail, version, bump],
+    () => ({ overview, refresh, toast, confirm, saved, history, undoLast, forget, fail, version, bump }),
+    [overview, refresh, toast, confirm, saved, history, undoLast, forget, fail, version, bump],
   );
 
   return (

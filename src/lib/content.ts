@@ -33,7 +33,8 @@ export interface BodyRef {
 /** Markdoc to HTML for the preview (the build uses @astrojs/markdoc; plain Markdoc gives the same tags here). */
 export function renderMarkdoc(source: string): string {
   const ast = Markdoc.parse(source);
-  return Markdoc.renderers.html(Markdoc.transform(ast));
+  // Markdoc wraps the document in <article>; the build (@astrojs/markdoc) does not, so neither does the preview.
+  return Markdoc.renderers.html(Markdoc.transform(ast)).replace(/^<article>([\s\S]*)<\/article>$/, '$1');
 }
 
 export function getSettings(Astro: Ctx): SiteSettings {

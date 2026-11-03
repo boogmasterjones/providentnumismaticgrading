@@ -3,7 +3,7 @@
  * edit the website visually, notable coins, the homepage slideshow, the journal, photos, business info, publish.
  * Screens are chosen by the address's #hash, so the browser's Back button works (also on phones).
  */
-import { useEffect, useState } from 'react';
+import { Component, useEffect, useState, type ReactNode } from 'react';
 import { StudioProvider, useStudio } from './state';
 import { api } from './api';
 import { Button, Icon, Loading } from './ui';
@@ -34,11 +34,37 @@ function useRoute() {
   return r;
 }
 
+/** If anything in Studio breaks, show a calm message with a way out instead of a blank screen. */
+class Boundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <div className="st-page st-page-narrow">
+        <div className="st-notice" role="alert">
+          <h2>Something went wrong on this screen</h2>
+          <p>Your saved changes are safe. Reload Studio to carry on.</p>
+          <p>
+            <button type="button" className="st-btn st-btn-primary" onClick={() => location.reload()}>
+              Reload Studio
+            </button>
+          </p>
+        </div>
+      </div>
+    );
+  }
+}
+
 export default function App() {
   return (
-    <StudioProvider>
-      <Shell />
-    </StudioProvider>
+    <Boundary>
+      <StudioProvider>
+        <Shell />
+      </StudioProvider>
+    </Boundary>
   );
 }
 

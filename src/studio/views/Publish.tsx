@@ -7,7 +7,7 @@ import { Changes } from './Changes';
 import type { PublishResult } from '../../lib/studio/store';
 
 export function Publish() {
-  const { overview, confirm, fail, refresh, toast, bump } = useStudio();
+  const { overview, confirm, fail, refresh, toast, bump, forget } = useStudio();
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<PublishResult | null>(null);
   if (!overview) return null;
@@ -31,6 +31,7 @@ export function Publish() {
       setResult(r);
       if (r.published) {
         toast('Published! The live website updates in a minute or two.');
+        forget();
         bump();
         await refresh();
       } else if (r.simulated) toast('Publish simulated: nothing was published in local mode.', 'info');

@@ -205,3 +205,17 @@ export function requireField(type: DocType, path: string): Field {
   if (!f) throw new EditError(`"${path}" can't be edited.`);
   return f;
 }
+
+/**
+ * The problems a save would introduce: like validateDoc, but values that were already stored unchanged are let
+ * through (older text that predates a limit is fixed when someone edits it, not forced on every save).
+ */
+export function newProblems(type: DocType, before: { data: Data; body?: string } | null, data: Data, body?: string): FieldProblem[] {
+  const all = validateDoc(type, data, body);
+  if (!before) return all;
+  return all.filter((p) =>
+    p.path === 'body'
+      ? (before.body ?? '').trim() !== (body ?? '').trim()
+      : JSON.stringify(getAt(before.data, p.path) ?? null) !== JSON.stringify(getAt(data, p.path) ?? null),
+  );
+}

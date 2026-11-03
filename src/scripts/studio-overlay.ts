@@ -123,12 +123,16 @@ function request(m: Msg): Promise<{ ok: boolean; error?: string }> {
   });
 }
 
-function saveScrollAndReload() {
+function saveScroll() {
   try {
-    sessionStorage.setItem(SCROLL_KEY(), String(scrollY));
+    sessionStorage.setItem(SCROLL_KEY(), JSON.stringify({ y: scrollY, at: Date.now() }));
   } catch {
     /* private mode */
   }
+}
+
+function saveScrollAndReload() {
+  saveScroll();
   location.reload();
 }
 
@@ -276,6 +280,7 @@ function startEdit(el: HTMLElement, at?: { x: number; y: number }) {
   }
   el.classList.add('sf-editing');
   el.spellcheck = true;
+  if (f.kind === 'rich') document.execCommand('defaultParagraphSeparator', false, 'p');
   el.focus({ preventScroll: true });
   if (at && f.raw === null) caretAt(at.x, at.y);
   else {
@@ -322,7 +327,7 @@ function startEdit(el: HTMLElement, at?: { x: number; y: number }) {
   const count = f.max ? (ui('span', 'sf-count') as HTMLSpanElement) : null;
   if (count) bar.append(count);
   btn('Cancel', 'Cancel (Esc)', () => cancel());
-  btn('<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 8.5 3.2 3L13 4.5"/></svg><span>Done</span>', 'Save (Enter)', () => void commit(), 'sf-primary');
+  btn('<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 8.5 3.2 3L13 4.5"/></svg><span>Done</span>', f.kind === 'line' ? 'Save (Enter)' : 'Save (Ctrl+Enter)', () => void commit(), 'sf-primary');
   editing = { el, f, original, originalValue, bar, count, msg: null };
   place(bar, el, 'above');
   updateCount();
@@ -476,8 +481,14 @@ async function commit(): Promise<void> {
 
 // ------------------------------------------------------------------------------------------------ events
 
+// Where the pointer went down: some page scripts capture the pointer (the slideshow's drag), which turns the click's
+// target into their container; the element really clicked is the one under the pointer at pointerdown.
+let downTarget: Element | null = null;
+
 function onClick(e: MouseEvent) {
-  const t = e.target as Element | null;
+  let t = e.target as Element | null;
+  if (downTarget && t && t !== downTarget && t.contains(downTarget)) t = downTarget;
+  downTarget = null;
   if (!t || t.closest('.sf-ui')) return;
   if (editing && editing.el.contains(t)) {
     // inside the text being edited: links don't navigate; a photo in formatted text opens the photo panel
@@ -565,7 +576,8 @@ function onKey(e: KeyboardEvent) {
     if (f.kind === 'text') {
       // a new paragraph (a blank line in the stored text)
       e.preventDefault();
-      document.execCommand('insertHTML', false, e.shiftKey ? '<br>' : '<br><br>');
+      // marked so the paragraph break survives even when the browser later drops the second line break
+      document.execCommand('insertHTML', false, e.shiftKey ? '<br>' : '<br data-sf-p="1"><br>');
     }
     return;
   }
@@ -643,15 +655,15 @@ function addSpots() {
 }
 
 function restoreScroll() {
-  let y: string | null = null;
+  // back to where the editor was when the page reloads after a change (only a recent position, not an old visit)
+  let saved: { y: number; at: number } | null = null;
   try {
-    y = sessionStorage.getItem(SCROLL_KEY());
-    sessionStorage.removeItem(SCROLL_KEY());
+    saved = JSON.parse(sessionStorage.getItem(SCROLL_KEY()) ?? 'null') as { y: number; at: number } | null;
   } catch {
     /* private mode */
   }
-  if (y === null) return;
-  const to = Number(y);
+  if (!saved || Date.now() - saved.at > 15_000) return;
+  const to = saved.y;
   const go = () => scrollTo({ top: to, behavior: 'instant' as ScrollBehavior });
   go();
   requestAnimationFrame(go);
@@ -664,6 +676,7 @@ function init() {
   addStyles();
   addSpots();
   restoreScroll();
+  document.addEventListener('pointerdown', (e) => (downTarget = e.target as Element), true);
   document.addEventListener('click', onClick, true);
   document.addEventListener('keydown', onKey, true);
   document.addEventListener('paste', onPaste, true);
@@ -674,12 +687,16 @@ function init() {
     e.preventDefault();
     post({ t: 'toast', msg: 'Forms are not sent while you edit.' });
   }, true);
+  let st = 0;
   addEventListener('scroll', () => {
+    clearTimeout(st);
+    st = window.setTimeout(saveScroll, 200);
     if (editing) place(editing.bar, editing.el, 'above');
     else if (activeItem) place(itemBar, activeItem, 'corner');
     if (hot) place(tag, hot, 'above');
   }, { passive: true });
   addEventListener('message', onMessage);
+  addEventListener('pagehide', saveScroll);
   post({ t: 'ready', path: publicPath(), title: document.title });
 }
 
