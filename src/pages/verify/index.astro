@@ -1,4 +1,5 @@
 ---
+import Divider from '../../components/Divider.astro';
 import Base from '../../layouts/Base.astro';
 import PageIntro from '../../components/PageIntro.astro';
 import { loadPage } from '../../lib/pages';
@@ -42,6 +43,7 @@ const tel = telHref(settings.phone);
       </div>
     </template>
 
+    <Divider kind="diamond" />
     {hasBody && <div class="prose"><Content /></div>}
     <p class="muted prose small verify-note">
       A match means this certificate number is on record in our registry with the details shown. Compare them, and the

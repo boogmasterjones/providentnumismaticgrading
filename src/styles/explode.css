@@ -2,7 +2,7 @@
 /* ---------- exploded holder ---------- */
 /* --q: 0 exploded .. 1 assembled. Registered so it can transition; without JavaScript the holder shows assembled. */
 @property --q { syntax: '<number>'; inherits: true; initial-value: 1; }
-.explode { margin: 0; --q: 1; --o: calc(1 - var(--q)); transition: --q 1.3s cubic-bezier(0.65, 0, 0.25, 1) 0.15s; }
+.explode { margin: 0; --q: 1; --o: calc(1 - var(--q)); transition: --q 0.9s cubic-bezier(0.65, 0, 0.25, 1) 0.05s; }
 .js .explode:not(.in) { --q: 0; }
 .ex-scene { position: relative; height: 560px; perspective: 1500px; display: grid; place-items: center; }
 .ex-stack { position: relative; width: 250px; height: 380px; transform-style: preserve-3d; transform: rotateX(calc(var(--o) * 54deg)) rotateZ(calc(var(--o) * -34deg)) translateY(calc(var(--o) * 20px)); will-change: transform; }
@@ -17,7 +17,7 @@
 .exl-mid span { font-size: 10.5px; line-height: 1.25; }
 .exl-mid em { font-family: var(--font-heading); font-size: 12.5px; }
 .exl-mid strong { font: 600 24px/1 var(--font-heading); color: #2a2214; }
-.exl-seal { width: 22px; height: 22px; border-radius: 50%; background: conic-gradient(from calc(var(--scroll, 0) * 0.2deg), #e9d3a0, #b9c9b6, #a9b4d6, #d8b4c4, #e9d3a0); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6); }
+.exl-seal { width: 22px; height: 22px; border-radius: 50%; --foil-a: 0deg; animation: foilTurn 24s linear infinite; background: conic-gradient(from var(--foil-a), #e9d3a0, #b9c9b6, #a9b4d6, #d8b4c4, #e9d3a0); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6); }
 .ex-front { background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.02) 38%, rgba(255, 255, 255, 0.08) 66%, rgba(255, 255, 255, 0.02)); border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: inset 0 0 0 7px rgba(255, 255, 255, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.45); }
 .ex-legend { list-style: none; margin: 0; padding: 0; position: absolute; right: 0; top: 50%; transform: translateY(-50%); display: grid; gap: 26px; opacity: calc(var(--o) * 1.5); }
 .ex-legend li { font: 500 0.66rem/1 var(--font-body); letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-muted); display: flex; align-items: center; gap: 10px; transform: translateX(calc(var(--o) * 0px + var(--q) * 20px)); }

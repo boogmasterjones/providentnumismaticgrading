@@ -1,4 +1,5 @@
 ---
+import Divider from '../components/Divider.astro';
 import '../styles/coin-engine.css';
 import '../styles/home.css';
 import Base from '../layouts/Base.astro';
@@ -6,6 +7,9 @@ import Mark from '../components/Mark.astro';
 import Prose from '../components/Prose.astro';
 import LinkArrow from '../components/LinkArrow.astro';
 import HolderExplode from '../components/HolderExplode.astro';
+import Reel from '../components/Reel.astro';
+import Carousel from '../components/Carousel.astro';
+import Notable from '../components/Notable.astro';
 import { loadPage } from '../lib/pages';
 import { gallery, settings } from '../lib/site';
 import { roman } from '../lib/text';
@@ -16,8 +20,22 @@ const steps = process.data.sections ?? [];
 const words = settings.siteName.split(' ');
 const first = words[0];
 const rest = words.slice(1).join(' ');
-// two captions at most: the film is a short scrub (about 1.5 screens of scroll), not a long story
-const film = (data.film ?? []).slice(0, 2);
+// Two footage panels (after patek.com): each clip simply plays while it is on screen. Captions come from the CMS
+// (Pages → Home → Film): "One-line summary" is the small line above, "Title" the one line over the footage.
+// Stock footage from Pexels (see README), dimmed and gold-graded in CSS. Phones get the smaller rendition.
+const clips = [
+  { src: '/media/film/5651766-hd_1280_720_25fps.mp4', small: '/media/film/5651766-sd_640_360_25fps.mp4', poster: '/media/film/silver-poster.webp', start: 0.15, end: 7.35, eyebrow: 'Raking light' },
+  { src: '/media/film/7348172-sd_960_506_30fps.mp4', small: undefined, poster: '/media/film/bronze-poster.webp', start: 3, end: 17, eyebrow: 'Recorded and sealed' },
+];
+const reels = (data.film ?? []).slice(0, clips.length).map((f, i) => ({
+  ...clips[i],
+  index: i,
+  title: f.title,
+  eyebrow: f.summary || clips[i].eyebrow,
+}));
+
+// Carousel photos: Pages → Home → Home carousel (falls back to the Photo library, then to marked placeholders).
+const slides = (data.carousel?.length ? data.carousel : gallery.photos).filter((s) => s.image);
 
 // Organization only: no people, no prices (client request, 2026-11-02).
 const jsonLd = {
@@ -31,40 +49,44 @@ const jsonLd = {
 };
 ---
 <Base title={data.metaTitle} description={data.metaDescription} home jsonLd={jsonLd}>
-  <!-- HERO: a brief hold (under half a screen) while the title lifts away and the frame closes in (after rolex.com) -->
-  <section class="hero-pin" data-progress="pin" aria-labelledby="hero-title">
-    <div class="hero">
-      <div class="hero-media" aria-hidden="true">
-        <div class="river" id="river"></div>
-        <div class="rosette turn hero-rosette"></div>
-        <div class="veil"></div>
+  <!-- HERO: static; the title sets itself once on load (under a second) and the page scrolls on normally -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-media" aria-hidden="true">
+      <div class="river" id="river"></div>
+      <div class="rosette turn hero-rosette"></div>
+      <div class="veil"></div>
+    </div>
+    <div class="hero-copy">
+      {data.eyebrow && <p class="eyebrow center hero-in" style="--d:0s">{data.eyebrow}</p>}
+      <h1 class="wordmark" id="hero-title">
+        <span class="wm-top hero-in" style="--d:.05s">{first}</span>
+        {rest && <span class="wm-rest hero-in" style="--d:.15s">{rest}</span>}
+      </h1>
+      <div class="deco-rule center hero-in in" style="--d:.2s" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p class="hero-statement hero-in" style="--d:.25s">{data.heading}</p>
+      <div class="links hero-links hero-in" style="--d:.3s">
+        <LinkArrow href="/process">{data.primaryButton || 'Our process'}</LinkArrow>
+        <LinkArrow href="/verify">{data.secondaryButton || 'Verify a certificate'}</LinkArrow>
       </div>
-      <div class="hero-frame deco-frame" aria-hidden="true"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
-      <div class="hero-copy">
-        {data.eyebrow && <p class="eyebrow center hero-in" style="--d:.2s">{data.eyebrow}</p>}
-        <h1 class="wordmark" id="hero-title">
-          <span class="wm-top hero-in" style="--d:.35s">{first}</span>
-          {rest && <span class="wm-rest hero-in" style="--d:.6s">{rest}</span>}
-        </h1>
-        <div class="deco-rule center hero-in in" style="--d:.8s" aria-hidden="true"><i></i><i></i><i></i></div>
-        <p class="hero-statement hero-in" style="--d:.95s">{data.heading}</p>
-        <div class="links hero-links hero-in" style="--d:1.15s">
-          <LinkArrow href="/process">{data.primaryButton || 'Our process'}</LinkArrow>
-          <LinkArrow href="/verify">{data.secondaryButton || 'Verify a certificate'}</LinkArrow>
-        </div>
-      </div>
-      <p class="hero-second" aria-hidden="true">Examined <i></i> Recorded <i></i> Sealed</p>
     </div>
   </section>
 
-  <!-- SCOPE -->
+  <!-- PHOTOS: slow carousel (Pages → Home → Home carousel); marked placeholders until real photos are added -->
+  <Carousel slides={slides} />
+
+  <!-- NOTABLE COINS (collection "Notable coins"); marked placeholders until real coins are added -->
+  <Notable title={data.notableTitle} intro={data.notableIntro} />
+
+  <!-- FOOTAGE I (after patek.com: a full-screen clip that plays while on screen; nothing pins) -->
+  {reels[0] && <Reel {...reels[0]} />}
+
+  <!-- WHAT WE GRADE (short) -->
   <section class="sec scope rake" aria-labelledby="scope-title">
     <div class="container">
       <div class="sec-head">
         <p class="eyebrow">What we grade</p>
         <h2 id="scope-title" class="rake-t">{data.gradeTitle}</h2>
         <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
-        {data.gradeIntro && <p class="lead">{data.gradeIntro}</p>}
       </div>
       <ul class="scope-list">
         {(data.grades ?? []).map((g, i) => (
@@ -78,30 +100,10 @@ const jsonLd = {
     </div>
   </section>
 
-  <!-- FILM: scroll scrubs through footage (after patek.com's scroll-driven video) -->
-  {film.length > 0 && (
-    <section class="film" data-progress="pin" aria-label="How a coin is examined" style={`--n:${film.length}`}>
-      <div class="film-stage">
-        <canvas class="film-canvas" data-scrub="/media/scrub/coins/" data-frames="80" aria-hidden="true"></canvas>
-        <div class="film-grade" aria-hidden="true"></div>
-        <div class="film-frame deco-frame" aria-hidden="true"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
-        <ol class="film-captions">
-          {film.map((f, i) => (
-            <li style={`--i:${i}`}>
-              <span class="numeral">{roman(i + 1)}</span>
-              <h2>{f.title}</h2>
-              <Prose text={f.text} />
-            </li>
-          ))}
-        </ol>
-        <div class="film-meter" aria-hidden="true"><span></span></div>
-      </div>
-    </section>
-  )}
-
-  <!-- PROCESS AT A GLANCE -->
+  <!-- THE NINE STEPS -->
   <section class="sec glance rake" aria-labelledby="glance-title">
     <div class="container">
+      <Divider kind="micro" class="tight" />
       <div class="glance-grid">
         <div class="sec-head">
           <p class="eyebrow">Our process</p>
@@ -125,34 +127,10 @@ const jsonLd = {
     </div>
   </section>
 
-  <!-- APPROACH -->
-  <section class="sec approach rake" aria-labelledby="approach-title">
-    <div class="sunburst approach-sun" aria-hidden="true"></div>
-    <div class="container">
-      <div class="approach-grid">
-        <div>
-          <p class="eyebrow">Our approach</p>
-          <h2 id="approach-title" class="rake-t">{data.approachTitle}</h2>
-          <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
-        </div>
-        <div class="approach-text rv">
-          <Prose text={data.approachText} />
-          <LinkArrow href="/why-provident">Why Provident</LinkArrow>
-        </div>
-      </div>
-      <ul class="principles">
-        {(data.principles ?? []).map((p, i) => (
-          <li class={`rv draw d${i}`}>
-            <Mark name={p.mark} size={40} />
-            <h3>{p.title}</h3>
-            <Prose text={p.text} />
-          </li>
-        ))}
-      </ul>
-    </div>
-  </section>
+  <!-- FOOTAGE II -->
+  {reels[1] && <Reel {...reels[1]} />}
 
-  <!-- HOLDER: an exploded view that assembles on its own when it comes into view (after a watch movement) -->
+  <!-- HOLDER (compact): the exploded view assembles on its own when it comes into view (after a watch movement) -->
   <section class="sec holder-sec rake" aria-labelledby="holder-title">
     <div class="container holder-grid">
       <HolderExplode />
@@ -166,9 +144,10 @@ const jsonLd = {
     </div>
   </section>
 
-  <!-- VERIFY -->
+  <!-- VERIFY (compact) -->
   <section class="sec verify-sec rake" aria-labelledby="verify-title">
     <div class="container">
+      <Divider kind="rosette" class="tight" />
       <div class="cert-panel foil verify-panel deco-frame draw">
         <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
         <div class="rosette" aria-hidden="true"></div>
@@ -180,7 +159,7 @@ const jsonLd = {
               <h2 id="verify-title" class="rake-t">{data.verifyTitle}</h2>
             </div>
           </div>
-          {data.verifyText && <p class="lead">{data.verifyText}</p>}
+          {data.verifyText && <p class="verify-text">{data.verifyText}</p>}
           <form class="verify-form" action="/verify" method="get" role="search">
             <label class="sr-only" for="home-cert">Certificate number</label>
             <div class="inrow">
@@ -195,42 +174,12 @@ const jsonLd = {
   </section>
 
   {hasBody && <section class="sec"><div class="container prose"><Content /></div></section>}
-
-  {gallery.photos.length > 0 && (
-    <section class="sec" aria-labelledby="gallery-heading">
-      <div class="container">
-        <h2 id="gallery-heading">From the grading room</h2>
-        <div class="photo-grid">
-          {gallery.photos.map((p) => (
-            <figure>
-              <img src={p.image} alt={p.alt} loading="lazy" decoding="async" />
-              {p.caption && <figcaption class="muted">{p.caption}</figcaption>}
-            </figure>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
-
-  <!-- CODA -->
-  <section class="coda home-coda rake" aria-labelledby="coda-title">
-    <div class="sunburst coda-sun" aria-hidden="true"></div>
-    <div class="rosette turn" aria-hidden="true"></div>
-    <div class="container">
-      <h2 id="coda-title" class="rake-t">{data.closingTitle}</h2>
-      <div class="deco-rule center" aria-hidden="true"><i></i><i></i><i></i></div>
-      {data.closingText && <p>{data.closingText}</p>}
-      <div class="links">
-        <LinkArrow href="/submit">Submissions</LinkArrow>
-        <LinkArrow href="/contact">Contact</LinkArrow>
-      </div>
-    </div>
-  </section>
 </Base>
 
 <script>
   import '../scripts/coin-engine.js';
-  import '../scripts/scrub';
+  import '../scripts/film';
+  import '../scripts/carousel';
 
   // The hero's coin river: slow, faint, purely ambient. No pointer effects, no flips.
   const host = document.getElementById('river');

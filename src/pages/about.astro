@@ -1,4 +1,5 @@
 ---
+import Divider from '../components/Divider.astro';
 import Base from '../layouts/Base.astro';
 import PageIntro from '../components/PageIntro.astro';
 import Features from '../components/Features.astro';
@@ -16,6 +17,7 @@ const services = data.sections ?? [];
         <div class="prose about-prose rv"><Content /></div>
       </div>
     )}
+    <Divider kind="micro" />
     {services.length > 0 && (
       <section class="about-services rake" aria-labelledby="services-title">
         <p class="eyebrow">What we offer</p>

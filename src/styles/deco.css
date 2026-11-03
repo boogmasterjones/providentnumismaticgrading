@@ -1,8 +1,8 @@
 /*
  * deco.css: the decorative system. References: security printing (guilloche rosettes, microtext, holographic foil),
  * Art Deco framing (stepped corners, sunbursts), raking light across relief, and title-sequence reveals.
- * Everything here is static or animates transform/opacity/background-position only. Scroll-linked values arrive as
- * CSS variables from src/scripts/scrollfx.ts (--p: 0..1 progress through the two home scroll sections; --scroll).
+ * Everything here is static or animates transform/opacity/background-position only, and nothing follows the scroll
+ * position. Reveals are quick (under a second) and start as soon as an element enters view. Shine: shine.css.
  */
 
 /* microtext: a line of tiny repeated lettering, as on banknote borders */
@@ -21,7 +21,7 @@
 .deco-frame > .tr { right: 0; top: 0; transform: scaleX(-1); }
 .deco-frame > .bl { left: 0; bottom: 0; transform: scaleY(-1); }
 .deco-frame > .br { right: 0; bottom: 0; transform: scale(-1); }
-.js .deco-frame.draw > .c { opacity: 0; transform-origin: center; transition: opacity 1.6s var(--ease) 0.3s; }
+.js .deco-frame.draw > .c { opacity: 0; transform-origin: center; transition: opacity 0.5s var(--ease) 0.1s; }
 .js .deco-frame.draw.in > .c { opacity: 0.8; }
 
 /* sunburst: fine rays from a point, as on deco medals and posters */
@@ -34,20 +34,25 @@
 .deco-rule i:nth-child(2) { width: 16px; opacity: 0.6; }
 .deco-rule i:nth-child(3) { width: 6px; opacity: 0.35; }
 .deco-rule.center { justify-content: center; }
-.js .deco-rule i { transform: scaleX(0); transform-origin: left; transition: transform 1.4s var(--ease); }
+.js .deco-rule i { transform: scaleX(0); transform-origin: left; transition: transform 0.6s var(--ease); }
 .js .in .deco-rule i, .js .deco-rule.in i { transform: none; }
-.js .deco-rule i:nth-child(2) { transition-delay: 0.2s; }
-.js .deco-rule i:nth-child(3) { transition-delay: 0.35s; }
+.js .deco-rule i:nth-child(2) { transition-delay: 0.08s; }
+.js .deco-rule i:nth-child(3) { transition-delay: 0.16s; }
+/* once drawn, a bright glint runs along the gold rule */
+.deco-rule i { position: relative; overflow: hidden; }
+.deco-rule i::after { content: ""; position: absolute; inset: -2px 0; background: linear-gradient(90deg, transparent, rgba(255, 252, 240, 0.95) 50%, transparent); width: 40%; transform: translateX(-120%); opacity: 0; }
+.js .in .deco-rule i::after, .js .deco-rule.in i::after { animation: ruleGlint 0.7s var(--flick) 0.55s both; }
+@keyframes ruleGlint { 0% { opacity: 1; transform: translateX(-120%); } 100% { opacity: 1; transform: translateX(260%); } }
 
-/* raking light: when a section reveals, light sweeps once across its title, like light across a coin's relief */
-.rake .rake-t { background: linear-gradient(100deg, var(--color-text) 0%, var(--color-text) 40%, #fff6dc 48%, #e3cb94 51%, var(--color-text) 60%, var(--color-text) 100%); background-size: 300% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
-.js .rake.in .rake-t { animation: rake 2.6s var(--ease) 0.25s both; }
-@keyframes rake { from { background-position: 100% 0; } to { background-position: 0 0; } }
+/* raking light: when a section reveals, a crisp, bright band of light flicks once across its title, like a mirror
+   catching the light (sweepText in shine.css) */
+.rake .rake-t { background: linear-gradient(105deg, transparent 42%, rgba(255, 246, 220, 0.2) 46%, #fffaf0 50%, rgba(255, 246, 220, 0.2) 54%, transparent 58%) no-repeat, linear-gradient(var(--color-text), var(--color-text)); background-size: 250% 100%, 100% 100%; background-position: 160% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
+.js .rake.in .rake-t { animation: sweepText 0.9s var(--flick) 0.15s both; }
 
 /* line drawings that draw themselves once (stroke dash), like an engraver's line */
-.js .draw .mark path, .js .draw .mark circle, .js .draw .mark ellipse, .js .draw .mark rect { stroke-dasharray: 320; stroke-dashoffset: 320; transition: stroke-dashoffset 2.6s var(--ease); }
-.js .draw svg.engrave [pathLength] { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 2.2s var(--ease); }
-.js .draw svg.engrave [pathLength]:not(:first-child) { transition-delay: 0.6s; }
+.js .draw .mark path, .js .draw .mark circle, .js .draw .mark ellipse, .js .draw .mark rect { stroke-dasharray: 320; stroke-dashoffset: 320; transition: stroke-dashoffset 0.9s var(--ease); }
+.js .draw svg.engrave [pathLength] { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.7s var(--ease); }
+.js .draw svg.engrave [pathLength]:not(:first-child) { transition-delay: 0.25s; }
 .js .draw.in .mark path, .js .draw.in .mark circle, .js .draw.in .mark ellipse, .js .draw.in .mark rect, .js .draw.in svg.engrave [pathLength] { stroke-dashoffset: 0; }
 
 /* medallion: a symbol inside a fine double ring, like a struck medal */
@@ -58,10 +63,13 @@
 .medallion .mark { width: 50px; height: 50px; }
 @media (max-width: 900px) { .medallion { width: 64px; height: 64px; } .medallion .mark { width: 36px; height: 36px; } }
 
-/* holographic foil: a soft spectral sheen that drifts with scroll (--scroll from scrollfx.ts) */
+/* holographic foil: a soft spectral sheen that drifts slowly on its own (time-based, never tied to scroll) */
 .foil { position: relative; overflow: hidden; isolation: isolate; }
-.foil::after { content: ''; position: absolute; inset: -50%; z-index: 1; pointer-events: none; mix-blend-mode: soft-light; opacity: 0.55; background: linear-gradient(115deg, transparent 30%, rgba(255, 214, 160, 0.55) 40%, rgba(180, 230, 210, 0.45) 46%, rgba(170, 190, 255, 0.45) 52%, rgba(255, 190, 220, 0.4) 58%, transparent 68%); transform: translateX(calc(-30% + var(--scroll, 0) * 0.04%)) rotate(0.001deg); }
-.foil-seal { width: 64px; height: 64px; border-radius: 50%; position: relative; background: conic-gradient(from calc(var(--scroll, 0) * 0.15deg), #e9d3a0, #b9c9b6, #a9b4d6, #d8b4c4, #e9d3a0, #c9a45c, #e9d3a0); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 4px 18px -6px rgba(0, 0, 0, 0.8); }
+.foil::after { content: ''; position: absolute; inset: -50%; z-index: 1; pointer-events: none; mix-blend-mode: soft-light; opacity: 0.55; background: linear-gradient(115deg, transparent 30%, rgba(255, 214, 160, 0.55) 40%, rgba(180, 230, 210, 0.45) 46%, rgba(170, 190, 255, 0.45) 52%, rgba(255, 190, 220, 0.4) 58%, transparent 68%); transform: translateX(-30%) rotate(0.001deg); animation: foilDrift 9s ease-in-out infinite alternate; }
+@keyframes foilDrift { to { transform: translateX(10%) rotate(0.001deg); } }
+@property --foil-a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes foilTurn { to { --foil-a: 360deg; } }
+.foil-seal { width: 64px; height: 64px; border-radius: 50%; position: relative; animation: foilTurn 24s linear infinite; background: conic-gradient(from var(--foil-a), #e9d3a0, #b9c9b6, #a9b4d6, #d8b4c4, #e9d3a0, #c9a45c, #e9d3a0); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 4px 18px -6px rgba(0, 0, 0, 0.8); }
 .foil-seal::after { content: ''; position: absolute; inset: 7px; border-radius: 50%; background: url('/guilloche.svg') center / 130% no-repeat; opacity: 0.55; mix-blend-mode: multiply; }
 
 /* certificate-style panel: guilloche ground, double hairline and a microtext border */

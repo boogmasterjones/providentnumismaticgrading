@@ -1,0 +1,46 @@
+---
+/**
+ * A full-bleed footage panel (after patek.com): the clip plays muted and looping while the panel is on screen and
+ * pauses when it leaves (src/scripts/film.ts). Nothing pins and nothing follows the scroll position. The footage is
+ * dimmed and gold-graded in CSS (home.css, "reel"); a caption (eyebrow + one line) fades in over it.
+ */
+import { roman } from '../lib/text';
+
+interface Props {
+  src: string;
+  small?: string;
+  poster: string;
+  start?: number;
+  end?: number;
+  eyebrow: string;
+  title: string;
+  index: number;
+}
+const { src, small, poster, start, end, eyebrow, title, index } = Astro.props;
+const id = `reel-${index + 1}`;
+---
+<section class={`reel reel-${index + 1}`} aria-labelledby={id}>
+  <video
+    class="reel-video"
+    muted
+    loop
+    playsinline
+    autoplay
+    preload="none"
+    poster={poster}
+    data-src={src}
+    data-src-small={small}
+    data-start={start}
+    data-end={end}
+    aria-hidden="true"
+    tabindex="-1"
+    disablepictureinpicture
+  ></video>
+  <div class="reel-grade" aria-hidden="true"></div>
+  <div class="rosette turn reel-rosette" aria-hidden="true"></div>
+  <div class="reel-frame deco-frame draw" aria-hidden="true"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
+  <div class="reel-caption rv">
+    <p class="eyebrow"><span class="numeral">{roman(index + 1)}</span>{eyebrow}</p>
+    <h2 id={id}>{title}</h2>
+  </div>
+</section>

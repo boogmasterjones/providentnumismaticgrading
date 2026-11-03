@@ -1,0 +1,54 @@
+/*
+ * shine.css: light catching polished metal, like a jeweller's window (owner, 2026-11-02: "it needs shine/flash/
+ * sparkle"). Classy, short and bright: near-white highlights with a warm tint on a dark ground, 300–900ms, eased like
+ * a flick of light. Transform/opacity on pseudo-elements wherever possible; text sweeps move a background band.
+ *  - --metal: gold that reads as metal (deep bronze to near-white highlights), used for gold type.
+ *  - .glint: the four-point specular star placed by src/scripts/shine.ts (one at a time, every few seconds).
+ *  - .sweep-text: a crisp light band across gold or ivory type (headings as they enter, the hero title on load).
+ *  - .shine: a bright band across a box on hover/focus (and once on entering view with .shine-enter).
+ *  - .proof: a proof-coin flash across a coin's field as it enters view and when its card is hovered.
+ * shine.ts adds .flick to play a sweep or flash once (and removes it when it ends, so it can play again).
+ */
+:root {
+  --metal: linear-gradient(180deg, #fff8e2 0%, #f3dc9c 18%, #d4ad62 40%, #9a7130 62%, #6e4c1c 74%, #c99d52 88%, #fbe9b8 100%);
+  --flash: rgba(255, 250, 232, 0.95);
+  --flick: cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+/* gold type with real contrast */
+.metal { background: var(--metal); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* ---------- specular glint ---------- */
+.glint { position: absolute; z-index: 60; width: 34px; height: 34px; margin: -17px 0 0 -17px; pointer-events: none; opacity: 0; animation: glint 0.8s var(--flick) both; }
+.glint::before, .glint::after { content: ''; position: absolute; left: 50%; top: 50%; border-radius: 50%; }
+/* the four points: two thin crossed beams, brightest at the centre */
+.glint::before { width: 100%; height: 2px; margin: -1px 0 0 -50%; background: linear-gradient(90deg, transparent, var(--flash) 45%, #fff 50%, var(--flash) 55%, transparent); box-shadow: 0 0 6px rgba(255, 236, 190, 0.7); }
+.glint::after { width: 2px; height: 100%; margin: -50% 0 0 -1px; background: linear-gradient(180deg, transparent, var(--flash) 45%, #fff 50%, var(--flash) 55%, transparent); box-shadow: 0 0 6px rgba(255, 236, 190, 0.7); }
+.glint i { position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, rgba(255, 240, 200, 0.85) 35%, rgba(255, 210, 140, 0) 70%); }
+.glint.small { width: 22px; height: 22px; margin: -11px 0 0 -11px; }
+@keyframes glint {
+  0% { opacity: 0; transform: scale(0.2) rotate(-30deg); }
+  35% { opacity: 1; transform: scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: scale(0.35) rotate(25deg); }
+}
+
+/* ---------- light sweep across type ---------- */
+/* two layers: a sharp near-white band (moves) over the type's own colour (stays) */
+.sweep-text { --base: linear-gradient(var(--color-text), var(--color-text)); background: linear-gradient(105deg, transparent 42%, rgba(255, 246, 220, 0.2) 46%, #fffaf0 50%, rgba(255, 246, 220, 0.2) 54%, transparent 58%) no-repeat, var(--base); background-size: 250% 100%, 100% 100%; background-position: 160% 0, 0 0; -webkit-background-clip: text; background-clip: text; color: transparent; }
+.sweep-text.metal, .metal .sweep-text { --base: var(--metal); }
+@keyframes sweepText { from { background-position: 160% 0, 0 0; } to { background-position: -60% 0, 0 0; } }
+.js .rake.in .sweep-text, .sweep-text.sweep-now { animation: sweepText 0.9s var(--flick) 0.15s both; }
+
+/* ---------- light sweep across a box (buttons, cards, gold borders) ---------- */
+.shine, .btn, .header-contact { position: relative; overflow: hidden; }
+.shine::before, .btn::before, .header-contact::before { content: ''; position: absolute; top: -20%; bottom: -20%; left: 0; width: 45%; z-index: 2; pointer-events: none; background: linear-gradient(100deg, transparent 0%, rgba(255, 244, 214, 0) 30%, rgba(255, 248, 228, 0.55) 48%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 248, 228, 0.55) 52%, rgba(255, 244, 214, 0) 70%, transparent 100%); transform: translateX(-160%) skewX(-18deg); opacity: 0; }
+.shine.flick::before, .btn.flick::before, .header-contact.flick::before { animation: sweepBox 0.75s var(--flick) both; }
+.btn::before, .header-contact::before { width: 35%; background: linear-gradient(100deg, transparent 20%, rgba(255, 248, 228, 0.35) 46%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 248, 228, 0.35) 54%, transparent 80%); }
+@keyframes sweepBox { 0% { opacity: 1; transform: translateX(-160%) skewX(-18deg); } 100% { opacity: 1; transform: translateX(330%) skewX(-18deg); } }
+
+/* ---------- proof-coin flash ---------- */
+/* a round coin field (or a holder window): a bright, soft-edged band turns across it, then a brief lift of light */
+.proof { position: relative; isolation: isolate; }
+.proof::after { content: ''; position: absolute; inset: 0; z-index: 3; border-radius: inherit; pointer-events: none; mix-blend-mode: screen; background: linear-gradient(120deg, transparent 30%, rgba(255, 240, 205, 0.25) 42%, rgba(255, 252, 240, 0.9) 50%, rgba(255, 240, 205, 0.25) 58%, transparent 70%) no-repeat; background-size: 300% 100%; background-position: 130% 0; opacity: 0; }
+.proof.flick::after { animation: proof 0.85s var(--flick) 0.1s both; }
+@keyframes proof { 0% { opacity: 0; background-position: 130% 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; background-position: -30% 0; } }

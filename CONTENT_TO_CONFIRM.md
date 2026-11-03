@@ -61,10 +61,9 @@ removal.
 - [ ] "Signature delivery is required for orders valued over $750." *Their site* ("orders over $750"; is this the return shipment?). This is the only number left on the site.
 - [ ] "We let you know when your coins are on their way." *Standard practice.*
 
-**Home page film captions** (over the stock footage)
-- [ ] "Examined under raking light": light drawn low across the surface to find wear, hairlines, tool marks. *Standard practice* (imaging and examination under controlled light; their site says "cutting edge technology & equipment" for photography and authenticity).
-- [ ] "Lettering, rims and fields are read closely, against what is known for the type."
-- [ ] "Only once a coin has been authenticated, attributed and graded is it sealed and given its certificate number."
+**Home page footage captions** (one line over each stock clip)
+- [ ] "Raking light · Examined under raking light." *Standard practice* (imaging and examination under controlled light; their site says "cutting edge technology & equipment" for photography and authenticity).
+- [ ] "Recorded and sealed · Then recorded, and sealed." (Only once a coin has been authenticated, attributed and graded is it sealed and given its certificate number.)
 - [ ] The footage is stock (Pexels, modern coins), not his grading room. Fine to keep, or replace with his own.
 
 ## 2. Grading standards page (/grading-standards)
@@ -144,4 +143,17 @@ Anything about **Provident's own practice** needs a yes:
 ## 9. Photos and footage
 
 - [ ] Real photos only: his slabs, labels and coins. **Never a photo of him.** No AI images.
-- [ ] The coins in the hero river and the holder drawing are drawn by the site; the film frames are Pexels stock footage (see README for the clips and licence).
+- [ ] The coins in the hero river and the holder drawing are drawn by the site; the footage panels are Pexels stock video (see README for the clips and licence).
+- [ ] The two full-screen footage panels on the home page are Pexels stock video (silver coins in macro; bronze coins on
+  a turntable). Real coins, but not his. Replace with his own footage when he has it (README, "Footage").
+- [ ] **Carousel photos (home, right under the headline).** No photos yet, so it shows three slides marked
+  "Placeholder · Photo coming soon". Needs his own photos: slabs, coins, labels, his workspace and tools; not his face.
+  He can add them himself in the editor: Pages → Home → Home carousel (photo, description, optional caption). Wide
+  (landscape) photos work best.
+- [ ] **Notable coins (home, under the carousel).** His claim to fame: the best coins he has graded. Shows three cards
+  marked "Placeholder · Coming soon: notable coin" until real entries exist. For each coin we need a photo (obverse,
+  optional reverse), the coin as written on the label, the grade, the certificate number (the card links to
+  /verify?cert=…) and an optional one-line note. Editor: Site → Notable coins. **Never invent a coin, a grade, a
+  certificate number or a provenance.** Each certificate should also verify on /verify before it goes up.
+- [ ] Notable coins heading and intro: "Notable coins." / "A selection from our registry, each with its certificate
+  open to anyone." (draft; Pages → Home).

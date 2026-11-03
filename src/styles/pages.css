@@ -18,7 +18,7 @@
 .scale-nums span:last-child { transform: translateX(-100%); }
 .scale-list { list-style: none; margin: var(--space-4) 0 0; padding: 0; border-top: 1px solid var(--color-border); }
 .scale-list li { display: grid; grid-template-columns: 6rem 4rem 14rem minmax(0, 1fr); gap: var(--space-3); align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--color-border); position: relative; }
-.scale-list li::before { content: ''; position: absolute; left: var(--x); top: -4px; width: 7px; height: 7px; border: 1px solid var(--gold); background: var(--color-bg); transform: rotate(45deg); opacity: 0; transition: opacity 1s var(--ease) 0.4s; }
+.scale-list li::before { content: ''; position: absolute; left: var(--x); top: -4px; width: 7px; height: 7px; border: 1px solid var(--gold); background: var(--color-bg); transform: rotate(45deg); opacity: 0; transition: opacity 0.4s var(--ease) 0.15s; }
 .js .scale-list li.in::before { opacity: 1; }
 .scale-range { font: 500 1.6rem/1 var(--font-heading); color: var(--gold-hi); font-variant-numeric: lining-nums; }
 .scale-code { font: 500 0.82rem/1 var(--font-caps); letter-spacing: 0.14em; color: var(--color-text); }

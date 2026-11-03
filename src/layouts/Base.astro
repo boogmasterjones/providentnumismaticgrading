@@ -3,6 +3,8 @@ import '../styles/theme.css';
 import '../styles/global.css';
 import '../styles/deco.css';
 import '../styles/pages.css';
+import '../styles/shine.css';
+import '../styles/detail.css';
 import BrandMark from '../components/BrandMark.astro';
 import { settings, telHref, mailtoHref } from '../lib/site';
 import { NAV, FOOTER_NAV } from '../lib/nav';
@@ -110,6 +112,7 @@ const current = (href: string) => (path === href || path.startsWith(href + '/') 
             </ul>
           </div>
         </div>
+        <div class="footer-seal" aria-hidden="true"><i></i></div>
         <div class="footer-legal">
           <span>© {year} {settings.siteName}</span>
           <nav aria-label="Legal">

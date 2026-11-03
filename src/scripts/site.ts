@@ -4,7 +4,7 @@
  * The coin engine loads only on pages that draw coins.
  */
 document.documentElement.classList.add('js');
-import './scrollfx';
+import './shine';
 
 const header = document.querySelector<HTMLElement>('.site-header');
 if (header) {
@@ -42,20 +42,22 @@ if (header) {
   });
 }
 
-// Reveal on scroll, once. Elements with .rv rise and fade; .rake sections get a sweep of raking light; .draw engraves
-// its symbols; .assemble (the exploded holder) puts itself together. Time-based, never tied to scroll position.
+// Reveal once, quickly, as soon as an element starts entering view. Elements with .rv rise and fade; .rake sections
+// get a flick of light across the title; .draw engraves its symbols; .assemble (the exploded holder) puts itself
+// together. Time-based (all under a second), never tied to scroll position. Anything already scrolled past (a jump
+// to an anchor, a restored scroll position) is revealed at once, so no content stays invisible.
 const reveal = document.querySelectorAll('.rv, .rake, .draw, .assemble');
 if ('IntersectionObserver' in window) {
   const io = new IntersectionObserver(
     (entries) => {
       for (const e of entries) {
-        if (e.isIntersecting) {
+        if (e.isIntersecting || e.boundingClientRect.bottom < 0) {
           e.target.classList.add('in');
           io.unobserve(e.target);
         }
       }
     },
-    { rootMargin: '0px 0px -8% 0px' },
+    { rootMargin: '0px 0px -6% 0px' },
   );
   reveal.forEach((el) => io.observe(el));
 } else {

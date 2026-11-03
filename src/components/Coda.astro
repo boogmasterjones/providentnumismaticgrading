@@ -1,10 +1,12 @@
 ---
 /** A closing band for inner pages: a statement, a deco rule and one or two quiet links. */
 import LinkArrow from './LinkArrow.astro';
+import Divider from './Divider.astro';
 interface Props { title: string; text?: string; links?: { href: string; label: string }[] }
 const { title, text, links = [] } = Astro.props;
 ---
 <section class="coda rake page-coda">
+  <Divider kind="rosette" />
   <div class="sunburst coda-sun" aria-hidden="true"></div>
   <h2 class="rake-t">{title}</h2>
   <div class="deco-rule center" aria-hidden="true"><i></i><i></i><i></i></div>

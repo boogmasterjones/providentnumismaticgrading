@@ -22,7 +22,7 @@ on the coin and the service and are quoted per submission ("coins don't work tha
 
 | Page | Address | Editable in Keystatic as |
 |---|---|---|
-| Home | `/` | Pages → Home (headline, links, four fields, film captions, approach and principles, holder, verify and closing text) |
+| Home | `/` | Pages → Home (headline, links, carousel photos, notable-coins heading, four fields, footage captions, holder, verify); Site → Notable coins |
 | Our process (9 steps) | `/process` | Pages → Our process (Steps) |
 | Grading standards (1–70 scale, details grades, designations, ancients, label) | `/grading-standards` | Pages → Grading standards (the scale rows and Sections) |
 | The holder and label | `/holder` | Pages → The holder and label |
@@ -45,47 +45,81 @@ and `[text](/path)` links.
 
 Dark, warm ivory and a restrained gold; Cormorant Garamond (display), Cinzel (wordmark and numerals), Inter (text).
 Approved references (owner, 2026-11-02): security printing, Art Deco, coin engraving, raking light, film titles,
-watch movements, plus two effects from patek.com and rolex.com (below). No loupe, no hover flips, no pointer-driven
-toys. **Animations always play** (owner's rule: no reduced-motion opt-out). Coins never flip, so they never show an edge.
-**Two scroll-driven moments on the whole site, both short** (owner, 2026-11-02: too many scroll stories, too long):
-the hero hold and the film scrub. Nothing else pins or maps scroll position; everything else reveals once on entering
-view.
+watch movements, and patek.com's footage panels (below). No loupe, no hover flips, no pointer-driven toys.
+**Animations always play** (owner's rule: no reduced-motion opt-out). Coins never flip, so they never show an edge.
+
+**Nothing pins and nothing follows the scroll position, anywhere** (owner, 2026-11-02: the scroll stories were "long
+and annoying"; do them like patek.com). The page scrolls normally the whole time. Footage simply plays while it is on
+screen; everything else reveals quickly (about 0.5 s, small stagger) as soon as it starts entering view, and line
+drawings finish within a second. Only the header is sticky. **Shine** (owner: "it needs shine/flash/sparkle"):
+short, bright, classy accents, like light catching polished metal in a jeweller's window.
+
+**Home, in order:** hero → photo carousel → notable coins → footage I → what we grade → the nine steps → footage II →
+holder and label (compact) → verify (compact) → footer.
 
 | Effect | Where | How |
 |---|---|---|
-| Hero hold-and-release (after rolex.com's opening scroll: a brief hold while the headline lifts away, then the page moves on) | Home hero | `.hero-pin` is 140% of the screen tall, so the sticky hero holds for only 40% of a screen. As you scroll, the title lifts and fades, the coin river pushes in and darkens, an Art Deco frame closes in, and "Examined · Recorded · Sealed" rises in its place. Driven by `--p` from `src/scripts/scrollfx.ts`. |
-| Scroll-scrubbed footage (after patek.com's scroll-driven video) | Home, between "What we grade" and "The process at a glance" | `.film` is pinned for 1.5 screens of scroll; scrolling scrubs 80 frames of real coin footage drawn to a canvas (`src/scripts/scrub.ts`), with two captions (only the first two in the CMS show) that change in turn and a fade through black where the clips change. Phones load every second frame. |
+| Footage panels (after patek.com) | Home: after Notable coins ("Raking light") and after the nine steps ("Recorded and sealed") | Full-bleed panels about 86% of the screen tall (78% on phones), never pinned. Real coin footage, muted, looping, inline; it loads about one screen before the panel arrives (`preload="none"` until then, poster first), plays while on screen and pauses when it leaves (`src/components/Reel.astro`, `src/scripts/film.ts`). Dimmed and gold-graded in CSS (sepia/brightness filter, a gold `mix-blend-mode: color` layer, vignette). Caption: roman numeral + eyebrow and one line, Deco corners and a slowly turning guilloché rosette; it fades in once. Phones get the 640-wide rendition. |
+| Home hero | Home | Static. The title sets itself once on load in under a second (letter-spacing settles, metal gold), then one bright light sweep and a glint or two. The coin river keeps drifting behind it. |
+| Photo carousel | Home, right under the hero | Wide, matted slides; a slide every 5 s with a gold progress line under the active dot; arrows; native swipe on phones, drag with a mouse; pauses on hover, keyboard focus, off screen and in a hidden tab (`src/components/Carousel.astro`, `src/scripts/carousel.ts`). Photos come from Pages → Home → Home carousel (falls back to the Photo library); until there are any, three slides marked "Placeholder · Photo coming soon". |
+| Notable coins | Home, under the carousel | Showcase cards on dark velvet: large round coin photo (reverse as a small inset if given), grade in metal gold, coin, note, "Certificate No. …" linking to `/verify?cert=…`. Collection: Site → Notable coins (`content/notable/*.json`, `src/lib/notable.ts`). Until there are entries, three cards marked "Placeholder · Coming soon: notable coin". Never invent coins, grades or numbers. |
 | Coin river (the one ambient signature) | Home hero | Slow, dimmed, desaturated; no interaction. `src/scripts/coin-engine.js`. |
-| Guilloche rosettes, turning very slowly | Page titles, home hero, closing bands, certificate panels | `/guilloche.svg` is generated at build time (`src/lib/guilloche.ts`, about 20 KB) and rotated by CSS (4 minutes per turn). |
-| Microtext borders | Footer edge, certificate panels | `.microtext` in `src/styles/deco.css`. |
-| Holographic foil | Verify seal, label seal, certificate panels | Gradients that shift with scroll (`--scroll`). |
+| Shine: specular glints | Visible gold elements site-wide: monogram, the big title, gold rules, Deco corners, grade numbers, buttons, seals, medallions | One small four-point star (near-white, warm) flares and fades in 0.8 s on a random visible gold element every 3–7 s; never more than one; paused while the tab is hidden (`src/scripts/shine.ts`, `.glint` in `src/styles/shine.css`). |
+| Shine: light sweeps | Section titles as they enter; the hero title on load; buttons, the Contact button and notable-coin cards on hover/focus (cards also once on entering); gold rules once drawn | A crisp near-white band crosses the type (background band, 0.9 s) or the box (skewed pseudo-element, 0.75 s), eased like a flick of light. |
+| Shine: proof-coin flash | Notable coin discs as they enter view and when their card is hovered | A bright band turns across the coin's field (`.proof`, 0.85 s). |
+| Metal gold | Hero title, grade numbers | `--metal`: deep bronze to near-white highlights, so the gold reads as metal. |
+| Guilloche rosettes, turning very slowly | Page titles, home hero, footage panels, carousel placeholders, certificate panels, closing bands | `/guilloche.svg` is generated at build time (`src/lib/guilloche.ts`, about 20 KB) and rotated by CSS (4 minutes per turn). |
+| Microtext borders | Footer edge, certificate panels, microtext dividers | `.microtext` in `src/styles/deco.css`; `.divider-micro` in `detail.css`. |
+| Holographic foil | Verify seal, label seal, certificate panels | Spectral gradients that drift slowly on their own (time-based; no longer tied to scroll). |
 | Art Deco | Stepped corners, stepped rules under titles, sunbursts behind closing sections | `src/styles/deco.css`. |
-| Raking light | Section titles | A light band sweeps once across each title when it scrolls into view. |
-| Engraved line drawings | Steps, scope, principles, the grading scale rule | Inline SVG that draws itself once (stroke dash). |
-| Exploded holder (after a watch-movement drawing) | Home and `/holder` | Back shell, insert, coin, label and front shell float apart in perspective and slide together on their own in about 1.3 seconds once the drawing comes into view; not scroll-driven (`src/components/HolderExplode.astro`, `src/styles/explode.css`). |
+| Raking light | Section titles | A bright light band flicks once across each title as it enters view (0.9 s). |
+| Engraved line drawings | Steps, scope, the grading scale rule | Inline SVG that draws itself once (stroke dash, under a second). |
+| Exploded holder (after a watch-movement drawing) | Home and `/holder` | Back shell, insert, coin, label and front shell float apart in perspective and slide together on their own in about 0.9 s once the drawing comes into view; not scroll-driven (`src/components/HolderExplode.astro`, `src/styles/explode.css`). |
+
+### Fine detail on every page (`src/styles/detail.css`, `src/components/Divider.astro`)
+
+Quiet, finely made detail in the same security-print / Deco / engraving language: gold at 10–40% opacity, hairlines,
+generous spacing, all CSS and inline SVG (no image files).
+
+| Detail | Where |
+|---|---|
+| Stepped Deco corners + double hairline frame (brightens on focus/hover) | Forms (submit, contact), certificate card (verify), certificate panels, notable-coin cards, carousel slides, quotes in text |
+| A small stepped corner on each block | Feature grids (why-provident, about services, holder, grading standards) |
+| Ornamental dividers, varied: lozenge, rosette, microtext, guilloché band | Rosette: above every closing band (process, standards, holder, why, about), end of each journal post, above Verify on home. Microtext: home (before the nine steps), about, grading standards, privacy/terms/thank-you. Lozenge: submit, holder, verify. Band: submit (above the form), faq. |
+| Eyebrow ornament (hairline ending in a lozenge) | Every eyebrow label |
+| Flourish under page titles + a lozenge on the title's base rule | Every inner page title, 404 |
+| Roman numerals | Steps (process, submit, home), footage captions |
+| Faint guilloché in section corners, soft vignettes | Every inner page body, home "What we grade" and the nine steps |
+| Lozenge bullets, roman-numeral ordered lists, rosette `<hr>`, dotted leaders in definition lists, lozenges on step rules | Text pages, journal, certificate facts, process and home steps |
+| Inset museum mat with a thin gold line | Images in text and journal posts, certificate photos, carousel |
+| Gold focus line that draws across inputs; hairline gold checkbox (lozenge tick) and radio | All forms |
+| Fine gold underline that draws in on hover | Footer links, process step index, journal list, contact details |
+| Footer: guilloché band with an engraved seal, small-caps legal line | Every page |
 
 ### Footage (stock, free licence, real footage only)
 
 Both clips are from Pexels under the [Pexels licence](https://www.pexels.com/license/) (free for commercial use, no
-attribution required; not to be resold as stock). They were reduced to stills in the browser and are served as
-`public/media/scrub/coins/000.webp`–`079.webp` (80 frames, 1280×720, about 1.4 MB in total). The original videos are
-not in the repository.
+attribution required; not to be resold as stock). They are the original Pexels MP4 renditions (no re-encoding; ffmpeg
+is not available here), served from `public/media/film/`. The loop is kept inside the good part of each clip with
+`data-start`/`data-end`. Posters are single frames from the same clips.
 
-| Frames | Clip | Author | Downloaded file (size) |
-|---|---|---|---|
-| 000–043 | [Metal money silver macro](https://www.pexels.com/video/metal-money-silver-macro-5651766/) (0:00.15–0:07.35) | Tima Miroshnichenko | `5651766-hd_1280_720_25fps.mp4` (2.4 MB) |
-| 044–079 | [Bronze coins on a turntable](https://www.pexels.com/video/bronze-coins-on-a-turntable-7348172/) (0:03–0:17) | Charlie Mounsey | `7348172-sd_960_506_30fps.mp4` (1.0 MB) |
+| Panel | Clip | Author | Files served (size) | Loop |
+|---|---|---|---|---|
+| I, "Raking light" | [Metal money silver macro](https://www.pexels.com/video/metal-money-silver-macro-5651766/) | Tima Miroshnichenko | Desktop `5651766-hd_1280_720_25fps.mp4` (2.4 MB); phones `5651766-sd_640_360_25fps.mp4` (0.45 MB); poster `silver-poster.webp` (15 KB) | 0:00.15–0:07.35 |
+| II, "Recorded and sealed" | [Bronze coins on a turntable](https://www.pexels.com/video/bronze-coins-on-a-turntable-7348172/) | Charlie Mounsey | `7348172-sd_960_506_30fps.mp4` (0.99 MB, all screens; Pexels serves the same file for its 640 and 426 renditions); poster `bronze-poster.webp` (16 KB) | 0:03–0:17 |
 
-A third clip was downloaded to look at and not used: [Close-up of ancient Turkish coins](https://www.pexels.com/video/close-up-of-ancient-turkish-coins-12848317/)
-(`12848317-hd_1280_720_25fps.mp4`, 3.7 MB; it shows modern pocket change). When the owner sends real footage of his
-own grading room, replace the frames (same names) and the film captions.
+Download address pattern: `https://videos.pexels.com/video-files/<id>/<file name>`. A third clip was downloaded to look
+at and not used: [Close-up of ancient Turkish coins](https://www.pexels.com/video/close-up-of-ancient-turkish-coins-12848317/)
+(it shows modern pocket change). When the owner sends real footage of his own grading room, replace the files and
+the captions (Pages → Home → Footage panels).
 
 ### Code map
 
-- Tokens: `src/styles/theme.css`. Site styles: `global.css`; decorative system: `deco.css`; inner pages: `pages.css`;
-  home: `home.css`; exploded holder: `explode.css`; coins: `coin-engine.css`.
-- Scroll-linked values: `src/scripts/scrollfx.ts` (one rAF per scroll, layout measured only on load/resize).
-- Header, phone menu, reveals: `src/scripts/site.ts`.
+- Tokens: `src/styles/theme.css`. Site styles: `global.css`; decorative system: `deco.css`; shine: `shine.css`; fine
+  detail: `detail.css`; inner pages: `pages.css`; home: `home.css`; exploded holder: `explode.css`; coins:
+  `coin-engine.css`.
+- Header, phone menu, reveals: `src/scripts/site.ts`. Glints, sweeps and flashes: `src/scripts/shine.ts`. Footage:
+  `src/scripts/film.ts`. Carousel: `src/scripts/carousel.ts`.
 - Add `?shot` to a URL to freeze the coin river for screenshots.
 
 ## Stack
@@ -106,7 +140,7 @@ Needs Node 22.22 or newer.
 ```sh
 npm install
 npm run dev        # http://localhost:4321  (editor: http://localhost:4321/admin)
-npm test           # unit tests (certificate lookup, adapters, cache, rate limit, population)
+npm test           # unit tests (certificate lookup, adapters, cache, rate limit, population, notable coins)
 npm run check      # TypeScript / Astro type check
 npm run build      # production build into dist/
 ```
@@ -121,12 +155,13 @@ Without `CODA_DOC_ID` the Verify page runs in **demo mode** with three clearly l
 |---|---|
 | Editor schema (what the owner can edit) | `keystatic.config.ts` |
 | Site settings: name, phone, email, location, hours, social links, **population switch**, **launched switch** | `content/settings.json` |
-| FAQ, photo library | `content/faq.json`, `content/gallery.json` |
+| FAQ, photo library | `content/faq.json`, `content/gallery.json` (the home carousel falls back to the photo library) |
 | Each page's title, description, heading, intro and text | `content/pages/*.mdoc` |
 | Blog posts | `content/blog/*.mdoc` (photos in `public/images/blog/`) |
 | Styles | `src/styles/` (see Design above) |
 | Coin engine (drawn coins, the hero river) | `src/scripts/coin-engine.js`, `src/styles/coin-engine.css` |
-| Scroll effects, film scrubber | `src/scripts/scrollfx.ts`, `src/scripts/scrub.ts`, frames in `public/media/scrub/coins/` |
+| Footage panels, carousel, shine | `src/scripts/film.ts` (clips in `public/media/film/`), `src/scripts/carousel.ts`, `src/scripts/shine.ts` |
+| Notable coins | `content/notable/*.json` (Site → Notable coins), photos in `public/images/notable/`, `src/lib/notable.ts` |
 | Draft text still to confirm with the owner | `CONTENT_TO_CONFIRM.md` |
 | Certificate shape + schema | `src/lib/certs/certificate.ts` |
 | Adapter interface (website ↔ the owner's database) | `src/lib/certs/adapter.ts` |

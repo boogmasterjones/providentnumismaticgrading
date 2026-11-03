@@ -1,0 +1,57 @@
+---
+/**
+ * Notable coins: the best coins we have graded (Keystatic collection "Notable coins", src/lib/notable.ts).
+ * A showcase: large coin photos on dark velvet panels, the grade in gold, the certificate linked to Verify.
+ * Nothing is ever invented: with no entries it shows three clearly marked placeholder cards.
+ */
+import { notableCoins, verifyHref } from '../lib/notable';
+
+interface Props {
+  title?: string | null;
+  intro?: string | null;
+}
+const { title, intro } = Astro.props;
+const coins = notableCoins().slice(0, 6);
+const placeholder = coins.length === 0;
+const corners = '<i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>';
+---
+<section class="sec notable rake" aria-labelledby="notable-title">
+  <div class="container">
+    <div class="sec-head center">
+      <p class="eyebrow center">From our registry</p>
+      <h2 id="notable-title" class="rake-t">{title || 'Notable coins.'}</h2>
+      <div class="deco-rule center" aria-hidden="true"><i></i><i></i><i></i></div>
+      {intro && <p class="lead">{intro}</p>}
+    </div>
+    <ul class="notable-grid">
+      {placeholder
+        ? [0, 1, 2].map((i) => (
+            <li class={`coin-card is-ph rv d${i} shine deco-frame`} data-proof-hover>
+              <Fragment set:html={corners} />
+              <span class="ph-tag">Placeholder</span>
+              <div class="coin-disc proof ph-disc" aria-hidden="true"><div class="rosette"></div></div>
+              <p class="coin-grade metal" aria-hidden="true">—</p>
+              <h3>Coming soon: notable coin</h3>
+              <p class="coin-note">A coin from our registry will be shown here.</p>
+            </li>
+          ))
+        : coins.map((c, i) => (
+            <li class={`coin-card rv d${i % 3} shine deco-frame`} data-proof-hover>
+              <Fragment set:html={corners} />
+              <div class="coin-disc proof">
+                <img src={c.obverse} alt={`${c.name}, obverse`} loading="lazy" decoding="async" />
+              </div>
+              {c.reverse && (
+                <div class="coin-disc coin-rev proof">
+                  <img src={c.reverse} alt={`${c.name}, reverse`} loading="lazy" decoding="async" />
+                </div>
+              )}
+              <p class="coin-grade metal">{c.grade}</p>
+              <h3>{c.name}</h3>
+              {c.note && <p class="coin-note">{c.note}</p>}
+              <a class="coin-cert" href={verifyHref(c.cert)}>Certificate No. {c.cert}</a>
+            </li>
+          ))}
+    </ul>
+  </div>
+</section>

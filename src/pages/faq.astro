@@ -1,4 +1,5 @@
 ---
+import Divider from '../components/Divider.astro';
 import Base from '../layouts/Base.astro';
 import PageIntro from '../components/PageIntro.astro';
 import { loadPage } from '../lib/pages';
@@ -23,6 +24,7 @@ const ld = {
         </details>
       ))}
     </div>
-    {hasBody && <div class="prose" style="margin-top: var(--space-6)"><Content /></div>}
+    <Divider kind="band" />
+    {hasBody && <div class="prose"><Content /></div>}
   </div>
 </Base>

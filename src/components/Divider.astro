@@ -1,0 +1,20 @@
+---
+/**
+ * An ornamental rule between sections, in the security-print / Art Deco language (styles: src/styles/detail.css).
+ * Varied on purpose so pages don't repeat one ornament:
+ *  - diamond: fine lines fading out to both sides of a small lozenge
+ *  - rosette: the same lines around a tiny engraved rosette
+ *  - micro: a short line of microtext in tiny capitals, fading at both ends
+ *  - band: a narrow guilloché band (interlaced waves), fading at both ends
+ */
+interface Props {
+  kind?: 'diamond' | 'rosette' | 'micro' | 'band';
+  class?: string;
+}
+const { kind = 'diamond', class: cls } = Astro.props;
+---
+{kind === 'micro' && <div class:list={['divider', 'divider-micro', cls]} aria-hidden="true"><span>Provident · Numismatic · Authentication · Examined · Recorded · Sealed · Provident · Numismatic · Authentication ·</span></div>}
+{kind === 'band' && <div class:list={['divider', 'divider-band', cls]} aria-hidden="true"></div>}
+{(kind === 'diamond' || kind === 'rosette') && (
+  <div class:list={['divider', `divider-${kind}`, cls]} aria-hidden="true"><span></span><i></i><span></span></div>
+)}

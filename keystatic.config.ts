@@ -80,7 +80,7 @@ export default config({
   ui: {
     brand: { name: 'Website editor' },
     navigation: {
-      'Site': ['settings', 'faq', 'gallery'],
+      'Site': ['settings', 'faq', 'gallery', 'notable'],
       'Journal': ['blog'],
       'Pages': [
         'pageHome',
@@ -192,21 +192,35 @@ export default config({
         ...pageFields,
         primaryButton: fields.text({ label: 'First link under the headline', description: 'Goes to Our process.', defaultValue: 'Our process' }),
         secondaryButton: fields.text({ label: 'Second link under the headline', description: 'Goes to Verify a certificate.', defaultValue: 'Verify a certificate' }),
+        carousel: fields.array(
+          fields.object({
+            image: fields.image({
+              label: 'Photo',
+              description: 'A wide photo works best (landscape, at least 1600 pixels across). Slabs, coins, the grading room.',
+              directory: 'public/images/home',
+              publicPath: '/images/home/',
+              validation: { isRequired: true },
+            }),
+            alt: fields.text({ label: 'Describe the photo (for blind visitors and Google)', validation: { isRequired: true } }),
+            caption: fields.text({ label: 'Short caption (optional)' }),
+          }),
+          {
+            label: 'Home carousel (photos under the headline)',
+            description: 'Slides change on their own every few seconds. Until you add photos, placeholder slides show.',
+            itemLabel: (p) => p.fields.alt.value || 'Photo',
+          },
+        ),
+        notableTitle: t('Notable coins: heading', 'The coins themselves are under Notable coins in the menu.'),
+        notableIntro: t('Notable coins: intro'),
         gradeTitle: t('What we grade: heading'),
-        gradeIntro: t('What we grade: intro'),
         grades: sections('What we grade: fields', 'Field'),
-        approachTitle: t('Our approach: heading'),
-        approachText: t('Our approach: text', 'Leave a blank line between paragraphs.'),
-        principles: sections('Our approach: principles', 'Principle'),
-        film: sections('Film: captions shown in turn as the footage scrubs (two at most; only the first two show)', 'Caption'),
+        film: sections('Footage panels: captions (two at most). "One-line summary" is the small line above; "Title" is the line over the footage. Text is not shown.', 'Caption'),
         processTitle: t('Process at a glance: heading', 'The steps themselves come from the Our process page.'),
         processText: t('Process at a glance: intro'),
         holderTitle: t('Holder and label: heading'),
-        holderText: t('Holder and label: text', 'Leave a blank line between paragraphs.'),
+        holderText: t('Holder and label: text (keep it to one or two sentences)'),
         verifyTitle: t('Verification: heading'),
         verifyText: t('Verification: text'),
-        closingTitle: t('Closing statement'),
-        closingText: t('Closing line under the statement'),
       },
     }),
     pageProcess: singleton({
@@ -275,6 +289,42 @@ export default config({
     pageThankYou: singleton({ label: 'Thank-you page', path: 'content/pages/thank-you', format: { contentField: 'body' }, schema: pageFields }),
   },
   collections: {
+    notable: collection({
+      label: 'Notable coins',
+      path: 'content/notable/*',
+      slugField: 'name',
+      format: { data: 'json' },
+      columns: ['name', 'grade', 'cert'],
+      schema: {
+        name: fields.slug({
+          name: {
+            label: 'Coin (name and attribution)',
+            description: 'As on the label, e.g. year, mint, denomination, variety.',
+            validation: { isRequired: true },
+          },
+        }),
+        obverse: fields.image({
+          label: 'Photo: front (obverse)',
+          description: 'The coin on a plain dark background, cropped close.',
+          directory: 'public/images/notable',
+          publicPath: '/images/notable/',
+          validation: { isRequired: true },
+        }),
+        reverse: fields.image({
+          label: 'Photo: back (reverse, optional)',
+          directory: 'public/images/notable',
+          publicPath: '/images/notable/',
+        }),
+        grade: fields.text({ label: 'Grade', description: 'Exactly as on the label, e.g. MS 66.', validation: { isRequired: true } }),
+        cert: fields.text({
+          label: 'Certificate number',
+          description: 'Links to the Verify page for this certificate.',
+          validation: { isRequired: true },
+        }),
+        note: fields.text({ label: 'One-line note (optional)', description: 'Only facts you can stand behind.' }),
+        order: fields.integer({ label: 'Order on the home page', description: 'Lower numbers show first.', defaultValue: 10 }),
+      },
+    }),
     blog: collection({
       label: 'Journal posts',
       path: 'content/blog/*',

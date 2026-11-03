@@ -29,11 +29,10 @@ const pages = defineCollection({
     primaryButton: opt,
     secondaryButton: opt,
     gradeTitle: opt,
-    gradeIntro: opt,
+    carousel: z.array(z.object({ image: z.string(), alt: z.string(), caption: opt })).nullish(),
+    notableTitle: opt,
+    notableIntro: opt,
     grades: z.array(section).nullish(),
-    approachTitle: opt,
-    approachText: opt,
-    principles: z.array(section).nullish(),
     film: z.array(section).nullish(),
     processTitle: opt,
     processText: opt,
@@ -41,8 +40,6 @@ const pages = defineCollection({
     holderText: opt,
     verifyTitle: opt,
     verifyText: opt,
-    closingTitle: opt,
-    closingText: opt,
     // grading standards
     scale: z.array(z.object({ range: z.string(), code: opt, name: z.string(), text: opt })).nullish(),
     // submissions

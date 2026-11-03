@@ -1,0 +1,132 @@
+/*
+ * detail.css: the quiet layer of finely made detail on every page (owner, 2026-11-02: "small subtle designs
+ * throughout the whole site ... framing and spiffying"). Security print, Art Deco and engraving, kept subtle: gold
+ * at 10–40% opacity, hairline weights, generous spacing. All CSS and inline SVG (data URIs), no image files.
+ *
+ *  Framing      small stepped corners + double hairline rules on cards, panels, forms, quotes and images
+ *  Dividers     .divider (src/components/Divider.astro): diamond, rosette, microtext, guilloché band
+ *  Headings     eyebrow ornament (line + lozenge), roman numerals, a fine flourish under page titles
+ *  Backgrounds  faint guilloché in section corners, soft vignettes
+ *  Lists        lozenge bullets, dotted leaders in definition lists, corner ornaments on quotes
+ *  Forms        a gold focus line that draws across inputs; checkbox and radio drawn in hairline gold
+ *  Links        a fine gold underline that draws in on hover (navigation, footer, lists)
+ *  Footer       guilloché band, an engraved seal, small-caps legal line
+ */
+:root {
+  /* stepped Deco corners, 14 px, one per corner */
+  --corner-tl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23c9a45c' stroke-opacity='.6'%3E%3Cpath d='M.5 14V.5H14M4.5 14V4.5H14'/%3E%3C/svg%3E");
+  --corner-tr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23c9a45c' stroke-opacity='.6'%3E%3Cpath d='M0 .5h13.5V14M0 4.5h9.5V14'/%3E%3C/svg%3E");
+  --corner-bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23c9a45c' stroke-opacity='.6'%3E%3Cpath d='M.5 0v13.5H14M4.5 0v9.5H14'/%3E%3C/svg%3E");
+  --corner-br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='%23c9a45c' stroke-opacity='.6'%3E%3Cpath d='M13.5 0v13.5H0M9.5 0v9.5H0'/%3E%3C/svg%3E");
+  --corners: var(--corner-tl) 6px 6px / 14px 14px no-repeat, var(--corner-tr) calc(100% - 6px) 6px / 14px 14px no-repeat, var(--corner-bl) 6px calc(100% - 6px) / 14px 14px no-repeat, var(--corner-br) calc(100% - 6px) calc(100% - 6px) / 14px 14px no-repeat;
+  /* double hairline rule, drawn inside the box */
+  --double-rule: inset 0 0 0 1px rgba(201, 164, 92, 0.2), inset 0 0 0 5px var(--color-bg), inset 0 0 0 6px rgba(201, 164, 92, 0.1);
+  --double-rule-hi: inset 0 0 0 1px rgba(227, 203, 148, 0.42), inset 0 0 0 5px var(--color-bg), inset 0 0 0 6px rgba(201, 164, 92, 0.18);
+  /* a tiny engraved rosette (petals in a beaded ring) */
+  --rosette-sm: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9a45c' stroke-width='.6'%3E%3Ccircle cx='12' cy='12' r='11'/%3E%3Ccircle cx='12' cy='12' r='9' stroke-dasharray='.6 1.4'/%3E%3Cg stroke-opacity='.9'%3E%3Cellipse cx='12' cy='12' rx='7' ry='2.2'/%3E%3Cellipse cx='12' cy='12' rx='7' ry='2.2' transform='rotate(45 12 12)'/%3E%3Cellipse cx='12' cy='12' rx='7' ry='2.2' transform='rotate(90 12 12)'/%3E%3Cellipse cx='12' cy='12' rx='7' ry='2.2' transform='rotate(135 12 12)'/%3E%3C/g%3E%3Ccircle cx='12' cy='12' r='1.2' fill='%23c9a45c'/%3E%3C/svg%3E");
+  /* a guilloché band: two interlaced waves */
+  --band: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12' fill='none' stroke='%23c9a45c' stroke-width='.6'%3E%3Cpath d='M0 6c6-6 6 6 12 0s6 6 12 0'/%3E%3Cpath d='M0 6c6 6 6-6 12 0s6-6 12 0'/%3E%3Cpath d='M0 1h24M0 11h24' stroke-opacity='.5'/%3E%3C/svg%3E");
+  /* the eyebrow ornament: a hairline ending in a small lozenge */
+  --eyebrow-orn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='8' viewBox='0 0 40 8' fill='none' stroke='%23c9a45c'%3E%3Cpath d='M0 4h31' stroke-opacity='.45'/%3E%3Cpath d='M35.5 1 38.5 4 35.5 7 32.5 4Z' stroke-opacity='.8'/%3E%3C/svg%3E");
+  --eyebrow-orn-r: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='8' viewBox='0 0 40 8' fill='none' stroke='%23c9a45c'%3E%3Cpath d='M9 4h31' stroke-opacity='.45'/%3E%3Cpath d='M4.5 1 7.5 4 4.5 7 1.5 4Z' stroke-opacity='.8'/%3E%3C/svg%3E");
+  /* the flourish under page titles: a stepped rule with a lozenge */
+  --flourish: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='12' viewBox='0 0 150 12' fill='none' stroke='%23c9a45c'%3E%3Cpath d='M0 6h58M92 6h58' stroke-opacity='.5'/%3E%3Cpath d='M20 9h34M96 9h34' stroke-opacity='.22'/%3E%3Cpath d='M75 1.5 79.5 6 75 10.5 70.5 6Z' stroke-opacity='.85'/%3E%3Cpath d='M63 6h4M83 6h4' stroke-opacity='.7'/%3E%3C/svg%3E");
+  --lozenge: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8' fill='none' stroke='%23c9a45c'%3E%3Cpath d='M4 .8 7.2 4 4 7.2.8 4Z'/%3E%3C/svg%3E");
+}
+
+/* ---------- headings ---------- */
+.eyebrow::before { width: 40px; height: 8px; background: var(--eyebrow-orn) center / 40px 8px no-repeat; }
+.eyebrow.center::after { width: 40px; height: 8px; background: var(--eyebrow-orn-r) center / 40px 8px no-repeat; }
+.page-head h1::after { content: ''; display: block; width: 150px; height: 12px; margin-top: var(--space-4); background: var(--flourish) left center / 150px 12px no-repeat; }
+.not-found h1::after { content: ''; display: block; width: 150px; height: 12px; margin: var(--space-3) auto 0; background: var(--flourish) center / 150px 12px no-repeat; }
+/* a lozenge sits on the page title's base rule, at the left of the text column */
+.page-head::after { content: ''; position: absolute; left: 0; bottom: -5px; width: 10px; height: 10px; background: var(--color-bg) var(--lozenge) center / 8px 8px no-repeat; }
+
+/* ---------- dividers ---------- */
+.divider { display: flex; align-items: center; justify-content: center; gap: 14px; margin: var(--space-6) auto; max-width: 62rem; opacity: 0.85; pointer-events: none; }
+.divider > span:not(:only-child) { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(201, 164, 92, 0.38)); }
+.divider > span:last-child:not(:only-child) { background: linear-gradient(90deg, rgba(201, 164, 92, 0.38), transparent); }
+.divider-diamond > i { width: 7px; height: 7px; border: 1px solid rgba(201, 164, 92, 0.6); transform: rotate(45deg); flex: none; box-shadow: 0 0 0 3px var(--color-bg), 0 0 0 4px rgba(201, 164, 92, 0.18); }
+.divider-rosette > i { width: 22px; height: 22px; flex: none; background: var(--rosette-sm) center / contain no-repeat; opacity: 0.75; }
+.divider-micro { overflow: hidden; -webkit-mask: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); mask: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); }
+.divider-micro span { white-space: nowrap; font: 500 0.5rem/1 var(--font-caps); letter-spacing: 0.42em; text-transform: uppercase; color: rgba(201, 164, 92, 0.42); }
+.divider-band { height: 12px; background: var(--band) 0 0 / 24px 12px repeat-x; opacity: 0.4; -webkit-mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent); mask: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent); }
+.divider.tight { margin: var(--space-4) auto; }
+/* a divider replaces the plain rule above the submission form */
+.divider + .request { border-top: 0; padding-top: 0; }
+/* the closing band on inner pages opens with a rosette rule instead of a plain line */
+.page-coda { border-top: 0; }
+.page-coda > .divider { margin: 0 auto var(--space-6); }
+
+/* ---------- framing: cards, panels, forms, quotes, images ---------- */
+.features > * { position: relative; background: var(--corner-tl) 0 -22px / 12px 12px no-repeat; background-origin: content-box; transition: border-color 0.5s var(--ease); }
+.features > *:hover { border-color: rgba(201, 164, 92, 0.32); }
+.cert-card { background: var(--corners), radial-gradient(90% 70% at 100% 0%, rgba(201, 164, 92, 0.07), transparent 60%), linear-gradient(180deg, #131215, #0c0c0e); }
+.cert-card::before { inset: 5px; border-color: rgba(201, 164, 92, 0.14); }
+.cert-panel, .coin-card { transition: border-color 0.5s var(--ease); }
+.cert-panel:hover, .cert-panel:focus-within { border-color: rgba(227, 203, 148, 0.55); }
+/* forms sit in a framed panel */
+form.stack { position: relative; padding: clamp(1.5rem, 3.5vw, 2.75rem); background: var(--corners), radial-gradient(120% 80% at 0% 0%, rgba(201, 164, 92, 0.05), transparent 60%), #0c0c0d; box-shadow: var(--double-rule); transition: box-shadow 0.5s var(--ease); }
+form.stack:focus-within { box-shadow: var(--double-rule-hi); }
+/* quotes: corner ornaments and a hairline */
+.prose blockquote { position: relative; margin: var(--space-5) 0; padding: var(--space-4) var(--space-5); font: italic 400 1.3rem/1.5 var(--font-heading); color: var(--color-text-2); background: var(--corner-tl) 0 0 / 14px 14px no-repeat, var(--corner-br) 100% 100% / 14px 14px no-repeat; border-left: 1px solid rgba(201, 164, 92, 0.25); }
+.prose blockquote p:last-child { margin-bottom: 0; }
+/* images: an inset mat with a thin gold line, like a museum frame */
+.prose img, .post-cover img, .cert-photos img { padding: 8px; background: #0e0d0c; box-shadow: inset 0 0 0 1px rgba(201, 164, 92, 0.28), 0 18px 40px -24px rgba(0, 0, 0, 0.9); outline: 1px solid rgba(201, 164, 92, 0.1); outline-offset: 4px; }
+
+/* ---------- backgrounds: faint guilloché in corners, soft vignettes ---------- */
+.page-body { position: relative; isolation: isolate; }
+.page-body::before { content: ''; position: absolute; z-index: -1; pointer-events: none; width: 560px; aspect-ratio: 1; left: -340px; bottom: 40px; background: url('/guilloche.svg') center / contain no-repeat; opacity: 0.06; -webkit-mask: radial-gradient(circle, #000 20%, transparent 68%); mask: radial-gradient(circle, #000 20%, transparent 68%); }
+.page-body::after { content: ''; position: absolute; z-index: -2; top: 0; bottom: 0; left: calc(50% - 50vw); right: calc(50% - 50vw); pointer-events: none; background: radial-gradient(60% 40% at 50% 0%, rgba(201, 164, 92, 0.035), transparent 70%), radial-gradient(120% 70% at 50% 100%, rgba(0, 0, 0, 0.35), transparent 60%); }
+.sec { isolation: isolate; }
+.scope::after, .glance::after { content: ''; position: absolute; z-index: -1; pointer-events: none; width: 520px; aspect-ratio: 1; background: url('/guilloche.svg') center / contain no-repeat; opacity: 0.06; -webkit-mask: radial-gradient(circle, #000 20%, transparent 68%); mask: radial-gradient(circle, #000 20%, transparent 68%); }
+.scope::after { right: -300px; top: -120px; }
+.glance::after { left: -320px; bottom: -80px; }
+.glance { background: radial-gradient(70% 60% at 80% 50%, rgba(201, 164, 92, 0.035), transparent 70%); }
+
+/* ---------- lists and details ---------- */
+.prose ul { list-style: none; padding-left: 1.4rem; }
+.prose ul > li { position: relative; }
+.prose ul > li::before { content: ''; position: absolute; left: -1.25rem; top: 0.62em; width: 7px; height: 7px; background: var(--lozenge) center / 7px 7px no-repeat; }
+.prose ol > li::marker { font-family: var(--font-caps); color: var(--gold); }
+.prose hr { border: 0; height: 22px; margin: var(--space-6) 0; background: var(--rosette-sm) center / 22px 22px no-repeat, linear-gradient(90deg, transparent, rgba(201, 164, 92, 0.3) 35%, transparent 47%, transparent 53%, rgba(201, 164, 92, 0.3) 65%, transparent) center / 100% 1px no-repeat; }
+/* dotted leaders between a term and its value */
+dl.facts dt, dl.facts dd { border-bottom: 1px dotted rgba(201, 164, 92, 0.22); }
+.faq-list details { transition: border-color 0.5s var(--ease); }
+.faq-list details[open] { border-bottom-color: rgba(201, 164, 92, 0.3); }
+.steps > li { position: relative; }
+.steps > li::before { content: ''; position: absolute; left: 0; top: -5px; width: 9px; height: 9px; background: var(--color-bg) var(--lozenge) center / 8px 8px no-repeat; }
+.glance-list li { position: relative; }
+.glance-list li::before { content: ''; position: absolute; right: 0; top: -4px; width: 8px; height: 8px; background: var(--color-bg) var(--lozenge) center / 7px 7px no-repeat; }
+
+/* ---------- forms ---------- */
+/* a gold line draws across the field on focus */
+input:not([type='checkbox']):not([type='radio']), textarea { background-image: linear-gradient(var(--gold-hi), var(--gold-hi)); background-repeat: no-repeat; background-position: 0 100%; background-size: 0% 1px; transition: border-color 0.6s var(--ease), background-size 0.45s var(--ease); }
+input:not([type='checkbox']):not([type='radio']):focus, textarea:focus { background-size: 100% 1px; }
+.inrow { background: linear-gradient(var(--gold-hi), var(--gold-hi)) 0 100% / 0% 1px no-repeat; transition: border-color 0.6s var(--ease), background-size 0.45s var(--ease); }
+.inrow:focus-within { background-size: 100% 1px; }
+.inrow input:focus { background-size: 0% 1px; }
+input[type='checkbox'], input[type='radio'] { appearance: none; -webkit-appearance: none; width: 18px; height: 18px; min-height: 0; padding: 0; margin: 0 10px 0 0; flex: none; vertical-align: -3px; border: 1px solid var(--gold-line); background: transparent center / 8px 8px no-repeat; border-radius: 1px; cursor: pointer; transition: border-color 0.3s var(--ease); }
+input[type='radio'] { border-radius: 50%; }
+input[type='checkbox']:hover, input[type='radio']:hover { border-color: var(--gold); }
+input[type='checkbox']:checked { border-color: var(--gold); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 0 8 4 4 8 0 4Z' fill='%23e3cb94'/%3E%3C/svg%3E"); }
+input[type='radio']:checked { border-color: var(--gold); background-image: radial-gradient(circle, var(--gold-hi) 0 3px, transparent 3.5px); background-size: 100% 100%; }
+input[type='checkbox']:focus-visible, input[type='radio']:focus-visible { outline: 1px solid var(--gold-hi); outline-offset: 3px; }
+
+/* ---------- links: a fine gold underline that draws in on hover ---------- */
+.site-footer a:not(.brand), .step-index a, .post-list h2 a, .ways a { text-decoration: none; background: linear-gradient(var(--gold), var(--gold)) 0 100% / 0% 1px no-repeat; padding-bottom: 2px; transition: color 0.4s var(--ease), background-size 0.45s var(--ease); }
+.site-footer a:not(.brand):hover, .site-footer a:not(.brand):focus-visible, .step-index a:hover, .post-list h2 a:hover, .ways a:hover { background-size: 100% 1px; }
+
+/* ---------- footer: guilloché band, an engraved seal, small-caps legal line ---------- */
+.footer-seal { display: flex; align-items: center; gap: 16px; margin-top: var(--space-6); }
+.footer-seal::before, .footer-seal::after { content: ''; flex: 1; height: 12px; background: var(--band) 0 0 / 24px 12px repeat-x; opacity: 0.28; }
+.footer-seal::before { -webkit-mask: linear-gradient(90deg, transparent, #000); mask: linear-gradient(90deg, transparent, #000); }
+.footer-seal::after { -webkit-mask: linear-gradient(90deg, #000, transparent); mask: linear-gradient(90deg, #000, transparent); }
+.footer-seal i { width: 44px; height: 44px; flex: none; background: var(--rosette-sm) center / contain no-repeat; opacity: 0.5; }
+.footer-legal { margin-top: var(--space-4); border-top: 0; font: 500 0.66rem/1.4 var(--font-body); letter-spacing: 0.2em; text-transform: uppercase; }
+
+@media (max-width: 720px) {
+  .divider { margin: var(--space-5) auto; }
+  .page-body::before { width: 380px; left: -260px; }
+  .scope::after, .glance::after { width: 360px; }
+}

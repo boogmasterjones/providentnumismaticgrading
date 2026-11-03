@@ -1,4 +1,5 @@
 ---
+import Divider from '../components/Divider.astro';
 import Base from '../layouts/Base.astro';
 import PageIntro from '../components/PageIntro.astro';
 import Features from '../components/Features.astro';
@@ -41,6 +42,7 @@ const first = (r: string) => Number(r.match(/\d+/)?.[0] ?? 0);
         </ol>
       </section>
     )}
+    <Divider kind="micro" />
     <Features items={sections} columns={2} />
     {hasBody && <div class="prose rv" style="margin-top: var(--space-6)"><Content /></div>}
   </div>

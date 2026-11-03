@@ -1,4 +1,5 @@
 ---
+import Divider from './Divider.astro';
 /** A page that is only editable text: label, heading, intro and body from Keystatic. */
 import Base from '../layouts/Base.astro';
 import PageIntro from './PageIntro.astro';
@@ -13,5 +14,6 @@ const { data, Content, hasBody } = await loadPage(id);
   <div class="page-body">
     {hasBody && <div class="prose rv"><Content /></div>}
     <slot />
+    <Divider kind="micro" />
   </div>
 </Base>

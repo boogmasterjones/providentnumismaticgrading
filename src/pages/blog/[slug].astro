@@ -1,4 +1,5 @@
 ---
+import Divider from '../../components/Divider.astro';
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { publishedPosts, formatDate } from '../../lib/blog';
@@ -29,5 +30,6 @@ const ld = {
     <div class="deco-rule in" aria-hidden="true"><i></i><i></i><i></i></div>
     {post.data.cover && <img src={post.data.cover} alt={post.data.coverAlt ?? ''} decoding="async" />}
     <Content />
+    <Divider kind="rosette" />
   </article>
 </Base>

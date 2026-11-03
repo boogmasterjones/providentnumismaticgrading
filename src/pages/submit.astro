@@ -1,4 +1,5 @@
 ---
+import Divider from '../components/Divider.astro';
 import Base from '../layouts/Base.astro';
 import PageIntro from '../components/PageIntro.astro';
 import Steps from '../components/Steps.astro';
@@ -19,6 +20,7 @@ const labels = ['A ready-made design', 'A custom design', 'No preference'];
   <div class="page-body">
     <Steps items={data.sections ?? []} compact />
 
+    <Divider kind="diamond" />
     {data.feesTitle && (
       <section id="fees" class="cert-panel fees-note deco-frame draw rake" aria-labelledby="fees-title">
         <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
@@ -35,6 +37,7 @@ const labels = ['A ready-made design', 'A custom design', 'No preference'];
 
     {hasBody && <div class="prose rv"><Content /></div>}
 
+    <Divider kind="band" />
     <section class="request" aria-labelledby="request-title">
       <div class="request-head">
         <p class="eyebrow">Submission request</p>

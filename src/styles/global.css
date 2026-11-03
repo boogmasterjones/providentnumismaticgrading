@@ -53,7 +53,7 @@ strong { color: var(--color-text); font-weight: 600; }
 .muted { color: var(--color-muted); }
 .small { font-size: 0.9rem; }
 .lead { font: 400 clamp(1.3rem, 1.9vw, 1.55rem)/1.45 var(--font-heading); color: var(--color-text-2); max-width: 34em; }
-/* decorations bleed to the screen edges but must never widen the page (clip keeps the two sticky home sections working) */
+/* decorations bleed to the screen edges but must never widen the page (clip, not hidden, so the sticky header keeps working) */
 main, .site-footer { overflow-x: clip; }
 main { min-height: 60vh; }
 
@@ -63,10 +63,11 @@ main { min-height: 60vh; }
 .eyebrow.center::after { content: ''; width: 32px; height: 1px; background: var(--gold-line); flex: none; }
 .numeral { font: 500 0.78rem/1 var(--font-caps); letter-spacing: 0.22em; color: var(--gold); }
 
-/* reveal on scroll (site.ts adds .in): a slow, short rise. Content is visible without JavaScript. */
-.js .rv { opacity: 0; transform: translateY(14px); transition: opacity var(--slow) var(--ease), transform var(--slow) var(--ease); }
+/* reveal on entering view (site.ts adds .in): a quick, short rise (0.5s, small stagger), so nothing waits on the
+   reader. Content is visible without JavaScript. */
+.js .rv { opacity: 0; transform: translateY(12px); transition: opacity var(--reveal) var(--ease), transform var(--reveal) var(--ease); }
 .js .rv.in { opacity: 1; transform: none; }
-.rv.d1 { transition-delay: 0.12s; } .rv.d2 { transition-delay: 0.24s; } .rv.d3 { transition-delay: 0.36s; } .rv.d4 { transition-delay: 0.48s; }
+.rv.d1 { transition-delay: 0.06s; } .rv.d2 { transition-delay: 0.12s; } .rv.d3 { transition-delay: 0.18s; } .rv.d4 { transition-delay: 0.24s; }
 
 /* divider: two hairlines meeting a small lozenge */
 .ornament { display: flex; align-items: center; gap: 14px; max-width: 220px; margin: var(--space-5) auto; }
@@ -135,6 +136,8 @@ main { min-height: 60vh; }
   body.menu-open { overflow: hidden; }
 }
 @media (max-width: 380px) { .brand-name small { display: none; } }
+/* phones: the brand and the menu button must fit side by side without widening the page */
+@media (max-width: 440px) { .site-header .bar { gap: 10px; } .brand { gap: 10px; min-width: 0; } .brand-name small { letter-spacing: 0.2em; } }
 
 /* ---------- page head: title, intro and a faint engraved rosette ---------- */
 .page-head { position: relative; padding: calc(var(--space-7) + 1rem) 0 var(--space-6); isolation: isolate; }
@@ -248,7 +251,7 @@ input::placeholder, textarea::placeholder { color: var(--color-faint); }
 .inrow .btn:hover { background: none; }
 .verify-form .hint { margin-top: 10px; display: block; }
 
-.cert-card { position: relative; border: 1px solid var(--color-border-strong); border-radius: var(--radius); padding: clamp(1.4rem, 3vw, 2.5rem); margin: var(--space-5) 0; background: linear-gradient(180deg, #121214, #0c0c0e); box-shadow: var(--shadow-card); display: grid; gap: var(--space-4); max-width: 62rem; animation: cardin 1.2s var(--ease) both; }
+.cert-card { position: relative; border: 1px solid var(--color-border-strong); border-radius: var(--radius); padding: clamp(1.4rem, 3vw, 2.5rem); margin: var(--space-5) 0; background: linear-gradient(180deg, #121214, #0c0c0e); box-shadow: var(--shadow-card); display: grid; gap: var(--space-4); max-width: 62rem; animation: cardin 0.6s var(--ease) both; }
 .cert-card::before { content: ''; position: absolute; inset: 6px; border: 1px solid var(--color-border); pointer-events: none; }
 @keyframes cardin { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .cert-card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-border); }
