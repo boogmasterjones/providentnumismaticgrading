@@ -1,0 +1,9 @@
+---
+/** Provident Studio's live preview of one journal post, hidden drafts included (signed in only, see src/middleware.ts). */
+import Page from '../../../blog/[slug].astro';
+import { getPosts } from '../../../../lib/content';
+export const prerender = false;
+const post = (await getPosts(Astro)).find((p) => p.id === Astro.params.slug);
+if (!post) return new Response('This post no longer exists.', { status: 404 });
+---
+<Page post={post} />

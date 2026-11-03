@@ -1,0 +1,115 @@
+---
+/**
+ * Provident Studio sign-in. A plain form (it works without JavaScript); the small script below only adds a nicer
+ * "Signing in…" state and shows errors without a page load. Sign-in rules: src/lib/studio/auth.ts.
+ */
+import '../../styles/studio.css';
+import BrandMark from '../../components/BrandMark.astro';
+import { config, currentSession } from '../../lib/studio/server';
+
+export const prerender = false;
+
+const cfg = config();
+const next = Astro.url.searchParams.get('next') ?? '/admin';
+if (currentSession(Astro.request, cfg)) return Astro.redirect(next.startsWith('/admin') ? next : '/admin', 303);
+const errors: Record<string, string> = {
+  invalid: 'That email and password do not match. Check them and try again.',
+  locked: 'Too many wrong passwords. For your safety, sign-in is paused for a few minutes.',
+  rate: 'Too many attempts. Wait a few minutes, then try again.',
+  unconfigured: 'Studio sign-in is not set up yet.',
+};
+const error = errors[Astro.url.searchParams.get('error') ?? ''] ?? '';
+const notSetUp = cfg.loginProblems.length > 0;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#0b0b0c" />
+    <title>Sign in · Provident Studio</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" />
+  </head>
+  <body class="st-login">
+    <main class="st-login-card">
+      <div class="st-login-mark"><BrandMark /></div>
+      <p class="st-caps">Provident</p>
+      <h1>Studio</h1>
+      <p class="st-login-lead">Sign in to edit your website.</p>
+      {notSetUp ? (
+        <div class="st-alert" role="alert">
+          <strong>Sign-in is not set up yet.</strong>
+          <p>Your web person needs to add the Studio settings to the website (see docs/STUDIO_SETUP.md).</p>
+          {import.meta.env.DEV && <ul>{cfg.loginProblems.map((p) => <li>{p}</li>)}</ul>}
+        </div>
+      ) : (
+        <form method="post" action="/api/studio/login" id="login" novalidate>
+          <input type="hidden" name="next" value={next} />
+          <div class="st-alert" role="alert" id="login-error" hidden={!error}>{error}</div>
+          <label class="st-field">
+            <span>Email</span>
+            <input type="email" name="email" autocomplete="username" required autofocus inputmode="email" />
+          </label>
+          <label class="st-field">
+            <span>Password</span>
+            <span class="st-pw">
+              <input type="password" name="password" autocomplete="current-password" required />
+              <button type="button" class="st-pw-toggle" aria-pressed="false" aria-label="Show password">Show</button>
+            </span>
+          </label>
+          <button class="st-btn st-btn-primary st-btn-block" type="submit">Sign in</button>
+        </form>
+      )}
+      <p class="st-login-help">Forgotten your password? Ask your web person to set a new one. Studio never emails passwords.</p>
+    </main>
+    <script>
+      const form = document.getElementById('login') as HTMLFormElement | null;
+      const err = document.getElementById('login-error');
+      const toggle = document.querySelector<HTMLButtonElement>('.st-pw-toggle');
+      toggle?.addEventListener('click', () => {
+        const input = toggle.previousElementSibling as HTMLInputElement;
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        toggle.textContent = show ? 'Hide' : 'Show';
+        toggle.setAttribute('aria-pressed', String(show));
+        toggle.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      });
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = new FormData(form);
+        const email = String(data.get('email') ?? '').trim();
+        const password = String(data.get('password') ?? '');
+        const show = (msg: string) => {
+          if (!err) return;
+          err.textContent = msg;
+          err.hidden = false;
+        };
+        if (!email || !password) return show('Enter your email and your password.');
+        const btn = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+        btn.disabled = true;
+        btn.textContent = 'Signing in…';
+        try {
+          const r = await fetch('/api/studio/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, next: data.get('next') }),
+          });
+          const j = (await r.json().catch(() => ({}))) as { ok?: boolean; next?: string; error?: string };
+          if (r.ok && j.ok) {
+            location.href = j.next || '/admin';
+            return;
+          }
+          show(j.error || 'Sign-in failed. Try again.');
+        } catch {
+          show('No connection. Check your internet and try again.');
+        }
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+      });
+    </script>
+  </body>
+</html>
