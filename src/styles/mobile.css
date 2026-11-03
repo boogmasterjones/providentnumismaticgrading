@@ -279,3 +279,98 @@
 @media (min-width: 721px) and (max-width: 960px) {
   html .holder-copy .eyebrow { font-size: 0.72rem; }
 }
+
+/* ======================================================================================================== */
+/* pass 2 (2026-11-03): fixes found with real-looking content and a second look                              */
+/* ======================================================================================================== */
+@media (max-width: 1120px) {
+  /* a long certificate number moves to its own line whole instead of breaking at a dash ("TMP-2026- / 000123") */
+  html .coin-cert .cert-no { display: inline-block; }
+}
+@media (max-width: 720px) {
+  /* the microtext line at the foot of framed panels ran under the corner ornaments (verify, home verify, fees):
+     it now runs between them and fades at both ends instead of stopping mid-letter */
+  html .cert-panel > .microtext { left: 42px; right: 42px; -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); }
+
+  /* the page title's base rule and the first step's (or post's) own rule sat 40px apart and read as a doubled line:
+     the first item drops its rule and its lozenge, and starts right under the page head */
+  html .page-body > .steps:first-child > li:first-child, html .page-body > .post-list:first-child > li:first-child { border-top: 0; padding-top: 0; }
+  html .page-body > .steps:first-child > li:first-child::before { display: none; }
+
+  /* journal: quotes had 40px of padding on each side of a 350px column; images keep a slimmer mat */
+  html .prose blockquote { padding: var(--space-3) var(--space-4); font-size: 1.22rem; }
+  html .prose img, html .post-cover img { padding: 6px; }
+
+
+  /* holder page: the drawing had 50px of empty stage above and below, while its caption sat 30px from the next label */
+  html .holder-feature { gap: var(--space-5); }
+}
+@media (max-width: 560px) {
+  html .ex-scene { height: 330px; }
+}
+@media (max-width: 1120px) {
+  /* notable coins: a long grade ("Ch XF, Strike 5/5, Surface 4/5") wraps into balanced lines that don't touch */
+  html .coin-grade { line-height: 1.12; text-wrap: balance; }
+  /* carousel captions stay clear of the slide's edges, so the next slide's caption never shows as stray letters in
+     the sliver of it that peeks in */
+  html .car-slide figcaption { padding: 0 28px; line-height: 1.6; }
+}
+@media (max-width: 720px) {
+  /* journal article: less air between the header, the back link and the date */
+  html article.post { padding-top: var(--space-5); }
+  html article.post .back { margin-bottom: var(--space-4); }
+}
+
+/* ---------- small laptops and iPad landscape (961–1120) ---------- */
+@media (min-width: 961px) and (max-width: 1120px) {
+  /* feature blocks: three columns were about 270px wide (35 characters a line, nine-line paragraphs); two read better */
+  html .features, html .features.two { grid-template-columns: 1fr 1fr; }
+  html .features > :nth-child(n), html .features.two > :nth-child(n) { padding-left: var(--space-5); padding-right: var(--space-5); border-left: 1px solid var(--color-border); }
+  html .features > :nth-child(2n + 1), html .features.two > :nth-child(2n + 1) { padding-left: 0; border-left: 0; }
+}
+@media (max-width: 720px) {
+  /* swipe rows: the space after the last item is a spacer element, not the row's end padding or the last item's
+     margin, which older iOS Safari leaves out of the scroll width (the last card or chip would end flush against
+     the screen edge). The step index also stops a sideways swipe at its ends from turning into "go back". */
+  html .notable-grid { padding-right: 0; }
+  html .notable-grid::after { content: ''; flex: 0 0 calc(var(--gutter) - 12px); }
+  html .step-index { padding-right: 0; overscroll-behavior-x: contain; }
+  html .step-index a:last-child { margin-right: 0; }
+  html .step-index::after { content: ''; flex: 0 0 36px; }
+}
+@media (max-width: 720px) {
+  /* footer and menu tap targets: pass 1 meant 44px, but the footer's hover-underline rule (detail.css, more
+     specific) kept a 2px bottom padding, so footer links measured 41px and the legal links 33px */
+  html .site-footer nav li a:not(.brand) { padding: 9px 0 8px; }
+  html .site-footer .footer-legal a:not(.brand) { padding: 15px 0 14px; }
+  html .nav-foot .nav-reach a { padding: 11px 0; }
+}
+/* tablets held in the hand (iPad portrait and landscape, touch laptops in tablet mode): controls at least 44px */
+@media (max-width: 1120px) and (pointer: coarse) {
+  html .link-arrow { padding-top: 14px; padding-bottom: 14px; }
+  html .car-dot { height: 44px; }
+  html .step-index a { padding-top: 9px; padding-bottom: 9px; }
+  html .site-footer nav li a:not(.brand) { display: inline-block; padding: 9px 0 8px; }
+  html .site-footer .footer-legal a:not(.brand) { display: inline-block; padding: 14px 0; }
+  html .site-footer ul { gap: 0; }
+}
+@media (max-width: 380px) {
+  /* certificate ledger on small phones: "DENOMINATION" no longer fits a 7rem label column at 0.12em tracking */
+  html dl.facts { grid-template-columns: minmax(7.7rem, 40%) minmax(0, 1fr); }
+  html dl.facts dt { letter-spacing: 0.07em; padding-right: 10px; }
+}
+/* ---------- tablet portrait (721–900): the steps had numeral and symbol on a line of their own, then the title, then
+   the summary (about 190px before the text began). They now use the phone layout, a little larger: symbol and
+   numeral in a column beside the title and summary. The doubled rule under the page head goes too. ---------- */
+@media (min-width: 721px) and (max-width: 900px) {
+  html .steps > li, html .steps.compact > li { grid-template-columns: 60px minmax(0, 1fr); column-gap: 22px; row-gap: 18px; }
+  html .steps .step-n { grid-auto-flow: row; justify-items: center; align-content: start; gap: 10px; }
+  html .steps .step-n .medallion { width: 60px; height: 60px; order: -1; }
+  html .steps .step-n .mark { width: 30px; height: 30px; }
+  html .steps .step-head { align-self: center; }
+  html .steps .step-head h2, html .steps .step-head h3 { margin: 0 0 6px; }
+  html .steps .step-body { grid-column: 1 / -1; }
+  html .page-body > .steps:first-child > li:first-child, html .page-body > .post-list:first-child > li:first-child { border-top: 0; padding-top: 0; }
+  html .page-body > .steps:first-child > li:first-child::before { display: none; }
+}
+@media (min-width: 721px) and (max-width: 900px) { html .page-body { padding-top: var(--space-6); } }

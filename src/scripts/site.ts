@@ -52,8 +52,15 @@ if ('IntersectionObserver' in window) {
     (entries) => {
       for (const e of entries) {
         if (e.isIntersecting || e.boundingClientRect.bottom < 0) {
-          e.target.classList.add('in');
-          io.unobserve(e.target);
+          // a swipeable row (notable coins on a phone) reveals all its cards together, so a card that was off to
+          // the side is already in place when it is swiped in, instead of rising while it slides
+          const row = e.target.closest('.notable-grid');
+          const swipe = row && row.scrollWidth > row.clientWidth + 1;
+          const group = swipe ? row.querySelectorAll('.rv') : [e.target];
+          for (const el of group) {
+            el.classList.add('in');
+            io.unobserve(el);
+          }
         }
       }
     },

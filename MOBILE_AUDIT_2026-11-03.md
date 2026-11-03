@@ -151,3 +151,117 @@ Scores are out of 10, before → after (at 390).
    grid and notable cards there.
 9. **Performance on a phone:** the coin river (8 coins on phones), the turning rosettes and the film grain overlay
    should be run through PageSpeed mobile on a deploy preview, if the owner ever allows one.
+
+---
+
+# Pass 2 (2026-11-03): a second look, with real-looking content
+
+Checked at 360×780, 390×844, 430×932, 768×1024, 900, 1024 and 1120 wide, plus the opening (`?intro`, at 360×640).
+For the first time the checks ran **with content**: three notable coins (two with a reverse photo, one with a very
+long single-word name, one with a long grade and a long certificate number), three carousel photos (wide, 3:2 and
+portrait, one long caption) and a journal post with a cover, two images, a quote, lists, a 45-letter word and a long
+web address. The pictures were plain gradients with a simply drawn coin, made locally (no stock, no AI). **All of it
+was removed before the commit**: `content/` and `public/images/` are as they were.
+
+## What pass 1 had missed, and the fixes
+
+1. **The reverse inset on notable coins was broken everywhere, desktop too.** The shine layer's `.proof` rule
+   (`position: relative`) overrode `.coin-rev { position: absolute }`, and on phones the disc's width rule made it
+   64% wide. A coin with a reverse photo showed a second, large coin dropped into the card under the first, shifted
+   left over the text. → The reverse now sits inside the bead ring (`Notable.astro`), against the obverse's lower
+   right (36% of the coin, overlapping it slightly), with a selector no other rule can override (`home.css`). On
+   desktop this changes **only coins that have a reverse photo**. There are none yet, so the desktop comparison below
+   is unaffected. It restores what the README describes ("reverse as a small inset").
+2. **The home "The holder and label" label** (pass 1's item 7, fixed on desktop as asked): it took the paragraph's
+   17px size **and its ivory colour**, so it matched the other gold labels in neither size nor colour. → It is now
+   11.5px and gold on every screen (`home.css`). This is the one intended desktop change.
+3. **The microtext still ran under the corner ornaments** on the Verify panel, the home verify panel and the fees
+   panel. Pass 1 said this was fixed, but at 2× zoom the letters still passed under both bottom corners and stopped
+   mid-letter at the right. → On phones the line now runs between the corners and fades out at both ends.
+4. **Footer tap targets were not 44px.** A more specific hover-underline rule in `detail.css` kept a 2px bottom
+   padding, so the footer links measured 41px and the Privacy and Terms links 33px. → All are now 44px. The phone
+   number in the menu foot went from 42px to 44px.
+5. **Long words and web addresses ran off the edge.** They were clipped in the journal and on coin cards; for example,
+   an ancient coin's attribution or a pasted link. → Headings, paragraphs, list items and captions now break a word
+   only when it cannot fit (`global.css`). Ordinary text lays out exactly as before, and the desktop comparison
+   confirms it.
+6. **A doubled rule under the page head** on Process, Submissions and the Journal list. The title's base rule and the
+   first item's own rule, each with a lozenge, sat 40px apart on phones, and about 115px apart on tablets with an
+   empty band between. → The first item drops its rule and lozenge and starts right under the head.
+7. **Notable coins revealed one by one while being swiped.** The cards off to the side were still invisible and rose
+   into place while sliding in. → When a swipeable row comes into view, all its cards reveal together (`site.ts`).
+   This applies only when the row really scrolls sideways, so desktop is unchanged.
+8. **Swipe-row ends.** The space after the last notable card and the last step chip came from end padding and a
+   margin on the last item, which older iOS Safari leaves out of the scroll width, so the last card would end flush
+   with the screen. → A spacer element now holds that space. The step index also stops a sideways swipe at its ends
+   from turning into "go back"; the notable row already did.
+9. **The certificate number on a coin card** broke at a dash ("TMP-2026- / 000123"). → The number now moves to its
+   own line whole (up to 1120px).
+10. **Carousel:** the next slide's caption showed as stray letters in the sliver of that slide that peeks in. →
+    Captions are inset from the slide edges (up to 1120px).
+11. **Long grades** ("Ch XF, Strike 5/5, Surface 4/5") wrapped with the lines touching. → The lines are balanced and
+    have a little more line spacing (up to 1120px).
+12. **Certificate ledger at 360:** "DENOMINATION" broke mid-word ("DENOMINATIO / N"). → Under 380px the label column
+    is slightly wider and the letter spacing tighter.
+13. **Holder page on phones:** the drawing had about 50px of empty stage above and below, while its caption sat 30px
+    from the next label. → The stage is shorter (330px), and there is more space after the caption.
+14. **Journal on phones:** quotes had 40px of padding on each side of a 350px column. → The padding is now 24px, with
+    slightly smaller italic. Image mats are now 6px, and there is less space above the article title.
+15. **Tablet portrait (721–900px):** process and submission steps put the numeral and symbol on a line of their own,
+    then the title, then the summary, so the text began about 190px down. → They now use the phone layout, slightly
+    larger, with a 60px symbol beside the title. The page body also starts a little sooner.
+16. **iPads and touch laptops (up to 1120px, touch input):** arrow links were 36px tall, carousel dots 24px, step-index
+    links 26px and the legal links 17px. → All are now 44px.
+17. **Small laptops and iPad landscape (961–1120px):** feature blocks were three columns about 270px wide, with 35
+    characters a line and nine-line paragraphs. → They are now two columns.
+
+## Checked and fine
+
+- **iOS address bar:** every full-height section uses `svh` (hero 100svh, footage 68svh on phones), which does not
+  change when the bar hides, so nothing jumps. The coin river takes its size from the hero (svh) and rebuilds only
+  when the size changes by more than 80px. `vh` is used only for minimum and maximum heights (main, the 404 page, the
+  carousel's maximum height), which also stay fixed on iOS. Nothing uses `dvh`. The site does not use
+  `viewport-fit=cover`, so Safari keeps content clear of the notch on its own. The menu foot's
+  `env(safe-area-inset-bottom)` is 0 for now and does no harm.
+- **Swipe rows:** the notable coins snap one card at a time (mandatory, aligned to the start), and the last card stops
+  20px from the edge at 360, 390 and 430. The step index snaps loosely (proximity) and fades out at the right. Neither
+  row takes over vertical scrolling. The carousel uses native swipe with centre snap.
+- **Opening** at 360×640: the medallion fits with room to spare, never shows an edge, and opens onto the hero cleanly.
+- **Forms:** the corner ornaments clear the first label and the "Fields marked" note.
+- **Width:** no page scrolls sideways at any width checked, with or without the test content.
+
+## Desktop unchanged (1440)
+
+The method is the same as pass 1: the position, size and about 20 computed styles of every element on 16 pages at
+1440×900. I made two "before" recordings (to measure the animation noise) and one "after", all without the test
+content. Only two kinds of difference showed up:
+- the intended holder label (17.28px ivory → 11.52px gold; the copy block beside the drawing is 6px shorter and,
+  being centred, moves up 3px);
+- the usual animation noise: the turning rosettes, the foil seal angle and the carousel progress line.
+
+## Checks
+
+- `npm run build`, `npm test` (62 tests) and `npx astro check` (0 errors) all pass.
+- Owner rules kept:
+  - nothing pins; only the header is sticky;
+  - the coin flip shows no edge;
+  - no loupe or gimmicks;
+  - no animation was removed;
+  - no images were added;
+  - nothing names the owner;
+  - all content still comes from Keystatic.
+
+## Left for pass 3
+
+1. **A real iPhone and iPad** (still the main gap). Check the svh hero and footage while the address bar hides, the
+   swipe-row end spacing on an older iOS, swipe-back from the screen edge over the notable row, and the touch rules
+   for tablets on an iPad.
+2. **Desktop, for the owner to decide** (left alone because desktop had to stay the same). A long grade wraps with its
+   lines touching (line-height 1). The peeking next slide's caption can show as stray letters at the right edge. A
+   long certificate number breaks at a dash. All three are fixed only up to 1120px.
+3. **Microtext under the corners on desktop**, on the Verify, home verify and fees panels: the same overlap as on
+   phones, fixed on phones only.
+4. **Footage brightness** on a phone once the clips play, and PageSpeed mobile on a deploy preview if the owner allows
+   one (pass 1's items 5 and 9).
+5. **Ordered lists in journal posts** hang their numerals a little left of the bullet column. Minor; check it with a
+   real post.

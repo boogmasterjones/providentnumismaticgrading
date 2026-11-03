@@ -43,16 +43,18 @@ const corners = '<i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i 
                 <div class="coin-disc proof">
                   <img src={c.obverse} alt={`${c.name}, obverse`} loading="lazy" decoding="async" />
                 </div>
+                {/* the reverse, as a small inset tucked against the obverse's lower right (inside .bead so it is
+                    placed against the coin, not against the card's height, which changes with the text) */}
+                {c.reverse && (
+                  <div class="coin-disc coin-rev proof">
+                    <img src={c.reverse} alt={`${c.name}, reverse`} loading="lazy" decoding="async" />
+                  </div>
+                )}
               </div>
-              {c.reverse && (
-                <div class="coin-disc coin-rev proof">
-                  <img src={c.reverse} alt={`${c.name}, reverse`} loading="lazy" decoding="async" />
-                </div>
-              )}
               <div class="grade-row"><span class="sprig l" aria-hidden="true"></span><p class="coin-grade metal">{c.grade}</p><span class="sprig r" aria-hidden="true"></span></div>
               <h3>{c.name}</h3>
               {c.note && <p class="coin-note">{c.note}</p>}
-              <a class="coin-cert" href={verifyHref(c.cert)}>Certificate No. {c.cert}</a>
+              <a class="coin-cert" href={verifyHref(c.cert)}>Certificate No. <span class="cert-no">{c.cert}</span></a>
             </li>
           ))}
     </ul>
