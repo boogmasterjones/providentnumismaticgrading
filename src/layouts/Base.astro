@@ -69,6 +69,7 @@ const current = (href: string) => (path === href || path.startsWith(href + '/') 
   </head>
   <body class={bodyClass || undefined}>
     <a class="skip-link" href="#main">Skip to content</a>
+    <slot name="intro" />
     <header class="site-header">
       {!settings.launched && <div class="preview-banner" role="note">Preview: draft text, not yet confirmed.</div>}
       <div class="container bar">

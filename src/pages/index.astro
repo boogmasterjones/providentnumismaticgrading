@@ -11,6 +11,7 @@ import HolderExplode from '../components/HolderExplode.astro';
 import Reel from '../components/Reel.astro';
 import Carousel from '../components/Carousel.astro';
 import Notable from '../components/Notable.astro';
+import Intro from '../components/Intro.astro';
 import { loadPage } from '../lib/pages';
 import { gallery, settings } from '../lib/site';
 import { roman } from '../lib/text';
@@ -68,6 +69,8 @@ const jsonLd = {
 };
 ---
 <Base title={data.metaTitle} description={data.metaDescription} home jsonLd={jsonLd}>
+  <!-- OPENING: a medallion flips and opens onto the site, once per session (src/components/Intro.astro) -->
+  <Intro slot="intro" />
   <!-- HERO: static; the title sets itself once on load (under a second) and the page scrolls on normally -->
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero-media" aria-hidden="true">

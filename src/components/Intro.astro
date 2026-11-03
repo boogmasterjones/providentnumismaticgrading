@@ -1,0 +1,223 @@
+---
+/**
+ * Home opening (owner, 2026-11-02: "it originally opened with a coin flipping and revealing the whole site … a little
+ * more pizazz … not too quick, not boring-long"). After the coin-toss intro of the Coin River prototype
+ * (build/alex-prototype), redone in the site's own style and rules:
+ *
+ *   a Provident medallion (PNA seal in a laurel wreath; the laurel P monogram on the back) appears on the dark,
+ *   catches the light (a glint on the rim and a light sweep across the relief), flips twice with weight (a slight
+ *   wind-up, a fast middle, a small settle), glints as it lands, then zooms toward the viewer: its gold rim becomes
+ *   the edge of an iris that opens onto the hero, with a short gold flash, a fading ring and four glints off the rim.
+ *   The hero title then sets in as it always has.
+ *
+ * Rules: the coin never shows an edge (a 2D turn: scaleX follows cos(angle), the faces swap exactly where the width is
+ * zero, shading follows the angle; the same technique as CoinEngine.flip). Animations always play (no reduced-motion
+ * opt-out). Any click, key, wheel, scroll or touch skips straight to the site. Inline only (markup, CSS and script are
+ * in the page; no extra request). The hero stays in the HTML underneath. Once per browser session (sessionStorage);
+ * add ?intro to the address to see it again. Without JavaScript the overlay never shows.
+ * Timings and the once-per-session switch: the constants at the top of the script below (and the README effects table).
+ */
+import { settings } from '../lib/site';
+import { initials, wreathSvg } from '../lib/roman';
+
+const pna = initials(settings.siteName);
+const ring = `${settings.siteName.toUpperCase().split(/\s+/).join(' · ')} · `;
+// one wreath, drawn once and used by both faces
+const wreath = wreathSvg({ cx: 100, cy: 100, r: 52, from: 100, to: 250, leaves: 8, leafLen: 10.5, leafW: 3, stroke: 1 });
+---
+<div id="pna-intro" class="pna-intro" aria-hidden="true">
+  <svg class="pi-defs" width="0" height="0" focusable="false">
+    <defs>
+      <radialGradient id="pi-field" cx="38%" cy="32%" r="78%">
+        <stop offset="0" stop-color="#f7e6b4" /><stop offset=".38" stop-color="#d8b56b" /><stop offset=".78" stop-color="#a07a3a" /><stop offset="1" stop-color="#6a4d20" />
+      </radialGradient>
+      <linearGradient id="pi-rim" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#fff2cc" /><stop offset=".28" stop-color="#c9a45c" /><stop offset=".55" stop-color="#6f5124" /><stop offset=".78" stop-color="#e6cb8c" /><stop offset="1" stop-color="#7d5d28" />
+      </linearGradient>
+      <radialGradient id="pi-light" cx="30%" cy="26%" r="90%">
+        <stop offset="0" stop-color="#fff" stop-opacity=".34" /><stop offset=".45" stop-color="#fff" stop-opacity="0" /><stop offset=".7" stop-color="#000" stop-opacity="0" /><stop offset="1" stop-color="#000" stop-opacity=".42" />
+      </radialGradient>
+      <path id="pi-arc" d="M100 100m-73 0a73 73 0 1 1 146 0a73 73 0 1 1 -146 0" />
+      <g id="pi-wreath" set:html={wreath} />
+      <!-- the struck detail of each face, in currentColor; drawn three times (shadow, highlight, relief) -->
+      <g id="pi-o">
+        <circle cx="100" cy="100" r="88.5" fill="none" stroke="currentColor" stroke-width="1.1" />
+        <circle cx="100" cy="100" r="84" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 4.4" />
+        <text fill="currentColor" font-family="Cinzel, 'Times New Roman', serif" font-size="10.5" font-weight="600"><textPath href="#pi-arc" textLength="452" lengthAdjust="spacing">{ring}</textPath></text>
+        <circle cx="100" cy="100" r="64" fill="none" stroke="currentColor" stroke-width=".8" />
+        <use href="#pi-wreath" />
+        <text x="100" y="112" text-anchor="middle" fill="currentColor" font-family="Cinzel, 'Times New Roman', serif" font-size="33" font-weight="600" letter-spacing="2">{pna}</text>
+        <path d="M80 121h40" stroke="currentColor" stroke-width=".9" />
+      </g>
+      <g id="pi-r">
+        <circle cx="100" cy="100" r="88.5" fill="none" stroke="currentColor" stroke-width="1.1" />
+        <circle cx="100" cy="100" r="84" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="0 4.4" />
+        <circle cx="100" cy="100" r="70" fill="none" stroke="currentColor" stroke-width=".8" />
+        <circle cx="100" cy="100" r="66.5" fill="none" stroke="currentColor" stroke-width=".5" />
+        <use href="#pi-wreath" />
+        <text x="100" y="128" text-anchor="middle" fill="currentColor" font-family="'Cormorant Garamond', Georgia, serif" font-size="88" font-weight="500">P</text>
+        <path d="M100 33l3 4-3 4-3-4z" fill="currentColor" />
+      </g>
+    </defs>
+  </svg>
+  <div class="pi-iris"><i></i></div>
+  <div class="pi-glow"></div>
+  <div class="pi-ring"></div>
+  <div class="pi-coin">
+    <div class="pi-toss">
+      <div class="pi-turn">
+        <svg class="pi-face pi-front" viewBox="0 0 200 200" focusable="false">
+          <circle cx="100" cy="100" r="99.5" fill="url(#pi-rim)" />
+          <circle cx="100" cy="100" r="96" fill="none" stroke="#5a4119" stroke-width="5" stroke-dasharray="1.4 1.6" opacity=".45" />
+          <circle cx="100" cy="100" r="91.5" fill="url(#pi-field)" />
+          <use href="#pi-o" color="#3a280b" opacity=".6" transform="translate(.8 1)" />
+          <use href="#pi-o" color="#fff4d2" opacity=".55" transform="translate(-.5 -.6)" />
+          <use href="#pi-o" color="#d9b871" />
+          <circle cx="100" cy="100" r="99.5" fill="url(#pi-light)" />
+        </svg>
+        <svg class="pi-face pi-back" viewBox="0 0 200 200" focusable="false">
+          <circle cx="100" cy="100" r="99.5" fill="url(#pi-rim)" />
+          <circle cx="100" cy="100" r="96" fill="none" stroke="#5a4119" stroke-width="5" stroke-dasharray="1.4 1.6" opacity=".45" />
+          <circle cx="100" cy="100" r="91.5" fill="url(#pi-field)" />
+          <use href="#pi-r" color="#3a280b" opacity=".6" transform="translate(.8 1)" />
+          <use href="#pi-r" color="#fff4d2" opacity=".55" transform="translate(-.5 -.6)" />
+          <use href="#pi-r" color="#d9b871" />
+          <circle cx="100" cy="100" r="99.5" fill="url(#pi-light)" />
+        </svg>
+        <i class="pi-lite"></i>
+        <i class="pi-sweep"><b></b></i>
+      </div>
+    </div>
+  </div>
+  <div class="pi-flash"></div>
+  <i class="pi-star"></i><i class="pi-star"></i><i class="pi-star"></i><i class="pi-star"></i><i class="pi-star"></i><i class="pi-star"></i>
+</div>
+<script is:inline>
+(function () {
+  // ---- Settings (owner can change these) ------------------------------------------------------------------------
+  var ONCE_PER_SESSION = true;        // false: play on every visit to home. ?intro in the address always plays it.
+  var KEY = 'pna-intro-seen';         // sessionStorage key (cleared when the browser session ends)
+  var T = {                           // milliseconds from the start
+    appear: 300,                      // coin fades and grows in
+    glint: 180,                       // first glint on the rim
+    sweep: 260, sweepMs: 620,         // light sweep across the relief
+    flip: 640, flipMs: 860, turns: 2, // the flip: starts, lasts, number of half-turns (2 = once over and back)
+    reveal: 1560, revealMs: 760       // the iris opens; the intro ends at reveal + revealMs (2.32 s)
+  };
+  // ---------------------------------------------------------------------------------------------------------------
+  var doc = document.documentElement, ov = document.getElementById('pna-intro');
+  if (!ov) return;
+  var q = location.search, force = /[?&]intro\b/.test(q), seen = false;
+  try { seen = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
+  if (/[?&]shot\b/.test(q) || !ov.animate || document.visibilityState === 'hidden' || (ONCE_PER_SESSION && seen && !force)) { ov.remove(); return; }
+  try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+  doc.classList.add('pi-on', 'pi-hold');
+  doc.setAttribute('data-intro', 'playing');
+  if (performance.mark) performance.mark('intro-start');
+
+  var W = innerWidth, H = innerHeight, D = Math.round(Math.max(180, Math.min(320, Math.min(W, H) * 0.54)));
+  var R = Math.ceil(Math.hypot(W, H) / 2) + 24, S = (2 * R) / (D * 0.97) * 1.06; // shadow spread, final iris scale
+  ov.style.setProperty('--pi-d', D + 'px');
+  ov.style.setProperty('--pi-r', R + 'px');
+  var $ = function (s) { return ov.querySelector(s); }, all = [];
+  var ani = function (el, k, o) { var a = el.animate(k, o); all.push(a); return a; };
+  var FL = 'cubic-bezier(.3,0,.1,1)', OUT = 'cubic-bezier(.22,.61,.24,1)', IRIS = 'cubic-bezier(.62,0,.22,1)';
+
+  // 1. appear, glow
+  ani($('.pi-coin'), [{ opacity: 0, transform: 'scale(.84)' }, { opacity: 1, transform: 'scale(1)' }], { duration: T.appear, easing: OUT, fill: 'both' });
+  ani($('.pi-glow'), [{ opacity: 0 }, { opacity: 1 }], { duration: T.appear * 2, easing: OUT, fill: 'both' });
+
+  // 2. catches the light: a glint on the rim, a sweep across the relief (and another as it lands)
+  var stars = ov.querySelectorAll('.pi-star');
+  var star = function (el, deg, at, ms, out, big) {
+    var a = deg * Math.PI / 180, r = D * 0.47, x = Math.cos(a) * r, y = Math.sin(a) * r, x2 = Math.cos(a) * (r + out), y2 = Math.sin(a) * (r + out);
+    var p = function (X, Y, s, rot) { return 'translate(' + X.toFixed(1) + 'px,' + Y.toFixed(1) + 'px) rotate(' + rot + 'deg) scale(' + s + ')'; };
+    ani(el, [{ opacity: 0, transform: p(x, y, 0.2, -30) }, { opacity: 1, transform: p(x + (x2 - x) * 0.3, y + (y2 - y) * 0.3, big, 0), offset: 0.32 }, { opacity: 0, transform: p(x2, y2, 0.3, 30) }],
+      { duration: ms, delay: at, easing: 'cubic-bezier(.2,.8,.3,1)', fill: 'both' });
+  };
+  star(stars[0], -48, T.glint, 820, 0, 1.25);
+  var sw = $('.pi-sweep b'), swk = [{ transform: 'translateX(-130%) skewX(-16deg)' }, { transform: 'translateX(260%) skewX(-16deg)' }];
+  ani(sw, swk, { duration: T.sweepMs, delay: T.sweep, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'both' });
+  ani(sw, swk, { duration: T.sweepMs * 0.8, delay: T.flip + T.flipMs - 140, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'forwards' });
+  star(stars[1], 205, T.flip + T.flipMs - 90, 700, 0, 1);
+
+  // 3. the flip: angle = turns·π·g(u), g a soft back-ease (small wind-up, fast middle, small settle).
+  //    Width = cos(angle); the faces swap exactly at each zero of the width, so no edge is ever drawn.
+  var c1 = 0.55, c2 = c1 * 1.525;
+  var g = function (u) { return u < 0.5 ? (Math.pow(2 * u, 2) * ((c2 + 1) * 2 * u - c2)) / 2 : (Math.pow(2 * u - 2, 2) * ((c2 + 1) * (u * 2 - 2) + c2) + 2) / 2; };
+  var ang = function (u) { return T.turns * Math.PI * g(u); };
+  var side = function (th) { return Math.floor((th + Math.PI / 2) / Math.PI) & 1; }; // 0 = front, 1 = back
+  var tk = [], fk = [], bk = [], lk = [], N = 72, cur = 0;
+  var kf = function (o, th) { var c = Math.cos(th); tk.push({ offset: o, transform: 'scaleX(' + c.toFixed(4) + ')' }); lk.push({ offset: o, opacity: (0.85 * Math.abs(Math.sin(th))).toFixed(3) }); };
+  var vis = function (o, s) { fk.push({ offset: o, opacity: s ? 0 : 1 }); bk.push({ offset: o, opacity: s ? 1 : 0 }); };
+  for (var i = 0; i <= N; i++) {
+    var o = i / N, th = ang(o), s = side(th);
+    if (s !== cur) { // crossed a zero of the width: find it and swap there, at width 0
+      var lo = (i - 1) / N, hi = o;
+      for (var j = 0; j < 32; j++) { var m = (lo + hi) / 2; if (side(ang(m)) === cur) lo = m; else hi = m; }
+      tk.push({ offset: lo, transform: 'scaleX(0)' }); lk.push({ offset: lo, opacity: 0.85 });
+      vis(lo, cur); vis(lo, s); cur = s;
+    }
+    kf(o, th); vis(o, cur);
+  }
+  var fo = { duration: T.flipMs, delay: T.flip, fill: 'both' };
+  ani($('.pi-turn'), tk, fo); ani($('.pi-front'), fk, fo); ani($('.pi-back'), bk, fo); ani($('.pi-lite'), lk, fo);
+  ani($('.pi-toss'), [{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-4%) scale(1.07)', offset: 0.5 }, { transform: 'translateY(0) scale(1)' }], { duration: T.flipMs, delay: T.flip, easing: 'ease-in-out', fill: 'both' });
+
+  // 4. the reveal: the coin zooms toward the viewer and its rim becomes the iris edge; flash, ring, glints off the rim
+  var ro = { duration: T.revealMs, delay: T.reveal, easing: IRIS, fill: 'forwards' };
+  ani($('.pi-iris i'), [{ opacity: 0 }, { opacity: 0 }], { duration: 1, delay: T.reveal, fill: 'forwards' });
+  var irisA = ani($('.pi-iris'), [{ transform: 'scale(1)' }, { transform: 'scale(' + S.toFixed(3) + ')' }], ro);
+  ani($('.pi-coin'), [{ transform: 'scale(1)', opacity: 1 }, { opacity: 1, offset: 0.06 }, { opacity: 0, offset: 0.4 }, { transform: 'scale(' + S.toFixed(3) + ')', opacity: 0 }], ro);
+  ani($('.pi-ring'), [{ transform: 'scale(1)', opacity: 0 }, { opacity: 1, offset: 0.04 }, { opacity: 0.8, offset: 0.4 }, { transform: 'scale(' + (S * 0.99).toFixed(3) + ')', opacity: 0 }], ro);
+  ani($('.pi-glow'), [{ opacity: 1 }, { opacity: 0 }], { duration: T.revealMs * 0.5, delay: T.reveal, easing: OUT, fill: 'forwards' });
+  ani($('.pi-flash'), [{ opacity: 0, transform: 'scale(.7)' }, { opacity: 0.7, transform: 'scale(1)', offset: 0.22 }, { opacity: 0, transform: 'scale(1.9)' }], { duration: 460, delay: T.reveal - 30, easing: OUT, fill: 'both' });
+  [-62, 22, 148, 236].forEach(function (deg, k) { star(stars[k + 2], deg, T.reveal + 30 + k * 45, 640, D * (0.32 + 0.08 * (k % 2)), 0.9 - 0.12 * (k % 2)); });
+
+  // 5. the hero title sets in as the iris opens; the overlay leaves when the iris is fully open
+  var done = false, tm = [];
+  var unhold = function () { doc.classList.remove('pi-hold'); };
+  var finish = function (how) {
+    if (done) return; done = true;
+    tm.forEach(clearTimeout); unhold();
+    ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(function (t) { removeEventListener(t, skip, true); });
+    doc.setAttribute('data-intro', how);
+    if (performance.mark) performance.mark('intro-end');
+    var gone = function () { all.forEach(function (a) { a.cancel(); }); ov.remove(); doc.classList.remove('pi-on'); };
+    if (how === 'skipped') { ov.style.opacity = '0'; setTimeout(gone, 400); } else gone(); // a skipping click lands on the (invisible) overlay, not on a link under it
+  };
+  var skip = function () { finish('skipped'); };
+  ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(function (t) { addEventListener(t, skip, { capture: true, passive: true }); });
+  tm.push(setTimeout(unhold, T.reveal + 90));
+  irisA.finished.then(function () { finish('done'); }, function () {});
+  tm.push(setTimeout(function () { finish('done'); }, T.reveal + T.revealMs + 600)); // backstop if the timeline stalls
+})();
+</script>
+
+<style is:global>
+  /* The overlay only exists while the intro plays (html.pi-on is set by the script); without JS it never shows. */
+  .pna-intro { display: none; }
+  html.pi-on .pna-intro { display: block; position: fixed; inset: 0; z-index: 200; overflow: hidden; pointer-events: auto; contain: strict; }
+  html.pi-hold .hero-in { animation-play-state: paused; }
+  .pna-intro .pi-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+  .pna-intro > div, .pna-intro > i { position: absolute; left: 50%; top: 50%; }
+  /* the iris: a round hole the size of the coin in a dark sheet (the sheet is its shadow); it grows to open the page */
+  .pi-iris { width: calc(var(--pi-d, 240px) * 0.97); height: calc(var(--pi-d, 240px) * 0.97); margin: calc(var(--pi-d, 240px) * -0.485) 0 0 calc(var(--pi-d, 240px) * -0.485); border-radius: 50%; box-shadow: 0 0 0 var(--pi-r, 150vmax) #0a0a0b; will-change: transform; }
+  .pi-iris i { position: absolute; inset: -2px; border-radius: 50%; background: #0a0a0b; }
+  .pi-glow { width: 150vmax; height: 150vmax; margin: -75vmax 0 0 -75vmax; background: radial-gradient(closest-side, rgba(201, 164, 92, 0.13), rgba(201, 164, 92, 0.04) 38%, transparent 70%); opacity: 0; }
+  .pi-ring { width: var(--pi-d, 240px); height: var(--pi-d, 240px); margin: calc(var(--pi-d, 240px) / -2) 0 0 calc(var(--pi-d, 240px) / -2); border-radius: 50%; border: 1px solid #f1dca6; box-shadow: 0 0 14px rgba(227, 203, 148, 0.55), inset 0 0 10px rgba(227, 203, 148, 0.35); opacity: 0; will-change: transform, opacity; }
+  .pi-coin { width: var(--pi-d, 240px); height: var(--pi-d, 240px); margin: calc(var(--pi-d, 240px) / -2) 0 0 calc(var(--pi-d, 240px) / -2); will-change: transform, opacity; }
+  .pi-toss, .pi-turn { position: absolute; inset: 0; will-change: transform; }
+  .pi-turn::before { content: ''; position: absolute; inset: 1%; border-radius: 50%; box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.85); }
+  .pi-face { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .pi-back { transform: scaleX(-1); opacity: 0; }
+  .pi-lite { position: absolute; inset: 0; border-radius: 50%; opacity: 0; background: linear-gradient(90deg, rgba(255, 243, 212, 0.5), rgba(255, 243, 212, 0) 34%, rgba(0, 0, 0, 0) 52%, rgba(0, 0, 0, 0.62)); }
+  .pi-sweep { position: absolute; inset: 2%; border-radius: 50%; overflow: hidden; }
+  .pi-sweep b { position: absolute; top: -15%; bottom: -15%; left: 0; width: 44%; transform: translateX(-130%) skewX(-16deg); background: linear-gradient(100deg, transparent, rgba(255, 252, 238, 0) 20%, rgba(255, 250, 232, 0.62) 50%, rgba(255, 252, 238, 0) 80%, transparent); }
+  .pi-flash { width: calc(var(--pi-d, 240px) * 1.5); height: calc(var(--pi-d, 240px) * 1.5); margin: calc(var(--pi-d, 240px) * -0.75) 0 0 calc(var(--pi-d, 240px) * -0.75); border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 253, 245, 0.95), rgba(255, 236, 190, 0.55) 34%, rgba(227, 203, 148, 0.16) 62%, transparent); opacity: 0; }
+  /* the four-point specular star (as .glint in shine.css), larger */
+  .pi-star { width: 46px; height: 46px; margin: -23px 0 0 -23px; opacity: 0; }
+  .pi-star::before, .pi-star::after { content: ''; position: absolute; left: 50%; top: 50%; border-radius: 50%; box-shadow: 0 0 8px rgba(255, 236, 190, 0.75); }
+  .pi-star::before { width: 100%; height: 2px; margin: -1px 0 0 -50%; background: linear-gradient(90deg, transparent, #fff3d6 45%, #fff 50%, #fff3d6 55%, transparent); }
+  .pi-star::after { width: 2px; height: 100%; margin: -50% 0 0 -1px; background: linear-gradient(180deg, transparent, #fff3d6 45%, #fff 50%, #fff3d6 55%, transparent); }
+</style>
