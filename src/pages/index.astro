@@ -1,6 +1,7 @@
 ---
 import Divider from '../components/Divider.astro';
 import '../styles/coin-engine.css';
+import Inscr from '../components/Inscr.astro';
 import '../styles/home.css';
 import Base from '../layouts/Base.astro';
 import Mark from '../components/Mark.astro';
@@ -75,7 +76,7 @@ const jsonLd = {
       <div class="veil"></div>
     </div>
     <div class="hero-copy">
-      {data.eyebrow && <p class="eyebrow center hero-in" style="--d:0s">{data.eyebrow}</p>}
+      {data.eyebrow && <p class="eyebrow center hero-in" style="--d:0s"><Inscr text={data.eyebrow} /></p>}
       <h1 class="wordmark" id="hero-title">
         <span class="wm-top hero-in" style="--d:.05s">{first}</span>
         {rest && <span class="wm-rest hero-in" style="--d:.15s">{rest}</span>}
@@ -102,7 +103,7 @@ const jsonLd = {
   <section class="sec scope rake" aria-labelledby="scope-title">
     <div class="container">
       <div class="sec-head">
-        <p class="eyebrow">What we grade</p>
+        <p class="eyebrow"><Inscr text="What we grade" /></p>
         <h2 id="scope-title" class="rake-t">{data.gradeTitle}</h2>
         <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
       </div>
@@ -124,7 +125,7 @@ const jsonLd = {
       <Divider kind="micro" class="tight" />
       <div class="glance-grid">
         <div class="sec-head">
-          <p class="eyebrow">Our process</p>
+          <p class="eyebrow"><Inscr text="Our process" /></p>
           <h2 id="glance-title" class="rake-t">{data.processTitle}</h2>
           <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
           {data.processText && <p class="lead">{data.processText}</p>}
@@ -153,7 +154,7 @@ const jsonLd = {
     <div class="container holder-grid">
       <HolderExplode />
       <div class="holder-copy">
-        <p class="eyebrow">The holder and label</p>
+        <p class="eyebrow"><Inscr text="The holder and label" /></p>
         <h2 id="holder-title" class="rake-t">{data.holderTitle}</h2>
         <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
         <div class="rv"><Prose text={data.holderText} /></div>
@@ -173,7 +174,7 @@ const jsonLd = {
           <div class="verify-head">
             <span class="foil-seal" aria-hidden="true"></span>
             <div>
-              <p class="eyebrow">Certificate registry</p>
+              <p class="eyebrow"><Inscr text="Certificate registry" /></p>
               <h2 id="verify-title" class="rake-t">{data.verifyTitle}</h2>
             </div>
           </div>

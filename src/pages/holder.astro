@@ -1,6 +1,7 @@
 ---
 import Divider from '../components/Divider.astro';
 import Base from '../layouts/Base.astro';
+import Inscr from '../components/Inscr.astro';
 import PageIntro from '../components/PageIntro.astro';
 import Features from '../components/Features.astro';
 import HolderExplode from '../components/HolderExplode.astro';
@@ -16,7 +17,7 @@ const sections = data.sections ?? [];
     <div class="holder-feature">
       <HolderExplode />
       <div class="holder-note rv">
-        <p class="eyebrow">Anatomy</p>
+        <p class="eyebrow"><Inscr text="Anatomy" /></p>
         <p class="lead">Five parts, sealed into one: a back shell, an insert that holds the coin without touching its faces, the coin, the label, and a clear front shell welded to the back.</p>
       </div>
     </div>

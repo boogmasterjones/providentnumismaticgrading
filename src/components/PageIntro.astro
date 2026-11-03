@@ -1,12 +1,13 @@
 ---
 /** The opening of every inner page: small label, title, intro, and a faint engraved rosette that turns very slowly. */
 import { inlineLinks } from '../lib/text';
+import Inscr from './Inscr.astro';
 interface Props { heading: string; intro?: string | null; eyebrow?: string | null }
 const { heading, intro, eyebrow } = Astro.props;
 ---
 <header class="page-head">
   <div class="rosette turn" aria-hidden="true"></div>
-  {eyebrow && <p class="eyebrow rv">{eyebrow}</p>}
+  {eyebrow && <p class="eyebrow rv"><Inscr text={eyebrow} /></p>}
   <h1 class="rv d1">{heading}</h1>
   {intro && <p class="lead rv d2" set:html={inlineLinks(intro)} />}
   <slot />

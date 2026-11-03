@@ -43,7 +43,8 @@ and `[text](/path)` links.
 
 ## Design
 
-Dark, warm ivory and a restrained gold; Cormorant Garamond (display), Cinzel (wordmark and numerals), Inter (text).
+Dark, warm ivory and a restrained gold; Cormorant Garamond (display), Cinzel (wordmark, numerals and the inscription
+capitals of labels; self-hosted, `public/fonts/cinzel/`, SIL Open Font License), Inter (text).
 Approved references (owner, 2026-11-02): security printing, Art Deco, coin engraving, raking light, film titles,
 watch movements, and patek.com's footage panels (below). No loupe, no hover flips, no pointer-driven toys.
 **Animations always play** (owner's rule: no reduced-motion opt-out). Coins never flip, so they never show an edge.
@@ -85,7 +86,7 @@ generous spacing, all CSS and inline SVG (no image files).
 |---|---|
 | Stepped Deco corners + double hairline frame (brightens on focus/hover) | Forms (submit, contact), certificate card (verify), certificate panels, notable-coin cards, carousel slides, quotes in text |
 | A small stepped corner on each block | Feature grids (why-provident, about services, holder, grading standards) |
-| Ornamental dividers, varied: lozenge, rosette, microtext, guilloché band | Rosette: above every closing band (process, standards, holder, why, about), end of each journal post, above Verify on home. Microtext: home (before the nine steps), about, grading standards, privacy/terms/thank-you. Lozenge: submit, holder, verify. Band: submit (above the form), faq. |
+| Ornamental dividers, varied: lozenge, rosette, microtext, guilloché band | Laurel (since the Rome accents): above every closing band (process, standards, holder, why, about) and at the end of each journal post. Rosette: above Verify on home. Microtext: home (before the nine steps), privacy/terms/thank-you. Meander: about, grading standards. Lozenge: submit, holder, verify. Band: submit (above the form), faq. |
 | Eyebrow ornament (hairline ending in a lozenge) | Every eyebrow label |
 | Flourish under page titles + a lozenge on the title's base rule | Every inner page title, 404 |
 | Roman numerals | Steps (process, submit, home), footage captions |
@@ -94,7 +95,30 @@ generous spacing, all CSS and inline SVG (no image files).
 | Inset museum mat with a thin gold line | Images in text and journal posts, certificate photos, carousel |
 | Gold focus line that draws across inputs; hairline gold checkbox (lozenge tick) and radio | All forms |
 | Fine gold underline that draws in on hover | Footer links, process step index, journal list, contact details |
-| Footer: guilloché band with an engraved seal, small-caps legal line | Every page |
+| Footer: guilloché band with the seal (now the Roman seal, see below), small-caps legal line | Every page |
+
+### Ancient-Rome accents (`src/styles/roman.css`, `src/lib/roman.ts`)
+
+Client, 2026-11-02: "a sort of ancient Rome type of feel for the accents", keeping the simple, modern, dark and gold
+look. Added after the saved look `look-v1-dark-shine` as refined accents, not a theme: hairlines, gold at low
+opacity, inline SVG and CSS only (no images; the one added file is the Cinzel font, Latin subset, 26 KB).
+
+| Accent | Where |
+|---|---|
+| Inscription lettering: Cinzel capitals (after the Trajan column) with interpuncts between words, "WHAT · WE · GRADE" (`src/components/Inscr.astro`; commas give way to the dots; labels over five words stay as written) | Every eyebrow label (all pages, footage captions, notable coins), footer column headings; Cinzel also on "Certificate No." |
+| Laurel wreath, fine line | Around the P monogram in the header and footer (`BrandMark.astro`), and on the footer seal |
+| Laurel sprigs | Flanking the grade on notable-coin cards; the laurel divider (two sprigs and a ring) that opens every inner closing band (process, standards, holder, why, about) and ends each journal post |
+| Bead-and-reel moulding | A thin band under the header (on home it appears with the header's background) |
+| Egg-and-dart moulding | A thin band along the top edge of the footer, every page |
+| Meander (Greek key), sparingly | Two dividers only: About and Grading standards (replacing the microtext line there) |
+| Fluted column rules | Between the footer columns (desktop) |
+| Denarius bead ring | A ring of fine dots just outside each round notable-coin image (and placeholder) |
+| Marble veining, barely visible | Inner-page closing bands and the home holder section |
+| Seal | Footer seal: the company initials (PNA, from the site name; never "SPQR") inside a laurel wreath, a beaded ring and the full name cut in an inscription ring (`Seal.astro`) |
+| Glints | The shine system now also catches the laurel monogram, the seal, the grade sprigs and the laurel dividers |
+
+Roman numerals stay where they were (steps, footage captions). To compare with the look before these accents:
+`git diff look-v1-dark-shine`.
 
 ### Footage (stock, free licence, real footage only)
 
@@ -146,7 +170,7 @@ Approved looks are kept as annotated git tags, so we can always go back to one.
 ### Code map
 
 - Tokens: `src/styles/theme.css`. Site styles: `global.css`; decorative system: `deco.css`; shine: `shine.css`; fine
-  detail: `detail.css`; inner pages: `pages.css`; home: `home.css`; exploded holder: `explode.css`; coins:
+  detail: `detail.css`; ancient-Rome accents: `roman.css`; inner pages: `pages.css`; home: `home.css`; exploded holder: `explode.css`; coins:
   `coin-engine.css`.
 - Header, phone menu, reveals: `src/scripts/site.ts`. Glints, sweeps and flashes: `src/scripts/shine.ts`. Footage:
   `src/scripts/film.ts`. Carousel: `src/scripts/carousel.ts`.

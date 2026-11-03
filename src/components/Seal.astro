@@ -1,0 +1,27 @@
+---
+/**
+ * The footer seal, in the manner of a Roman seal: the company's initials in the centre (never "SPQR"), a laurel
+ * wreath around them and the full name cut into an inscription ring. Inline SVG; the lettering is Cinzel.
+ */
+import { settings } from '../lib/site';
+import { initials, wreathSvg } from '../lib/roman';
+
+const name = settings.siteName.toUpperCase().split(/\s+/).join(' · ');
+const ring = `${name} · `;
+const wreath = wreathSvg({ cx: 60, cy: 60, r: 27, from: 100, to: 250, leaves: 7, leafLen: 5.6, leafW: 1.6, stroke: 0.5 });
+const beads = Array.from({ length: 72 }, (_, i) => {
+  const a = (i / 72) * Math.PI * 2;
+  return `<circle cx="${(60 + 37.5 * Math.cos(a)).toFixed(2)}" cy="${(60 + 37.5 * Math.sin(a)).toFixed(2)}" r=".5"/>`;
+}).join('');
+---
+<svg class="seal" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+  <defs><path id="seal-ring" d="M60 60m-47 0a47 47 0 1 1 94 0a47 47 0 1 1 -94 0" /></defs>
+  <circle cx="60" cy="60" r="57" fill="none" stroke="currentColor" stroke-width=".6" />
+  <circle cx="60" cy="60" r="53.6" fill="none" stroke="currentColor" stroke-width=".35" stroke-opacity=".6" />
+  <text class="seal-ring" fill="currentColor"><textPath href="#seal-ring" textLength="292" lengthAdjust="spacing">{ring}</textPath></text>
+  <circle cx="60" cy="60" r="40.6" fill="none" stroke="currentColor" stroke-width=".4" stroke-opacity=".7" />
+  <g fill="currentColor" opacity=".7" set:html={beads} />
+  <g class="laurel" opacity=".85" set:html={wreath} />
+  <text class="seal-initials" x="60" y="64.4" text-anchor="middle" fill="currentColor">{initials(settings.siteName)}</text>
+  <path d="M49 69.5h22" stroke="currentColor" stroke-width=".35" stroke-opacity=".6" />
+</svg>

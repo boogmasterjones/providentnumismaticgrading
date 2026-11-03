@@ -5,6 +5,7 @@
  * Nothing is ever invented: with no entries it shows three clearly marked placeholder cards.
  */
 import { notableCoins, verifyHref } from '../lib/notable';
+import Inscr from './Inscr.astro';
 
 interface Props {
   title?: string | null;
@@ -18,7 +19,7 @@ const corners = '<i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i 
 <section class="sec notable rake" aria-labelledby="notable-title">
   <div class="container">
     <div class="sec-head center">
-      <p class="eyebrow center">From our registry</p>
+      <p class="eyebrow center"><Inscr text="From our registry" /></p>
       <h2 id="notable-title" class="rake-t">{title || 'Notable coins.'}</h2>
       <div class="deco-rule center" aria-hidden="true"><i></i><i></i><i></i></div>
       {intro && <p class="lead">{intro}</p>}
@@ -29,8 +30,8 @@ const corners = '<i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i 
             <li class={`coin-card is-ph rv d${i} shine deco-frame`} data-proof-hover>
               <Fragment set:html={corners} />
               <span class="ph-tag">Placeholder</span>
-              <div class="coin-disc proof ph-disc" aria-hidden="true"><div class="rosette"></div></div>
-              <p class="coin-grade metal" aria-hidden="true">—</p>
+              <div class="bead"><div class="coin-disc proof ph-disc" aria-hidden="true"><div class="rosette"></div></div></div>
+              <div class="grade-row"><span class="sprig l" aria-hidden="true"></span><p class="coin-grade metal" aria-hidden="true">—</p><span class="sprig r" aria-hidden="true"></span></div>
               <h3>Coming soon: notable coin</h3>
               <p class="coin-note">A coin from our registry will be shown here.</p>
             </li>
@@ -38,15 +39,17 @@ const corners = '<i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i 
         : coins.map((c, i) => (
             <li class={`coin-card rv d${i % 3} shine deco-frame`} data-proof-hover>
               <Fragment set:html={corners} />
-              <div class="coin-disc proof">
-                <img src={c.obverse} alt={`${c.name}, obverse`} loading="lazy" decoding="async" />
+              <div class="bead">
+                <div class="coin-disc proof">
+                  <img src={c.obverse} alt={`${c.name}, obverse`} loading="lazy" decoding="async" />
+                </div>
               </div>
               {c.reverse && (
                 <div class="coin-disc coin-rev proof">
                   <img src={c.reverse} alt={`${c.name}, reverse`} loading="lazy" decoding="async" />
                 </div>
               )}
-              <p class="coin-grade metal">{c.grade}</p>
+              <div class="grade-row"><span class="sprig l" aria-hidden="true"></span><p class="coin-grade metal">{c.grade}</p><span class="sprig r" aria-hidden="true"></span></div>
               <h3>{c.name}</h3>
               {c.note && <p class="coin-note">{c.note}</p>}
               <a class="coin-cert" href={verifyHref(c.cert)}>Certificate No. {c.cert}</a>

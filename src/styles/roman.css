@@ -1,0 +1,80 @@
+/*
+ * roman.css: ancient-Rome accents (client, 2026-11-02: "a sort of ancient Rome type of feel for the accents ... still
+ * keeping its relatively simple and modern look, just add some niceties and elegant designs with that theme").
+ * Refined accents on top of the approved look (git tag look-v1-dark-shine), never a theme park: hairline weights,
+ * gold at low opacity, all CSS and inline SVG. The only file is the Cinzel webfont (SIL OFL, self-hosted).
+ *
+ *  Lettering    eyebrow labels and footer headings in Cinzel (Trajan-column capitals) with interpuncts (·)
+ *  Laurel       a fine laurel wreath around the P monogram (BrandMark.astro), sprigs flanking notable-coin grades,
+ *               a laurel divider (Divider kind="laurel"), the wreath on the footer seal
+ *  Mouldings    bead-and-reel under the header, egg-and-dart above the footer, a meander (Greek key) divider used
+ *               sparingly (Divider kind="meander")
+ *  Columns      fluted hairline rules between the footer columns
+ *  Coins        a denarius-style bead ring around round coin images
+ *  Material     an extremely faint marble veining in the closing bands and the home holder section
+ *  Seal         the footer seal: the company initials in a laurel wreath with an inscription ring (Seal.astro)
+ *  The laurel and the seal also receive the occasional glint (src/scripts/shine.ts).
+ *  --laurel-sprig is set on <html> by src/layouts/Base.astro (drawn by src/lib/roman.ts).
+ */
+:root {
+  /* bead-and-reel moulding: an elongated reel, then a bead */
+  --bead-reel: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6' viewBox='0 0 12 6' fill='none' stroke='%23c9a45c' stroke-width='.55'%3E%3Cellipse cx='4' cy='3' rx='2.9' ry='1.25'/%3E%3Ccircle cx='9.5' cy='3' r='1.3'/%3E%3C/svg%3E");
+  /* egg-and-dart moulding, hanging from a fillet */
+  --egg-dart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='10' viewBox='0 0 12 10' fill='none' stroke='%23c9a45c' stroke-width='.55'%3E%3Cpath d='M0 .5h12'/%3E%3Cpath d='M1 1.4Q1 9.2 4.5 9.2T8 1.4'/%3E%3Cellipse cx='4.5' cy='4.7' rx='1.9' ry='2.9' stroke-opacity='.7'/%3E%3Cpath d='M10.5 1.4V8.4M9.6 7 10.5 8.4 11.4 7'/%3E%3C/svg%3E");
+  /* the meander (Greek key; the Romans used it too): one key hanging from a fillet, between two fillets */
+  --meander: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%23c9a45c' stroke-width='.6'%3E%3Cpath d='M0 .5h12M0 11.5h12' stroke-opacity='.6'/%3E%3Cpath d='M1.5 11.5V3h8v5.5h-5V5.5H7'/%3E%3C/svg%3E");
+  /* marble veining: iso-lines of a stretched fractal noise read as fine veins; warm, almost invisible */
+  --marble: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='720' height='720'%3E%3Cfilter id='m' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.0022 .007' numOctaves='4' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .89 0 0 0 0 .8 0 0 0 0 .58 1 0 0 0 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='720' height='720' filter='url(%23m)'/%3E%3C/svg%3E");
+}
+
+/* ---------- inscription lettering ---------- */
+.eyebrow { font: 600 0.72rem/1.1 var(--font-caps); letter-spacing: 0.26em; }
+.inscr .ip { color: var(--gold); opacity: 0.55; font-weight: 500; margin-right: -0.1em; }
+.site-footer h2 { font: 600 0.7rem/1.1 var(--font-caps); letter-spacing: 0.26em; }
+.coin-cert { font-family: var(--font-caps); font-weight: 600; letter-spacing: 0.2em; }
+
+/* ---------- laurel ---------- */
+.brand-mark { width: 46px; height: 46px; margin: -5px; }
+.grade-row { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 0 var(--space-2); }
+.grade-row .coin-grade { margin: 0; }
+.sprig { width: 32px; height: 12px; flex: none; background: var(--laurel-sprig) center / 32px 12px no-repeat; opacity: 0.7; }
+.sprig.l { transform: scaleX(-1); }
+.divider-laurel > b { width: 32px; height: 12px; flex: none; background: var(--laurel-sprig) center / 32px 12px no-repeat; opacity: 0.85; }
+.divider-laurel > b:first-of-type { transform: scaleX(-1); }
+.divider-laurel > i { width: 5px; height: 5px; flex: none; border-radius: 50%; border: 1px solid rgba(201, 164, 92, 0.7); margin: 0 -6px; }
+
+/* ---------- mouldings ---------- */
+/* bead-and-reel under the header (on the home page it appears with the header's background) */
+.site-header::after { content: ''; position: absolute; left: 0; right: 0; bottom: -4px; height: 6px; pointer-events: none; background: var(--bead-reel) 0 0 / 12px 6px repeat-x; opacity: 0.22; -webkit-mask: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); mask: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); transition: opacity 0.9s var(--ease); }
+.home .site-header:not(.scrolled):not(.open)::after { opacity: 0; }
+/* egg-and-dart above the footer */
+.site-footer::before { content: ''; position: absolute; left: 0; right: 0; top: -12px; height: 10px; pointer-events: none; background: var(--egg-dart) 0 0 / 12px 10px repeat-x; opacity: 0.28; -webkit-mask: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent); mask: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent); }
+.site-footer { margin-top: 12px; }
+/* a meander band, used sparingly */
+.divider-meander { height: 12px; max-width: 30rem; background: var(--meander) center / 12px 12px repeat-x; opacity: 0.42; -webkit-mask: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); mask: linear-gradient(90deg, transparent, #000 25%, #000 75%, transparent); }
+
+/* ---------- fluted column rules between the footer columns (desktop) ---------- */
+@media (min-width: 961px) {
+  .footer-top > * + * { position: relative; }
+  .footer-top > * + *::before { content: ''; position: absolute; left: calc(var(--space-5) / -2 - 3px); top: -6px; bottom: -6px; width: 7px; pointer-events: none; background: repeating-linear-gradient(90deg, rgba(201, 164, 92, 0.18) 0 1px, transparent 1px 3px); -webkit-mask: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent); mask: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent); }
+}
+
+/* ---------- coins: a denarius-style bead ring around round coin images ---------- */
+/* .bead wraps the round coin disc (Notable.astro) and draws a ring of fine dots just outside it */
+.bead { position: relative; width: min(78%, 260px); margin: 0 auto var(--space-4); }
+.bead > .coin-disc { width: 100%; margin: 0; }
+.bead::before { content: ''; position: absolute; inset: -15px; pointer-events: none; opacity: 0.7; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='49' fill='none' stroke='%23c9a45c' stroke-width='.62' stroke-linecap='round' stroke-dasharray='0 1' pathLength='120'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+@media (max-width: 600px) { .bead { width: min(64%, 240px); } }
+
+/* ---------- material: marble veining, very low contrast ---------- */
+.page-coda, .holder-sec { position: relative; isolation: isolate; }
+.page-coda::after, .holder-sec::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: var(--marble) center / 720px 720px; opacity: 0.055; -webkit-mask: radial-gradient(80% 90% at 50% 50%, #000 30%, transparent 85%); mask: radial-gradient(80% 90% at 50% 50%, #000 30%, transparent 85%); }
+
+/* ---------- footer seal ---------- */
+.footer-seal i { display: none; }
+.footer-seal .seal { width: 104px; height: 104px; flex: none; color: var(--gold); opacity: 0.62; }
+.seal-ring { font: 600 6.3px var(--font-caps); letter-spacing: 0.5px; }
+.seal-initials { font: 600 13px var(--font-caps); letter-spacing: 1.6px; }
+@media (max-width: 720px) {
+  .footer-seal .seal { width: 88px; height: 88px; }
+}

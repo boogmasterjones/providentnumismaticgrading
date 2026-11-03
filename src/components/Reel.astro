@@ -7,6 +7,7 @@
  * CSS (home.css, "reel"); a caption (eyebrow + one line) fades in over it.
  */
 import { roman } from '../lib/text';
+import Inscr from './Inscr.astro';
 import type { Clip } from '../lib/film';
 
 interface Props {
@@ -27,7 +28,7 @@ const video = { muted: true, playsinline: true, preload: 'none', 'aria-hidden': 
   <div class="rosette turn reel-rosette" aria-hidden="true"></div>
   <div class="reel-frame deco-frame draw" aria-hidden="true"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>
   <div class="reel-caption rv">
-    <p class="eyebrow"><span class="numeral">{roman(index + 1)}</span>{eyebrow}</p>
+    <p class="eyebrow"><span class="numeral">{roman(index + 1)}</span><Inscr text={eyebrow} /></p>
     <h2 id={id}>{title}</h2>
   </div>
 </section>

@@ -1,6 +1,7 @@
 ---
 import Divider from '../components/Divider.astro';
 import Base from '../layouts/Base.astro';
+import Inscr from '../components/Inscr.astro';
 import PageIntro from '../components/PageIntro.astro';
 import Features from '../components/Features.astro';
 import Coda from '../components/Coda.astro';
@@ -17,10 +18,10 @@ const services = data.sections ?? [];
         <div class="prose about-prose rv"><Content /></div>
       </div>
     )}
-    <Divider kind="micro" />
+    <Divider kind="meander" />
     {services.length > 0 && (
       <section class="about-services rake" aria-labelledby="services-title">
-        <p class="eyebrow">What we offer</p>
+        <p class="eyebrow"><Inscr text="What we offer" /></p>
         <h2 id="services-title" class="rake-t">Services</h2>
         <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
         <Features items={services} columns={3} headingLevel="h3" />

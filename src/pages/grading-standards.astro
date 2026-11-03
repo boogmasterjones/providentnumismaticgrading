@@ -1,6 +1,7 @@
 ---
 import Divider from '../components/Divider.astro';
 import Base from '../layouts/Base.astro';
+import Inscr from '../components/Inscr.astro';
 import PageIntro from '../components/PageIntro.astro';
 import Features from '../components/Features.astro';
 import Coda from '../components/Coda.astro';
@@ -19,7 +20,7 @@ const first = (r: string) => Number(r.match(/\d+/)?.[0] ?? 0);
     {scale.length > 0 && (
       <section class="scale rake" aria-labelledby="scale-title">
         <div class="scale-head">
-          <p class="eyebrow">The 1 to 70 scale</p>
+          <p class="eyebrow"><Inscr text="The 1 to 70 scale" /></p>
           <h2 id="scale-title" class="rake-t">From Poor to Mint State.</h2>
           <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
         </div>
@@ -42,7 +43,7 @@ const first = (r: string) => Number(r.match(/\d+/)?.[0] ?? 0);
         </ol>
       </section>
     )}
-    <Divider kind="micro" />
+    <Divider kind="meander" />
     <Features items={sections} columns={2} />
     {hasBody && <div class="prose rv" style="margin-top: var(--space-6)"><Content /></div>}
   </div>

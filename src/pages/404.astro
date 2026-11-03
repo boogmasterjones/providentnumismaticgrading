@@ -1,11 +1,12 @@
 ---
 import Base from '../layouts/Base.astro';
 import LinkArrow from '../components/LinkArrow.astro';
+import Inscr from '../components/Inscr.astro';
 ---
 <Base title="Page not found" description="This page does not exist." noindex>
   <section class="not-found">
     <div class="rosette turn" aria-hidden="true"></div>
-    <p class="eyebrow center">Error 404</p>
+    <p class="eyebrow center"><Inscr text="Error 404" /></p>
     <h1>Not on record.</h1>
     <div class="deco-rule center in" aria-hidden="true"><i></i><i></i><i></i></div>
     <p class="lead">The page you were looking for is not here.</p>

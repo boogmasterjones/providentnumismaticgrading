@@ -1,7 +1,8 @@
 /**
  * Shine (styles in src/styles/shine.css): light catching polished metal.
  *  - Glints: one small four-point star flares on a gold element in view every few seconds (randomised), never more
- *    than one at a time. Targets: the monogram, the hero title, gold rules and Deco corners, grade numbers, buttons
+ *    than one at a time. Targets: the monogram and its laurel, the footer seal, laurel sprigs, the hero title, gold
+ *    rules and Deco corners, grade numbers, buttons
  *    and seals. Paused while the tab is hidden. On the home page the hero title gets a sweep and two glints on load.
  *  - Sweeps and proof flashes: .shine and .proof elements play once (.flick) on hover/focus and, with .shine-enter or
  *    .proof, once as they come into view. Nothing here follows the scroll position.
@@ -9,6 +10,9 @@
  */
 const TARGETS = [
   '.brand-mark',
+  '.footer-seal .seal',
+  '.sprig',
+  '.divider-laurel > i',
   '.wm-top',
   '.deco-rule i:nth-child(2)',
   '.deco-frame > .c',

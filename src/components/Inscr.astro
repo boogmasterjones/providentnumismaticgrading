@@ -1,0 +1,11 @@
+---
+/**
+ * Inscription lettering for small labels: words separated by interpuncts, like letters cut in stone
+ * ("WHAT · WE · GRADE"). The dots are decoration only (hidden from screen readers). Styles: src/styles/roman.css.
+ */
+import { inscriptionWords } from '../lib/roman';
+
+interface Props { text: string }
+const words = inscriptionWords(Astro.props.text);
+---
+<span class="inscr">{words.map((w, i) => (i > 0 ? [' ', <span class="ip" aria-hidden="true">·</span>, ' ', w] : w))}</span>

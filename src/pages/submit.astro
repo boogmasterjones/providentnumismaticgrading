@@ -1,6 +1,7 @@
 ---
 import Divider from '../components/Divider.astro';
 import Base from '../layouts/Base.astro';
+import Inscr from '../components/Inscr.astro';
 import PageIntro from '../components/PageIntro.astro';
 import Steps from '../components/Steps.astro';
 import Prose from '../components/Prose.astro';
@@ -26,7 +27,7 @@ const labels = ['A ready-made design', 'A custom design', 'No preference'];
         <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
         <div class="rosette" aria-hidden="true"></div>
         <div class="fees-inner">
-          <p class="eyebrow">Fees</p>
+          <p class="eyebrow"><Inscr text="Fees" /></p>
           <h2 id="fees-title" class="rake-t">{data.feesTitle}</h2>
           <Prose text={data.feesText} />
           <LinkArrow href="/contact">Ask for a quote</LinkArrow>
@@ -40,7 +41,7 @@ const labels = ['A ready-made design', 'A custom design', 'No preference'];
     <Divider kind="band" />
     <section class="request" aria-labelledby="request-title">
       <div class="request-head">
-        <p class="eyebrow">Submission request</p>
+        <p class="eyebrow"><Inscr text="Submission request" /></p>
         <h2 id="request-title">Tell us about your coins.</h2>
         <p class="muted">We reply with a quote and shipping details. Nothing needs to be sent until then.</p>
       </div>
