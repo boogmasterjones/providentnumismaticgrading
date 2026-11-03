@@ -1,17 +1,21 @@
 ---
 import Base from '../layouts/Base.astro';
 import PageIntro from '../components/PageIntro.astro';
-import { loadPage } from '../lib/pages';
-import { settings } from '../lib/site';
+import Body from '../components/Body.astro';
+import { getSettings, loadPage } from '../lib/content';
+import { editor } from '../lib/edit';
 import { loadPopulation } from '../lib/certs/verify';
 import { getCertStore, getServerCertAdapter } from '../lib/certs/server';
 
 // Built on request from the certificate database (cached for an hour), so it stays current without a rebuild.
 export const prerender = false;
 
-const { data, Content, hasBody } = await loadPage('population');
+const { data, body, hasBody } = await loadPage(Astro, 'population');
+const settings = getSettings(Astro);
+const e = editor(Astro);
 // Hidden unless "Show the population report" is ticked in Site settings.
-const enabled = settings.showPopulation;
+// Studio's preview shows it either way, so its text can be edited before it is switched on.
+const enabled = settings.showPopulation || e.on;
 if (!enabled) Astro.response.status = 404;
 const outcome = enabled
   ? await loadPopulation({ adapter: getServerCertAdapter(), store: getCertStore(), now: Date.now, log: (m) => console.warn(m) })
@@ -25,8 +29,9 @@ const pop = outcome?.kind === 'report' ? outcome.report : null;
   </Base>
 ) : (
   <Base title={data.metaTitle} description={data.metaDescription}>
-    <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+    <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} doc="page:population" />
     <div class="page-body">
+    {e.on && !settings.showPopulation && <p class="notice info">This page is hidden on the website until "Show the population report" is switched on in Business info.</p>}
     {outcome?.kind === 'report' && outcome.demo && (
       <p class="notice warning"><span class="badge demo">DEMO</span> These figures come from made-up DEMO records. The certificate database is not connected yet.</p>
     )}
@@ -56,7 +61,7 @@ const pop = outcome?.kind === 'report' ? outcome.report : null;
         </table>
       </div>
     )}
-    {hasBody && <div class="prose"><Content /></div>}
+    {(hasBody || e.on) && <div class="prose" {...e('page:population', 'body')}><Body of={body} /></div>}
     </div>
   </Base>
 )}

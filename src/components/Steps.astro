@@ -3,26 +3,40 @@
 import Mark from './Mark.astro';
 import Prose from './Prose.astro';
 import { inlineLinks, roman } from '../lib/text';
+import { editor } from '../lib/edit';
 import type { PageSection } from '../lib/pages';
-interface Props { items: PageSection[]; compact?: boolean; headingLevel?: 'h2' | 'h3' }
-const { items, compact = false, headingLevel = 'h2' } = Astro.props;
+interface Props {
+  items: PageSection[];
+  compact?: boolean;
+  headingLevel?: 'h2' | 'h3';
+  /** Studio: the document and list these steps come from */
+  doc?: string;
+  path?: string;
+}
+const { items, compact = false, headingLevel = 'h2', doc, path = 'sections' } = Astro.props;
 const H = headingLevel;
+const e = editor(Astro);
+const ed = (p: string, o?: { panel?: boolean }) => (doc ? e(doc, `${path}.${p}`, o) : {});
 ---
-<ol class:list={['steps', { compact }]}>
+<ol class:list={['steps', { compact }]} {...(doc && items.length === 0 ? e.add(doc, path, 'Add the first step') : {})}>
   {items.map((s, i) => (
-    <li class="rv draw" id={`step-${i + 1}`}>
+    <li class="rv draw" id={`step-${i + 1}`} {...(doc ? e.item(doc, path, i, items.length) : {})}>
       <div class="step-n">
         <span class="numeral">{roman(i + 1)}</span>
-        {s.mark && s.mark !== 'none' && <span class="medallion"><Mark name={s.mark} /></span>}
+        {s.mark && s.mark !== 'none' && <span class="medallion" {...ed(`${i}.mark`, { panel: true })}><Mark name={s.mark} /></span>}
       </div>
       <div class="step-head">
-        <H>{s.title}</H>
-        {s.summary && <p>{s.summary}</p>}
+        <H {...ed(`${i}.title`)}>{s.title}</H>
+        {s.summary && <p {...ed(`${i}.summary`)}>{s.summary}</p>}
       </div>
       <div class="step-body">
-        <Prose text={s.text} />
+        <Prose text={s.text} f={ed(`${i}.text`)} />
         {s.points && s.points.length > 0 && (
-          <ul class="points">{s.points.map((p) => <li set:html={inlineLinks(p)} />)}</ul>
+          <ul class="points">
+            {s.points.map((p, j) => (
+              <li {...ed(`${i}.points.${j}`)} {...(doc ? e.item(doc, `${path}.${i}.points`, j, s.points!.length) : {})} set:html={inlineLinks(p)} />
+            ))}
+          </ul>
         )}
       </div>
     </li>

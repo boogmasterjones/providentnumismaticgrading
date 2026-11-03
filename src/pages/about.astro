@@ -5,31 +5,32 @@ import Inscr from '../components/Inscr.astro';
 import PageIntro from '../components/PageIntro.astro';
 import Features from '../components/Features.astro';
 import Coda from '../components/Coda.astro';
-import { loadPage } from '../lib/pages';
+import Body from '../components/Body.astro';
+import { loadPage } from '../lib/content';
+import { editor } from '../lib/edit';
 
-const { data, Content, hasBody } = await loadPage('about');
+const { data, body, hasBody } = await loadPage(Astro, 'about');
 const services = data.sections ?? [];
+const D = 'page:about';
+const e = editor(Astro);
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} doc={D} />
   <div class="page-body">
-    {hasBody && (
+    {(hasBody || e.on) && (
       <div class="about-body">
-        <div class="prose about-prose rv"><Content /></div>
+        <div class="prose about-prose rv" {...e(D, 'body')}><Body of={body} /></div>
       </div>
     )}
     <Divider kind="meander" />
-    {services.length > 0 && (
+    {(services.length > 0 || e.on) && (
       <section class="about-services rake" aria-labelledby="services-title">
-        <p class="eyebrow"><Inscr text="What we offer" /></p>
-        <h2 id="services-title" class="rake-t">Services</h2>
+        {data.servicesEyebrow && <p class="eyebrow" {...e(D, 'servicesEyebrow', { raw: data.servicesEyebrow })}><Inscr text={data.servicesEyebrow} /></p>}
+        <h2 id="services-title" class="rake-t" {...e(D, 'servicesTitle')}>{data.servicesTitle}</h2>
         <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
-        <Features items={services} columns={3} headingLevel="h3" />
+        <Features items={services} columns={3} headingLevel="h3" doc={D} />
       </section>
     )}
   </div>
-  <Coda
-    title="Why collectors choose us."
-    links={[{ href: '/why-provident', label: 'Why Provident' }, { href: '/contact', label: 'Contact' }]}
-  />
+  <Coda coda={data.coda} doc={D} />
 </Base>

@@ -1,4 +1,7 @@
-/** Singleton data edited in Keystatic (Site section), read at build time. */
+/**
+ * Singleton data edited in Provident Studio (Business info, Questions, spare slideshow photos), read at build time.
+ * Templates read them through src/lib/content.ts, which swaps in the drafts inside Studio's preview.
+ */
 import settingsJson from '../../content/settings.json';
 import faqJson from '../../content/faq.json';
 import galleryJson from '../../content/gallery.json';
@@ -6,6 +9,8 @@ import galleryJson from '../../content/gallery.json';
 export interface SiteSettings {
   siteName: string;
   tagline: string;
+  /** the line under the name in the footer */
+  footerText: string;
   siteUrl: string;
   phone: string;
   email: string;
@@ -18,25 +23,32 @@ export interface SiteSettings {
   launched: boolean;
 }
 
-export const settings: SiteSettings = {
-  tagline: '',
-  phone: '',
-  email: '',
-  location: '',
-  hours: '',
-  contactNote: '',
-  socialLinks: [],
-  showPopulation: false,
-  launched: false,
-  ...(settingsJson as Partial<SiteSettings>),
-} as SiteSettings;
+/** Settings with every optional field filled in. */
+export function withSettingsDefaults(raw: unknown): SiteSettings {
+  return {
+    tagline: '',
+    footerText: '',
+    phone: '',
+    email: '',
+    location: '',
+    hours: '',
+    contactNote: '',
+    socialLinks: [],
+    showPopulation: false,
+    launched: false,
+    ...(raw as Partial<SiteSettings>),
+  } as SiteSettings;
+}
 
-export const faq: { items: { question: string; answer: string }[] } = { items: [], ...(faqJson as object) };
+export type Faq = { items: { question: string; answer: string }[] };
+export type Gallery = { photos: { image: string; alt: string; caption?: string | null }[] };
 
-export const gallery: { photos: { image: string; alt: string; caption?: string }[] } = {
-  photos: [],
-  ...(galleryJson as object),
-};
+export const withFaqDefaults = (raw: unknown): Faq => ({ items: [], ...(raw as object) });
+export const withGalleryDefaults = (raw: unknown): Gallery => ({ photos: [], ...(raw as object) });
+
+export const settings: SiteSettings = withSettingsDefaults(settingsJson);
+export const faq: Faq = withFaqDefaults(faqJson);
+export const gallery: Gallery = withGalleryDefaults(galleryJson);
 
 /** "(941) 800-1585" -> "tel:+19418001585". Returns null when there are not enough digits to dial. */
 export function telHref(phone: string | undefined | null): string | null {

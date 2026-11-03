@@ -3,29 +3,34 @@ import Base from '../layouts/Base.astro';
 import PageIntro from '../components/PageIntro.astro';
 import NetlifyForm from '../components/NetlifyForm.astro';
 import Field from '../components/Field.astro';
-import { loadPage } from '../lib/pages';
-import { settings, telHref, mailtoHref } from '../lib/site';
+import Body from '../components/Body.astro';
+import { getSettings, loadPage } from '../lib/content';
+import { editor } from '../lib/edit';
+import { telHref, mailtoHref } from '../lib/site';
 
-const { data, Content, hasBody } = await loadPage('contact');
+const { data, body, hasBody } = await loadPage(Astro, 'contact');
+const settings = getSettings(Astro);
 const tel = telHref(settings.phone);
 const mailto = mailtoHref(settings.email);
+const D = 'page:contact';
+const e = editor(Astro);
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} doc={D} />
   <div class="page-body two-col">
     <section aria-labelledby="direct" class="rv">
-      <h2 id="direct" class="section-title">Directly</h2>
+      <h2 id="direct" class="section-title" {...e(D, 'directTitle')}>{data.directTitle}</h2>
       <ul class="ways">
-        {settings.phone && <li><span>Telephone, calls and texts</span>{tel ? <a href={tel}>{settings.phone}</a> : <b>{settings.phone}</b>}</li>}
-        {settings.email && <li><span>Email</span>{mailto ? <a href={mailto}>{settings.email}</a> : <b>{settings.email}</b>}</li>}
-        {settings.hours && <li><span>Hours</span><b>{settings.hours}</b></li>}
-        {settings.location && <li><span>Based in</span><b>{settings.location}</b></li>}
+        {settings.phone && <li><span>Telephone, calls and texts</span>{tel ? <a href={tel} {...e('settings', 'phone')}>{settings.phone}</a> : <b {...e('settings', 'phone')}>{settings.phone}</b>}</li>}
+        {settings.email && <li><span>Email</span>{mailto ? <a href={mailto} {...e('settings', 'email')}>{settings.email}</a> : <b {...e('settings', 'email')}>{settings.email}</b>}</li>}
+        {settings.hours && <li><span>Hours</span><b {...e('settings', 'hours')}>{settings.hours}</b></li>}
+        {settings.location && <li><span>Based in</span><b {...e('settings', 'location')}>{settings.location}</b></li>}
       </ul>
-      {settings.contactNote && <p class="muted">{settings.contactNote}</p>}
-      {hasBody && <div class="prose"><Content /></div>}
+      {settings.contactNote && <p class="muted" {...e('settings', 'contactNote')}>{settings.contactNote}</p>}
+      {(hasBody || e.on) && <div class="prose" {...e(D, 'body')}><Body of={body} /></div>}
     </section>
     <section aria-labelledby="msg" class="rv d1">
-      <h2 id="msg" class="section-title">Write to us</h2>
+      <h2 id="msg" class="section-title" {...e(D, 'formTitle')}>{data.formTitle}</h2>
       <NetlifyForm name="contact" submitLabel="Send message" label="Contact">
         <Field name="name" label="Name" required autocomplete="name" />
         <Field name="email" label="Email" type="email" required autocomplete="email" />

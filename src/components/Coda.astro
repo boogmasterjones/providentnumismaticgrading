@@ -1,15 +1,38 @@
 ---
-/** A closing band for inner pages: a statement, a deco rule and one or two quiet links. */
+/**
+ * A closing band for inner pages: a statement, a deco rule and one or two quiet links. The words come from the page's
+ * content ("coda"); `fallback` is used only if a page has none.
+ */
 import LinkArrow from './LinkArrow.astro';
 import Divider from './Divider.astro';
-interface Props { title: string; text?: string; links?: { href: string; label: string }[] }
-const { title, text, links = [] } = Astro.props;
+import Ed from './Ed.astro';
+import { editor } from '../lib/edit';
+import type { Coda } from '../lib/schemas';
+interface Props { coda?: Coda | null; doc?: string }
+const { coda, doc } = Astro.props;
+const e = editor(Astro);
+const ed = (p: string) => (doc ? e(doc, `coda.${p}`) : {});
+const links = coda?.links ?? [];
 ---
-<section class="coda rake page-coda">
-  <Divider kind="laurel" />
-  <div class="sunburst coda-sun" aria-hidden="true"></div>
-  <h2 class="rake-t">{title}</h2>
-  <div class="deco-rule center" aria-hidden="true"><i></i><i></i><i></i></div>
-  {text && <p>{text}</p>}
-  {links.length > 0 && <div class="links">{links.map((l) => <LinkArrow href={l.href}>{l.label}</LinkArrow>)}</div>}
-</section>
+{coda && (
+  <section class="coda rake page-coda">
+    <Divider kind="laurel" />
+    <div class="sunburst coda-sun" aria-hidden="true"></div>
+    <h2 class="rake-t" {...ed('title')}>{coda.title}</h2>
+    <div class="deco-rule center" aria-hidden="true"><i></i><i></i><i></i></div>
+    {coda.text && <p {...ed('text')}>{coda.text}</p>}
+    {links.length > 0 && (
+      <div class="links">
+        {links.map((l, i) =>
+          e.on && doc ? (
+            <span class="sf-wrap" {...e.item(doc, 'coda.links', i, links.length)}>
+              <LinkArrow href={l.href}><Ed f={ed(`links.${i}.label`)}>{l.label}</Ed></LinkArrow>
+            </span>
+          ) : (
+            <LinkArrow href={l.href}>{l.label}</LinkArrow>
+          ),
+        )}
+      </div>
+    )}
+  </section>
+)}

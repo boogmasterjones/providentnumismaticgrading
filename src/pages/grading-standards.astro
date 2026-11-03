@@ -5,23 +5,27 @@ import Inscr from '../components/Inscr.astro';
 import PageIntro from '../components/PageIntro.astro';
 import Features from '../components/Features.astro';
 import Coda from '../components/Coda.astro';
-import { loadPage } from '../lib/pages';
+import Body from '../components/Body.astro';
+import { loadPage } from '../lib/content';
+import { editor } from '../lib/edit';
 import { paragraphs } from '../lib/site';
 
-const { data, Content, hasBody } = await loadPage('grading-standards');
+const { data, body, hasBody } = await loadPage(Astro, 'grading-standards');
 const scale = data.scale ?? [];
 const sections = data.sections ?? [];
 // position each band on a 1-70 rule by its first number (bands are evenly spaced so short ones stay readable)
 const first = (r: string) => Number(r.match(/\d+/)?.[0] ?? 0);
+const D = 'page:grading-standards';
+const e = editor(Astro);
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} doc={D} />
   <div class="page-body">
-    {scale.length > 0 && (
+    {(scale.length > 0 || e.on) && (
       <section class="scale rake" aria-labelledby="scale-title">
         <div class="scale-head">
-          <p class="eyebrow"><Inscr text="The 1 to 70 scale" /></p>
-          <h2 id="scale-title" class="rake-t">From Poor to Mint State.</h2>
+          {data.scaleEyebrow && <p class="eyebrow" {...e(D, 'scaleEyebrow', { raw: data.scaleEyebrow })}><Inscr text={data.scaleEyebrow} /></p>}
+          <h2 id="scale-title" class="rake-t" {...e(D, 'scaleTitle')}>{data.scaleTitle}</h2>
           <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
         </div>
         <div class="scale-rule draw" aria-hidden="true">
@@ -31,24 +35,21 @@ const first = (r: string) => Number(r.match(/\d+/)?.[0] ?? 0);
           </svg>
           <div class="scale-nums">{[1, 10, 20, 30, 40, 50, 60, 70].map((n) => <span style={`--x:${((n - 1) / 69) * 100}%`}>{n}</span>)}</div>
         </div>
-        <ol class="scale-list">
-          {scale.map((b) => (
-            <li class="rv" style={`--x:${((first(b.range) - 1) / 69) * 100}%`}>
-              <span class="scale-range">{b.range}</span>
-              <span class="scale-code">{b.code}</span>
-              <span class="scale-name">{b.name}</span>
-              {b.text && <span class="scale-text">{paragraphs(b.text).join(' ')}</span>}
+        <ol class="scale-list" {...(scale.length ? {} : e.add(D, 'scale', 'Add the first grade band'))}>
+          {scale.map((b, i) => (
+            <li class="rv" style={`--x:${((first(b.range) - 1) / 69) * 100}%`} {...e.item(D, 'scale', i, scale.length)}>
+              <span class="scale-range" {...e(D, `scale.${i}.range`)}>{b.range}</span>
+              <span class="scale-code" {...e(D, `scale.${i}.code`)}>{b.code}</span>
+              <span class="scale-name" {...e(D, `scale.${i}.name`)}>{b.name}</span>
+              {b.text && <span class="scale-text" {...e(D, `scale.${i}.text`)}>{paragraphs(b.text).join(' ')}</span>}
             </li>
           ))}
         </ol>
       </section>
     )}
     <Divider kind="meander" />
-    <Features items={sections} columns={2} />
-    {hasBody && <div class="prose rv" style="margin-top: var(--space-6)"><Content /></div>}
+    <Features items={sections} columns={2} doc={D} />
+    {(hasBody || e.on) && <div class="prose rv" style="margin-top: var(--space-6)" {...e(D, 'body')}><Body of={body} /></div>}
   </div>
-  <Coda
-    title="Every grade, reviewed before it is sealed."
-    links={[{ href: '/process', label: 'Our process' }, { href: '/holder', label: 'The holder and label' }]}
-  />
+  <Coda coda={data.coda} doc={D} />
 </Base>

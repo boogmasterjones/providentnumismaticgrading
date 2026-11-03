@@ -2,20 +2,37 @@
 /** A ruled grid of blocks (reasons, services, holder topics), each with an engraved symbol. */
 import Mark from './Mark.astro';
 import Prose from './Prose.astro';
+import Ed from './Ed.astro';
 import { inlineLinks } from '../lib/text';
+import { editor } from '../lib/edit';
 import type { PageSection } from '../lib/pages';
-interface Props { items: PageSection[]; columns?: 2 | 3; headingLevel?: 'h2' | 'h3' }
-const { items, columns = 3, headingLevel = 'h2' } = Astro.props;
+interface Props {
+  items: PageSection[];
+  columns?: 2 | 3;
+  headingLevel?: 'h2' | 'h3';
+  /** Studio: the document and list these blocks come from, e.g. "page:about" + "sections" */
+  doc?: string;
+  path?: string;
+}
+const { items, columns = 3, headingLevel = 'h2', doc, path = 'sections' } = Astro.props;
 const H = headingLevel;
+const e = editor(Astro);
+const ed = (p: string, o?: { panel?: boolean }) => (doc ? e(doc, `${path}.${p}`, o) : {});
 ---
-<div class:list={['features', { two: columns === 2 }]}>
+<div class:list={['features', { two: columns === 2 }]} {...(doc && items.length === 0 ? e.add(doc, path, 'Add the first block') : {})}>
   {items.map((s, i) => (
-    <section class={`rv draw d${i % 3}`}>
-      <Mark name={s.mark} size={46} />
-      <H>{s.title}</H>
-      {s.summary && <p class="muted">{s.summary}</p>}
-      <Prose text={s.text} />
-      {s.points && s.points.length > 0 && <ul class="points">{s.points.map((p) => <li set:html={inlineLinks(p)} />)}</ul>}
+    <section class={`rv draw d${i % 3}`} {...(doc ? e.item(doc, path, i, items.length) : {})}>
+      <Ed f={ed(`${i}.mark`, { panel: true })}><Mark name={s.mark} size={46} /></Ed>
+      <H {...ed(`${i}.title`)}>{s.title}</H>
+      {s.summary && <p class="muted" {...ed(`${i}.summary`)}>{s.summary}</p>}
+      <Prose text={s.text} f={ed(`${i}.text`)} />
+      {s.points && s.points.length > 0 && (
+        <ul class="points">
+          {s.points.map((p, j) => (
+            <li {...ed(`${i}.points.${j}`)} {...(doc ? e.item(doc, `${path}.${i}.points`, j, s.points!.length) : {})} set:html={inlineLinks(p)} />
+          ))}
+        </ul>
+      )}
     </section>
   ))}
 </div>

@@ -1,18 +1,22 @@
 ---
 import Divider from './Divider.astro';
-/** A page that is only editable text: label, heading, intro and body from Keystatic. */
+/** A page that is only editable text: label, heading, intro and body (Studio, or content/pages/<id>.mdoc). */
 import Base from '../layouts/Base.astro';
 import PageIntro from './PageIntro.astro';
-import { loadPage } from '../lib/pages';
+import Body from './Body.astro';
+import { loadPage } from '../lib/content';
+import { editor } from '../lib/edit';
 
 interface Props { id: string; noindex?: boolean }
 const { id, noindex } = Astro.props;
-const { data, Content, hasBody } = await loadPage(id);
+const { data, body, hasBody } = await loadPage(Astro, id);
+const doc = `page:${id}`;
+const e = editor(Astro);
 ---
 <Base title={data.metaTitle} description={data.metaDescription} noindex={noindex}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} doc={doc} />
   <div class="page-body">
-    {hasBody && <div class="prose rv"><Content /></div>}
+    {(hasBody || e.on) && <div class="prose rv" {...e(doc, 'body')}><Body of={body} /></div>}
     <slot />
     <Divider kind="micro" />
   </div>

@@ -1,0 +1,10 @@
+---
+/**
+ * Wraps a piece of text in an editable <span> inside Studio's preview (for text that sits next to other markup, such
+ * as a link label beside its arrow). On public pages it renders the text alone, with no wrapper.
+ */
+interface Props { f: Record<string, string> }
+const { f } = Astro.props;
+const on = Object.keys(f).length > 0;
+---
+{on ? <span {...f}><slot /></span> : <slot />}

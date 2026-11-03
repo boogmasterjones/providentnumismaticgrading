@@ -11,13 +11,20 @@ import HolderExplode from '../components/HolderExplode.astro';
 import Reel from '../components/Reel.astro';
 import Carousel from '../components/Carousel.astro';
 import Notable from '../components/Notable.astro';
-import { loadPage } from '../lib/pages';
-import { gallery, settings } from '../lib/site';
+import Ed from '../components/Ed.astro';
+import Body from '../components/Body.astro';
+import { getGallery, getSettings, loadPage } from '../lib/content';
+import { editor } from '../lib/edit';
 import { roman } from '../lib/text';
 
-const { data, Content, hasBody } = await loadPage('home');
-const process = await loadPage('process');
+const { data, body, hasBody } = await loadPage(Astro, 'home');
+const process = await loadPage(Astro, 'process');
 const steps = process.data.sections ?? [];
+const settings = getSettings(Astro);
+const gallery = getGallery(Astro);
+// Studio's editing annotations (empty on the public site): src/lib/edit.ts
+const e = editor(Astro);
+const H = 'page:home';
 const words = settings.siteName.split(' ');
 const first = words[0];
 const rest = words.slice(1).join(' ');
@@ -53,8 +60,9 @@ const reels = (data.film ?? []).slice(0, clips.length).map((f, i) => ({
   eyebrow: f.summary || clips[i].eyebrow,
 }));
 
-// Carousel photos: Pages → Home → Home carousel (falls back to the Photo library, then to marked placeholders).
-const slides = (data.carousel?.length ? data.carousel : gallery.photos).filter((s) => s.image);
+// Carousel photos: Studio → Homepage slideshow (falls back to the spare photos, then to marked placeholders).
+const ownSlides = Boolean(data.carousel?.length);
+const slides = (ownSlides ? data.carousel! : gallery.photos).filter((s) => s.image);
 
 // Organization only: no people, no prices (client request, 2026-11-02).
 const jsonLd = {
@@ -76,43 +84,43 @@ const jsonLd = {
       <div class="veil"></div>
     </div>
     <div class="hero-copy">
-      {data.eyebrow && <p class="eyebrow center hero-in" style="--d:0s"><Inscr text={data.eyebrow} /></p>}
-      <h1 class="wordmark" id="hero-title">
+      {data.eyebrow && <p class="eyebrow center hero-in" style="--d:0s" {...e(H, 'eyebrow', { raw: data.eyebrow })}><Inscr text={data.eyebrow} /></p>}
+      <h1 class="wordmark" id="hero-title" {...e('settings', 'siteName', { panel: true })}>
         <span class="wm-top hero-in" style="--d:.05s">{first}</span>
         {rest && <span class="wm-rest hero-in" style="--d:.15s">{rest}</span>}
       </h1>
       <div class="deco-rule center hero-in in" style="--d:.2s" aria-hidden="true"><i></i><i></i><i></i></div>
-      <p class="hero-statement hero-in" style="--d:.25s">{data.heading}</p>
+      <p class="hero-statement hero-in" style="--d:.25s" {...e(H, 'heading')}>{data.heading}</p>
       <div class="links hero-links hero-in" style="--d:.3s">
-        <LinkArrow href="/process">{data.primaryButton || 'Our process'}</LinkArrow>
-        <LinkArrow href="/verify">{data.secondaryButton || 'Verify a certificate'}</LinkArrow>
+        <LinkArrow href="/process"><Ed f={e(H, 'primaryButton')}>{data.primaryButton || 'Our process'}</Ed></LinkArrow>
+        <LinkArrow href="/verify"><Ed f={e(H, 'secondaryButton')}>{data.secondaryButton || 'Verify a certificate'}</Ed></LinkArrow>
       </div>
     </div>
   </section>
 
   <!-- PHOTOS: slow carousel (Pages → Home → Home carousel); marked placeholders until real photos are added -->
-  <Carousel slides={slides} />
+  <Carousel slides={slides} doc={ownSlides ? H : 'gallery'} path={ownSlides ? 'carousel' : 'photos'} />
 
   <!-- NOTABLE COINS (collection "Notable coins"); marked placeholders until real coins are added -->
-  <Notable title={data.notableTitle} intro={data.notableIntro} />
+  <Notable eyebrow={data.notableEyebrow} title={data.notableTitle} intro={data.notableIntro} doc={H} />
 
   <!-- FOOTAGE I (after patek.com: a full-screen clip that plays while on screen; nothing pins) -->
-  {reels[0] && <Reel {...reels[0]} />}
+  {reels[0] && <Reel {...reels[0]} doc={H} />}
 
   <!-- WHAT WE GRADE (short) -->
   <section class="sec scope rake" aria-labelledby="scope-title">
     <div class="container">
       <div class="sec-head">
-        <p class="eyebrow"><Inscr text="What we grade" /></p>
-        <h2 id="scope-title" class="rake-t">{data.gradeTitle}</h2>
+        {data.gradeEyebrow && <p class="eyebrow" {...e(H, 'gradeEyebrow', { raw: data.gradeEyebrow })}><Inscr text={data.gradeEyebrow} /></p>}
+        <h2 id="scope-title" class="rake-t" {...e(H, 'gradeTitle')}>{data.gradeTitle}</h2>
         <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
       </div>
-      <ul class="scope-list">
-        {(data.grades ?? []).map((g, i) => (
-          <li class={`rv draw d${i}`}>
-            <span class="medallion"><Mark name={g.mark} /></span>
-            <h3>{g.title}</h3>
-            <Prose text={g.text} />
+      <ul class="scope-list" {...(data.grades?.length ? {} : e.add(H, 'grades', 'Add the first field'))}>
+        {(data.grades ?? []).map((g, i, all) => (
+          <li class={`rv draw d${i}`} {...e.item(H, 'grades', i, all.length)}>
+            <span class="medallion" {...e(H, `grades.${i}.mark`, { panel: true })}><Mark name={g.mark} /></span>
+            <h3 {...e(H, `grades.${i}.title`)}>{g.title}</h3>
+            <Prose text={g.text} f={e(H, `grades.${i}.text`)} />
           </li>
         ))}
       </ul>
@@ -125,19 +133,19 @@ const jsonLd = {
       <Divider kind="micro" class="tight" />
       <div class="glance-grid">
         <div class="sec-head">
-          <p class="eyebrow"><Inscr text="Our process" /></p>
-          <h2 id="glance-title" class="rake-t">{data.processTitle}</h2>
+          {data.processEyebrow && <p class="eyebrow" {...e(H, 'processEyebrow', { raw: data.processEyebrow })}><Inscr text={data.processEyebrow} /></p>}
+          <h2 id="glance-title" class="rake-t" {...e(H, 'processTitle')}>{data.processTitle}</h2>
           <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
-          {data.processText && <p class="lead">{data.processText}</p>}
-          <LinkArrow href="/process">Read the full process</LinkArrow>
+          {data.processText && <p class="lead" {...e(H, 'processText')}>{data.processText}</p>}
+          {data.processLink && <LinkArrow href="/process"><Ed f={e(H, 'processLink')}>{data.processLink}</Ed></LinkArrow>}
         </div>
         <ol class="glance-list">
           {steps.map((s, i) => (
             <li class="rv">
               <span class="numeral">{roman(i + 1)}</span>
               <div>
-                <h3>{s.title}</h3>
-                {s.summary && <p>{s.summary}</p>}
+                <h3 {...e('page:process', `sections.${i}.title`)}>{s.title}</h3>
+                {s.summary && <p {...e('page:process', `sections.${i}.summary`)}>{s.summary}</p>}
               </div>
             </li>
           ))}
@@ -147,18 +155,18 @@ const jsonLd = {
   </section>
 
   <!-- FOOTAGE II -->
-  {reels[1] && <Reel {...reels[1]} />}
+  {reels[1] && <Reel {...reels[1]} doc={H} />}
 
   <!-- HOLDER (compact): the exploded view assembles on its own when it comes into view (after a watch movement) -->
   <section class="sec holder-sec rake" aria-labelledby="holder-title">
     <div class="container holder-grid">
       <HolderExplode />
       <div class="holder-copy">
-        <p class="eyebrow"><Inscr text="The holder and label" /></p>
-        <h2 id="holder-title" class="rake-t">{data.holderTitle}</h2>
+        {data.holderEyebrow && <p class="eyebrow" {...e(H, 'holderEyebrow', { raw: data.holderEyebrow })}><Inscr text={data.holderEyebrow} /></p>}
+        <h2 id="holder-title" class="rake-t" {...e(H, 'holderTitle')}>{data.holderTitle}</h2>
         <div class="deco-rule" aria-hidden="true"><i></i><i></i><i></i></div>
-        <div class="rv"><Prose text={data.holderText} /></div>
-        <LinkArrow href="/holder">About the holder and label</LinkArrow>
+        <div class="rv"><Prose text={data.holderText} f={e(H, 'holderText')} /></div>
+        {data.holderLink && <LinkArrow href="/holder"><Ed f={e(H, 'holderLink')}>{data.holderLink}</Ed></LinkArrow>}
       </div>
     </div>
   </section>
@@ -174,11 +182,11 @@ const jsonLd = {
           <div class="verify-head">
             <span class="foil-seal" aria-hidden="true"></span>
             <div>
-              <p class="eyebrow"><Inscr text="Certificate registry" /></p>
-              <h2 id="verify-title" class="rake-t">{data.verifyTitle}</h2>
+              {data.verifyEyebrow && <p class="eyebrow" {...e(H, 'verifyEyebrow', { raw: data.verifyEyebrow })}><Inscr text={data.verifyEyebrow} /></p>}
+              <h2 id="verify-title" class="rake-t" {...e(H, 'verifyTitle')}>{data.verifyTitle}</h2>
             </div>
           </div>
-          {data.verifyText && <p class="verify-text">{data.verifyText}</p>}
+          {data.verifyText && <p class="verify-text" {...e(H, 'verifyText')}>{data.verifyText}</p>}
           <form class="verify-form" action="/verify" method="get" role="search">
             <label class="sr-only" for="home-cert">Certificate number</label>
             <div class="inrow">
@@ -192,7 +200,7 @@ const jsonLd = {
     </div>
   </section>
 
-  {hasBody && <section class="sec"><div class="container prose"><Content /></div></section>}
+  {(hasBody || e.on) && <section class="sec"><div class="container prose" {...e(H, 'body')}><Body of={body} /></div></section>}
 </Base>
 
 <script>

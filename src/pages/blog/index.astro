@@ -1,27 +1,31 @@
 ---
 import Base from '../../layouts/Base.astro';
 import PageIntro from '../../components/PageIntro.astro';
-import { loadPage } from '../../lib/pages';
-import { publishedPosts, formatDate } from '../../lib/blog';
+import Body from '../../components/Body.astro';
+import { getPosts, loadPage } from '../../lib/content';
+import { editor } from '../../lib/edit';
+import { formatDate } from '../../lib/blog';
 
-const { data, Content, hasBody } = await loadPage('blog');
-const posts = await publishedPosts();
+const { data, body, hasBody } = await loadPage(Astro, 'blog');
+const posts = await getPosts(Astro);
+const D = 'page:blog';
+const e = editor(Astro);
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} doc={D} />
   <div class="page-body">
-    {hasBody && <div class="prose"><Content /></div>}
+    {(hasBody || e.on) && <div class="prose" {...e(D, 'body')}><Body of={body} /></div>}
     {posts.length === 0 ? (
-      <p class="muted">The first articles are in preparation.</p>
+      <p class="muted" {...e(D, 'emptyText')}>{data.emptyText}</p>
     ) : (
       <ul class="post-list">
         {posts.map((p) => (
           <li class="rv">
             <time datetime={p.data.date.toISOString().slice(0, 10)}>{formatDate(p.data.date)}</time>
             <div>
-              {p.data.cover && <img src={p.data.cover} alt={p.data.coverAlt ?? ''} loading="lazy" decoding="async" />}
-              <h2><a href={`/blog/${p.id}`}>{p.data.title}</a></h2>
-              <p class="muted">{p.data.description}</p>
+              {p.data.cover && <img src={p.data.cover} alt={p.data.coverAlt ?? ''} loading="lazy" decoding="async" {...e(`post:${p.id}`, 'cover')} />}
+              <h2><a href={`/blog/${p.id}`}>{p.data.title}</a>{e.on && p.data.draft && <small class="sf-badge"> Hidden</small>}</h2>
+              <p class="muted" {...e(`post:${p.id}`, 'description')}>{p.data.description}</p>
             </div>
           </li>
         ))}
