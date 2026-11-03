@@ -25,3 +25,10 @@ export const FOOTER_NAV = {
     { href: '/contact', label: 'Contact' },
   ],
 } as const;
+
+/** The phone menu's quieter second row (pages that are otherwise only in the footer). */
+export const MENU_MORE = [
+  { href: '/why-provident', label: 'Why Provident' },
+  { href: '/faq', label: 'Questions' },
+  { href: '/blog', label: 'Journal' },
+] as const;
