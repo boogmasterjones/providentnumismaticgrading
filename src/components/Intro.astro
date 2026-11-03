@@ -93,7 +93,7 @@ const wreath = wreathSvg({ cx: 100, cy: 100, r: 52, from: 100, to: 250, leaves: 
   <i class="pi-star"></i><i class="pi-star"></i><i class="pi-star"></i><i class="pi-star"></i><i class="pi-star"></i><i class="pi-star"></i>
 </div>
 <script is:inline>
-(function () {
+(function boot() {
   // ---- Settings (owner can change these) ------------------------------------------------------------------------
   var ONCE_PER_SESSION = true;        // false: play on every visit to home. ?intro in the address always plays it.
   var KEY = 'pna-intro-seen';         // sessionStorage key (cleared when the browser session ends)
@@ -107,10 +107,21 @@ const wreath = wreathSvg({ cx: 100, cy: 100, r: 52, from: 100, to: 250, leaves: 
   // ---------------------------------------------------------------------------------------------------------------
   var doc = document.documentElement, ov = document.getElementById('pna-intro');
   if (!ov) return;
+  // A page opened in a background tab waits until it is actually seen, instead of silently skipping the intro.
+  if (document.visibilityState === 'hidden') {
+    document.addEventListener('visibilitychange', function v() { if (document.visibilityState === 'visible') { document.removeEventListener('visibilitychange', v); boot(); } });
+    return;
+  }
   var q = location.search, force = /[?&]intro\b/.test(q), seen = false;
+  // Pressing reload plays it again (only moving around the site within the same visit skips it).
+  try { var nav = performance.getEntriesByType('navigation')[0]; if (nav && nav.type === 'reload') force = true; } catch (e) {}
   try { seen = sessionStorage.getItem(KEY) === '1'; } catch (e) {}
-  if (/[?&]shot\b/.test(q) || !ov.animate || document.visibilityState === 'hidden' || (ONCE_PER_SESSION && seen && !force)) { ov.remove(); return; }
+  if (/[?&]shot\b/.test(q) || !ov.animate || (ONCE_PER_SESSION && seen && !force)) { ov.remove(); return; }
   try { sessionStorage.setItem(KEY, '1'); } catch (e) {}
+  // Start at the top: a browser restoring an old scroll position must not count as the visitor skipping.
+  try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; } catch (e) {}
+  scrollTo(0, 0);
+  var startedAt = performance.now();
   doc.classList.add('pi-on', 'pi-hold');
   doc.setAttribute('data-intro', 'playing');
   if (performance.mark) performance.mark('intro-start');
@@ -180,14 +191,16 @@ const wreath = wreathSvg({ cx: 100, cy: 100, r: 52, from: 100, to: 250, leaves: 
   var finish = function (how) {
     if (done) return; done = true;
     tm.forEach(clearTimeout); unhold();
-    ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(function (t) { removeEventListener(t, skip, true); });
+    ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (t) { removeEventListener(t, skip, true); });
     doc.setAttribute('data-intro', how);
     if (performance.mark) performance.mark('intro-end');
     var gone = function () { all.forEach(function (a) { a.cancel(); }); ov.remove(); doc.classList.remove('pi-on'); };
     if (how === 'skipped') { ov.style.opacity = '0'; setTimeout(gone, 400); } else gone(); // a skipping click lands on the (invisible) overlay, not on a link under it
   };
-  var skip = function () { finish('skipped'); };
-  ['pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'].forEach(function (t) { addEventListener(t, skip, { capture: true, passive: true }); });
+  // Only real visitor actions skip (not scroll events, which the browser can fire by itself on load),
+  // and nothing in the first quarter second counts (the click or key press that opened the page).
+  var skip = function () { if (performance.now() - startedAt > 250) finish('skipped'); };
+  ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(function (t) { addEventListener(t, skip, { capture: true, passive: true }); });
   tm.push(setTimeout(unhold, T.reveal + 90));
   irisA.finished.then(function () { finish('done'); }, function () {});
   tm.push(setTimeout(function () { finish('done'); }, T.reveal + T.revealMs + 600)); // backstop if the timeline stalls
