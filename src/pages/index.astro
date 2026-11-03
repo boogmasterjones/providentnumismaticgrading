@@ -20,12 +20,30 @@ const steps = process.data.sections ?? [];
 const words = settings.siteName.split(' ');
 const first = words[0];
 const rest = words.slice(1).join(' ');
-// Two footage panels (after patek.com): each clip simply plays while it is on screen. Captions come from the CMS
-// (Pages → Home → Film): "One-line summary" is the small line above, "Title" the one line over the footage.
-// Stock footage from Pexels (see README), dimmed and gold-graded in CSS. Phones get the smaller rendition.
+// Two footage panels (after patek.com): each panel cycles through three real coin clips, crossfading (about 1 s)
+// from one to the next while it is on screen. Captions come from the CMS (Pages → Home → Film): 'One-line summary' is
+// the small line above, 'Title' the one line over the footage. Stock footage from Pexels (see README), dimmed and
+// gold-graded in CSS. Phones get the smaller renditions. start/end: the good part of each clip, in seconds.
+const F = '/media/film/';
 const clips = [
-  { src: '/media/film/5651766-hd_1280_720_25fps.mp4', small: '/media/film/5651766-sd_640_360_25fps.mp4', poster: '/media/film/silver-poster.webp', start: 0.15, end: 7.35, eyebrow: 'Raking light' },
-  { src: '/media/film/7348172-sd_960_506_30fps.mp4', small: undefined, poster: '/media/film/bronze-poster.webp', start: 3, end: 17, eyebrow: 'Recorded and sealed' },
+  {
+    poster: F + 'silver-poster.webp',
+    eyebrow: 'Raking light',
+    sequence: [
+      { src: F + '5651766-hd_1280_720_25fps.mp4', small: F + '5651766-sd_640_360_25fps.mp4', start: 0.15, end: 6.6 },
+      { src: F + '5651775-sd_960_540_25fps.mp4', small: F + '5651775-sd_640_360_25fps.mp4', start: 2, end: 8.4 },
+      { src: F + '5651783-sd_960_540_25fps.mp4', small: F + '5651783-sd_640_360_25fps.mp4', start: 1.4, end: 7.6 },
+    ],
+  },
+  {
+    poster: F + 'bronze-poster.webp',
+    eyebrow: 'Recorded and sealed',
+    sequence: [
+      { src: F + '7348172-sd_960_506_30fps.mp4', start: 3, end: 10 },
+      { src: F + '5253412-sd_640_360_24fps.mp4', start: 7, end: 13.5 },
+      { src: F + '5651769-sd_960_540_25fps.mp4', small: F + '5651769-sd_640_360_25fps.mp4', start: 0.2, end: 6 },
+    ],
+  },
 ];
 const reels = (data.film ?? []).slice(0, clips.length).map((f, i) => ({
   ...clips[i],

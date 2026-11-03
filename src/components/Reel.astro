@@ -1,41 +1,28 @@
 ---
 /**
- * A full-bleed footage panel (after patek.com): the clip plays muted and looping while the panel is on screen and
- * pauses when it leaves (src/scripts/film.ts). Nothing pins and nothing follows the scroll position. The footage is
- * dimmed and gold-graded in CSS (home.css, "reel"); a caption (eyebrow + one line) fades in over it.
+ * A full-bleed footage panel (after patek.com). The panel cycles through a short sequence of clips: two stacked
+ * <video> elements take turns, the next clip is fetched while the current one plays, and each change is a slow
+ * crossfade (about 1 s), so there is never a hard cut or a loop seam (src/scripts/film.ts). It plays only while the
+ * panel is on screen. Nothing pins and nothing follows the scroll position. The footage is dimmed and gold-graded in
+ * CSS (home.css, "reel"); a caption (eyebrow + one line) fades in over it.
  */
 import { roman } from '../lib/text';
+import type { Clip } from '../lib/film';
 
 interface Props {
-  src: string;
-  small?: string;
+  sequence: Clip[];
   poster: string;
-  start?: number;
-  end?: number;
   eyebrow: string;
   title: string;
   index: number;
 }
-const { src, small, poster, start, end, eyebrow, title, index } = Astro.props;
+const { sequence, poster, eyebrow, title, index } = Astro.props;
 const id = `reel-${index + 1}`;
+const video = { muted: true, playsinline: true, preload: 'none', 'aria-hidden': 'true', tabindex: '-1', disablepictureinpicture: true } as const;
 ---
-<section class={`reel reel-${index + 1}`} aria-labelledby={id}>
-  <video
-    class="reel-video"
-    muted
-    loop
-    playsinline
-    autoplay
-    preload="none"
-    poster={poster}
-    data-src={src}
-    data-src-small={small}
-    data-start={start}
-    data-end={end}
-    aria-hidden="true"
-    tabindex="-1"
-    disablepictureinpicture
-  ></video>
+<section class={`reel reel-${index + 1}`} aria-labelledby={id} data-sequence={JSON.stringify(sequence)}>
+  <video class="reel-video is-on" poster={poster} {...video}></video>
+  <video class="reel-video" {...video}></video>
   <div class="reel-grade" aria-hidden="true"></div>
   <div class="rosette turn reel-rosette" aria-hidden="true"></div>
   <div class="reel-frame deco-frame draw" aria-hidden="true"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></div>

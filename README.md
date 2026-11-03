@@ -59,7 +59,7 @@ holder and label (compact) → verify (compact) → footer.
 
 | Effect | Where | How |
 |---|---|---|
-| Footage panels (after patek.com) | Home: after Notable coins ("Raking light") and after the nine steps ("Recorded and sealed") | Full-bleed panels about 86% of the screen tall (78% on phones), never pinned. Real coin footage, muted, looping, inline; it loads about one screen before the panel arrives (`preload="none"` until then, poster first), plays while on screen and pauses when it leaves (`src/components/Reel.astro`, `src/scripts/film.ts`). Dimmed and gold-graded in CSS (sepia/brightness filter, a gold `mix-blend-mode: color` layer, vignette). Caption: roman numeral + eyebrow and one line, Deco corners and a slowly turning guilloché rosette; it fades in once. Phones get the 640-wide rendition. |
+| Footage panels (after patek.com) | Home: after Notable coins ("Raking light") and after the nine steps ("Recorded and sealed") | Full-bleed panels about 86% of the screen tall (78% on phones), never pinned. Real coin footage, muted, inline: each panel cycles through three clips with a 1 s crossfade (never a hard cut or loop seam; see Footage below); the first clip loads about one screen before the panel arrives (poster first), the next one a few seconds before it is needed; it plays while on screen and pauses when it leaves (`src/components/Reel.astro`, `src/scripts/film.ts`). Dimmed and gold-graded in CSS (sepia/brightness filter, a gold `mix-blend-mode: color` layer, vignette). Caption: roman numeral + eyebrow and one line, Deco corners and a slowly turning guilloché rosette; it fades in once. Phones get the 640-wide renditions. |
 | Home hero | Home | Static. The title sets itself once on load in under a second (letter-spacing settles, metal gold), then one bright light sweep and a glint or two. The coin river keeps drifting behind it. |
 | Photo carousel | Home, right under the hero | Wide, matted slides; a slide every 5 s with a gold progress line under the active dot; arrows; native swipe on phones, drag with a mouse; pauses on hover, keyboard focus, off screen and in a hidden tab (`src/components/Carousel.astro`, `src/scripts/carousel.ts`). Photos come from Pages → Home → Home carousel (falls back to the Photo library); until there are any, three slides marked "Placeholder · Photo coming soon". |
 | Notable coins | Home, under the carousel | Showcase cards on dark velvet: large round coin photo (reverse as a small inset if given), grade in metal gold, coin, note, "Certificate No. …" linking to `/verify?cert=…`. Collection: Site → Notable coins (`content/notable/*.json`, `src/lib/notable.ts`). Until there are entries, three cards marked "Placeholder · Coming soon: notable coin". Never invent coins, grades or numbers. |
@@ -98,20 +98,37 @@ generous spacing, all CSS and inline SVG (no image files).
 
 ### Footage (stock, free licence, real footage only)
 
-Both clips are from Pexels under the [Pexels licence](https://www.pexels.com/license/) (free for commercial use, no
+Each footage panel cycles through **three different real coin clips** (owner, 2026-11-02: "multiple videos that it
+cycles through", no ugly cut). Two stacked `<video>` elements take turns: while one plays the good part of its clip
+(in to out point, 5 to 7 s), the other fetches the next clip about 3 s before it is needed and waits at its in-point;
+1 s before the out-point the next clip starts on top and fades in (CSS opacity, 1 s, eased). After the last clip it
+crossfades back to the first, so there is never a hard cut or a loop seam. Only the current and the next clip are
+ever loaded, nothing before the panel is about one screen away, and it all pauses off screen. Sequences and in/out
+points: `src/pages/index.astro` (`clips`); timing: `src/lib/film.ts` (`FADE`, `LEAD`, tested in
+`tests/film.test.ts`); player: `src/scripts/film.ts`.
+
+All clips are from Pexels under the [Pexels licence](https://www.pexels.com/license/) (free for commercial use, no
 attribution required; not to be resold as stock). They are the original Pexels MP4 renditions (no re-encoding; ffmpeg
-is not available here), served from `public/media/film/`. The loop is kept inside the good part of each clip with
-`data-start`/`data-end`. Posters are single frames from the same clips.
+is not available here), served from `public/media/film/`. Posters are single frames from each panel's first clip
+(`silver-poster.webp`, 15 KB; `bronze-poster.webp`, 16 KB). Phones (720 px wide or less) get the 640-wide file.
 
-| Panel | Clip | Author | Files served (size) | Loop |
-|---|---|---|---|---|
-| I, "Raking light" | [Metal money silver macro](https://www.pexels.com/video/metal-money-silver-macro-5651766/) | Tima Miroshnichenko | Desktop `5651766-hd_1280_720_25fps.mp4` (2.4 MB); phones `5651766-sd_640_360_25fps.mp4` (0.45 MB); poster `silver-poster.webp` (15 KB) | 0:00.15–0:07.35 |
-| II, "Recorded and sealed" | [Bronze coins on a turntable](https://www.pexels.com/video/bronze-coins-on-a-turntable-7348172/) | Charlie Mounsey | `7348172-sd_960_506_30fps.mp4` (0.99 MB, all screens; Pexels serves the same file for its 640 and 426 renditions); poster `bronze-poster.webp` (16 KB) | 0:03–0:17 |
+| Panel | # | Clip (Pexels ID) | Author | Desktop file (size) | Phone file (size) | In–out |
+|---|---|---|---|---|---|---|
+| I, "Raking light" | 1 | [Close-up of British coins in macro view (5651766)](https://www.pexels.com/video/metal-money-silver-macro-5651766/) | Tima Miroshnichenko | `5651766-hd_1280_720_25fps.mp4` (2.4 MB) | `5651766-sd_640_360_25fps.mp4` (0.45 MB) | 0:00.15–0:06.6 |
+| I | 2 | [Close-up footage of US money coins (5651775)](https://www.pexels.com/video/close-up-footage-of-us-money-coins-5651775/): slow macro slide across a heap of coins | Tima Miroshnichenko | `5651775-sd_960_540_25fps.mp4` (1.17 MB) | `5651775-sd_640_360_25fps.mp4` (0.51 MB) | 0:02–0:08.4 |
+| I | 3 | [Close-up video of coins (5651783)](https://www.pexels.com/video/close-up-video-of-coins-5651783/): shallow-focus macro gliding over coin relief | Tima Miroshnichenko | `5651783-sd_960_540_25fps.mp4` (1.53 MB) | `5651783-sd_640_360_25fps.mp4` (0.52 MB) | 0:01.4–0:07.6 |
+| II, "Recorded and sealed" | 1 | [Bronze coins on a turntable (7348172)](https://www.pexels.com/video/bronze-coins-on-a-turntable-7348172/) | Charlie Mounsey | `7348172-sd_960_506_30fps.mp4` (0.99 MB, all screens; despite its name the file is 426×226, the only small rendition Pexels serves; the next one up is 6.7 MB) | same | 0:03–0:10 |
+| II | 2 | [Close up footage of coins (5253412)](https://www.pexels.com/video/close-up-footage-of-a-coins-5253412/): coins on a dark wooden table, low warm light | Jerms | `5253412-sd_640_360_24fps.mp4` (1.50 MB, all screens; the 960 file is 2.8 MB) | same | 0:07–0:13.5 |
+| II | 3 | [US coins of different value (5651769)](https://www.pexels.com/video/us-coins-of-different-value-5651769/): slow pull back from a pile of coins | Tima Miroshnichenko | `5651769-sd_960_540_25fps.mp4` (1.42 MB) | `5651769-sd_640_360_25fps.mp4` (0.48 MB) | 0:00.2–0:06 |
 
-Download address pattern: `https://videos.pexels.com/video-files/<id>/<file name>`. A third clip was downloaded to look
-at and not used: [Close-up of ancient Turkish coins](https://www.pexels.com/video/close-up-of-ancient-turkish-coins-12848317/)
-(it shows modern pocket change). When the owner sends real footage of his own grading room, replace the files and
-the captions (Pages → Home → Footage panels).
+Added for the cycling (2026-11-02): 7.1 MB on disk; a desktop visitor loads at most about 5.6 MB of it, a phone
+about 3 MB, and only as each clip comes up. Download address pattern:
+`https://videos.pexels.com/video-files/<id>/<file name>`. Looked at and not used: Pexels has no real ancient or Roman
+coin footage (searched "ancient coins", "roman coins", "old coins"); the "gold coin" macro clips there are Bitcoin
+tokens; the magnifying-glass clips show banknotes; spinning-coin clips show the coin edge (the site never shows an
+edge). [Close-up of ancient Turkish coins](https://www.pexels.com/video/close-up-of-ancient-turkish-coins-12848317/)
+shows modern pocket change. When the owner sends real footage of his own grading room, replace the files and the
+captions (Pages → Home → Footage panels).
 
 ### Code map
 
