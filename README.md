@@ -130,6 +130,19 @@ edge). [Close-up of ancient Turkish coins](https://www.pexels.com/video/close-up
 shows modern pocket change. When the owner sends real footage of his own grading room, replace the files and the
 captions (Pages → Home → Footage panels).
 
+### Saved looks
+
+Approved looks are kept as annotated git tags, so we can always go back to one.
+
+| Tag | Saved | What it contains |
+|---|---|---|
+| `look-v1-dark-shine` | 2026-11-02, commit `8c211ec` | The owner-approved look: dark theme with warm ivory and restrained gold, the shine system (glints, light sweeps, proof-coin flash, metal gold), the fine framing and detail (Deco corners, guilloché, microtext, dividers), Patek-style footage panels cycling through three clips each with crossfades, the photo carousel and notable coins. Before the ancient-Rome accents. |
+
+- See it again: `git checkout look-v1-dark-shine` (a read-only look; `git checkout master` comes back).
+- Compare today's site with it: `git diff look-v1-dark-shine` (add `--stat` for a list of changed files, or a path such as `-- src/styles`).
+- Go back to it for good: `git switch -c restore-look-v1 look-v1-dark-shine`, check it, then merge that branch.
+- List saved looks: `git tag -n1 "look-*"`.
+
 ### Code map
 
 - Tokens: `src/styles/theme.css`. Site styles: `global.css`; decorative system: `deco.css`; shine: `shine.css`; fine
