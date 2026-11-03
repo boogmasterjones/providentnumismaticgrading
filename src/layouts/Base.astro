@@ -6,12 +6,13 @@ import '../styles/pages.css';
 import '../styles/shine.css';
 import '../styles/detail.css';
 import '../styles/roman.css';
+import '../styles/mobile.css';
 import BrandMark from '../components/BrandMark.astro';
 import Inscr from '../components/Inscr.astro';
 import Seal from '../components/Seal.astro';
 import { cssUrl, sprigSvg } from '../lib/roman';
 import { settings, telHref, mailtoHref } from '../lib/site';
-import { NAV, FOOTER_NAV } from '../lib/nav';
+import { NAV, FOOTER_NAV, MENU_MORE } from '../lib/nav';
 
 interface Props {
   title: string;
@@ -59,6 +60,9 @@ const current = (href: string) => (path === href || path.startsWith(href + '/') 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="preload" href="/fonts/cinzel/cinzel-latin-wght.woff2" as="font" type="font/woff2" crossorigin />
+    {/* the guilloche rosette behind every page title (and the home hero) is the largest thing on a phone's first
+        screen; as a CSS background it was only found once the stylesheets had loaded */}
+    <link rel="preload" href="/guilloche.svg" as="image" type="image/svg+xml" fetchpriority="high" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -82,6 +86,16 @@ const current = (href: string) => (path === href || path.startsWith(href + '/') 
             {nav.map((l) => <li><a href={l.href} aria-current={current(l.href)}>{l.label}</a></li>)}
             <li class="nav-contact"><a href="/contact" aria-current={current('/contact')}>Contact</a></li>
           </ul>
+          <!-- phone menu only (mobile.css): the remaining pages and how to reach us -->
+          <div class="nav-foot">
+            <div class="nav-more">{MENU_MORE.map((l) => <a href={l.href} aria-current={current(l.href)}>{l.label}</a>)}</div>
+            {(settings.phone || settings.location) && (
+              <div class="nav-reach">
+                {settings.location && <span>{settings.location}</span>}
+                {settings.phone && (tel ? <a href={tel}>{settings.phone}</a> : <span>{settings.phone}</span>)}
+              </div>
+            )}
+          </div>
         </nav>
         <a class="header-contact" href="/contact">Contact</a>
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu <i aria-hidden="true"></i></button>

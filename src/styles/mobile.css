@@ -1,0 +1,444 @@
+/*
+ * mobile.css: the phone and tablet makeover (owner, 2026-11-03: "make sure everything looks and feels amazing on
+ * mobile ... formatting, text sizing, making really, really good use of the limited space, not squishing anything").
+ *
+ * DESKTOP NEVER CHANGES: every rule here sits inside a max-width media query (960px or less, 1120px for the menu,
+ * which is already the phone menu up to there). Selectors start with `html` so these rules win over the base rules
+ * whatever order the stylesheets are bundled in. Loaded last by src/layouts/Base.astro.
+ *
+ *  Rhythm     tighter section spacing on phones (tokens), smaller dividers and ornaments; roomy where it matters
+ *             (hero, footage, notable coins), compact where it should be (lists, steps, footer)
+ *  Type       body copy never under 16px; inscription capitals letter-spaced for a phone; refined heading scale
+ *  Space      notable coins and the process index become swipeable rows; steps and feature blocks put their
+ *             symbol beside the title instead of above it; certificate facts become a two-column ledger;
+ *             the footer folds its two link lists side by side
+ *  Touch      every control at least 44px tall (carousel dots and arrows, footer and legal links, step index)
+ */
+
+/* ---------- menu (the phone menu runs up to 1120px) ---------- */
+.nav-foot { display: none; }
+@media (max-width: 1120px) {
+  html .nav { display: flex; flex-direction: column; }
+  html .nav ul { padding-bottom: var(--space-4); }
+  /* the items arrive in a short stagger when the menu opens */
+  html .nav li { opacity: 0; transform: translateY(8px); transition: opacity 0.45s var(--ease), transform 0.45s var(--ease); }
+  html .site-header.open .nav li { opacity: 1; transform: none; }
+  html .site-header.open .nav li:nth-child(2) { transition-delay: 0.04s; }
+  html .site-header.open .nav li:nth-child(3) { transition-delay: 0.08s; }
+  html .site-header.open .nav li:nth-child(4) { transition-delay: 0.12s; }
+  html .site-header.open .nav li:nth-child(5) { transition-delay: 0.16s; }
+  html .site-header.open .nav li:nth-child(6) { transition-delay: 0.2s; }
+  html .site-header.open .nav li:nth-child(7) { transition-delay: 0.24s; }
+  html .site-header.open .nav li:nth-child(8) { transition-delay: 0.28s; }
+  html .nav li a { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; }
+  html .nav li a[aria-current='page'] { color: var(--gold-hi); }
+  /* the rest of the site, quietly, under the menu: more pages, then how to reach us */
+  html .nav-foot { display: grid; gap: var(--space-4); margin-top: auto; padding: var(--space-4) var(--gutter) calc(var(--space-5) + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--color-border); opacity: 0; transition: opacity 0.5s var(--ease) 0.2s; }
+  html .site-header.open .nav-foot { opacity: 1; }
+  html .nav-foot .nav-more { display: flex; flex-wrap: wrap; gap: 0 22px; }
+  html .nav-foot .nav-more a { font: 400 0.95rem/1 var(--font-body); color: var(--color-text-2); padding: 14px 0; text-decoration: none; }
+  html .nav-foot .nav-reach { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; color: var(--color-muted); font-size: 0.95rem; }
+  html .nav-foot .nav-reach a { font: 500 1.35rem/1 var(--font-heading); color: var(--color-text); text-decoration: none; padding: 10px 0; }
+  html .nav-foot .eyebrow { margin: 0; }
+}
+@media (max-width: 1120px) and (max-height: 600px) { html .nav li a { padding: 12px 0; font-size: 1.45rem; } }
+
+/* ---------- tablet (721–960) ---------- */
+@media (min-width: 721px) and (max-width: 900px) {
+  /* three notable coins in one row instead of two and an orphan */
+  html .notable-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  html .coin-card { padding: 2.4rem 1rem 1.5rem; }
+  html .coin-card h3 { font-size: 1.25rem; }
+  html .bead { width: 82%; }
+  /* the nine steps in two columns */
+  html .glance-list { display: grid; grid-template-columns: 1fr 1fr; column-gap: var(--space-5); }
+  html .glance-list li { padding: 20px 0; }
+}
+
+/* ---------- phones ---------- */
+@media (max-width: 720px) {
+  :root { --space-6: 3.25rem; --space-7: 4.25rem; --space-8: 5.25rem; --gutter: 1.25rem; }
+
+  /* type: a refined scale for a narrow column; nothing under 16px that is meant to be read */
+  html h1 { font-size: clamp(2.45rem, 11.2vw, 2.9rem); line-height: 1.04; }
+  html h2 { font-size: clamp(1.95rem, 8.6vw, 2.25rem); line-height: 1.08; }
+  html .lead { font-size: 1.24rem; line-height: 1.5; }
+  html .eyebrow { letter-spacing: 0.2em; gap: 10px; font-size: 0.7rem; line-height: 1.5; margin-bottom: var(--space-3); }
+  html .eyebrow::before, html .eyebrow.center::after { width: 28px; background-size: 40px 8px; background-position: right center; }
+  html .eyebrow.center::after { background-position: left center; }
+  html .link-arrow { padding: 14px 0; letter-spacing: 0.2em; }
+  html .btn { letter-spacing: 0.2em; }
+  html .deco-rule { margin: var(--space-3) 0 var(--space-4); }
+  html .divider { margin: var(--space-4) auto; }
+  html .divider.tight { margin: var(--space-3) auto; }
+
+  /* inner page head */
+  html .page-head { padding: calc(var(--space-6) - 0.5rem) 0 var(--space-5); }
+  html .page-head h1 { max-width: none; }
+  html .page-head h1::after { width: 120px; margin-top: var(--space-3); background-size: 120px 10px; height: 10px; }
+  html .page-body { padding: var(--space-6) 0 var(--space-7); }
+  html .coda { padding-top: var(--space-6); padding-bottom: var(--space-6); }
+  html .page-coda > .divider { margin-bottom: var(--space-5); }
+  html .coda .links { flex-direction: column; gap: 4px; }
+  html .coda .rosette { width: 520px; }
+
+  /* steps (process, submissions): the symbol sits beside the title instead of above it */
+  html .steps > li, html .steps.compact > li { grid-template-columns: 52px minmax(0, 1fr); column-gap: 16px; row-gap: 14px; padding: var(--space-5) 0 calc(var(--space-5) - 4px); }
+  html .steps .step-n { grid-auto-flow: row; justify-items: center; align-content: start; gap: 8px; }
+  html .steps .step-n .medallion { width: 52px; height: 52px; order: -1; }
+  html .steps .step-n .medallion::after { inset: 4px; }
+  html .steps .step-n .mark { width: 28px; height: 28px; }
+  html .steps .step-n .numeral { font-size: 0.7rem; letter-spacing: 0.16em; }
+  html .steps .step-head { align-self: center; }
+  html .steps .step-head h2, html .steps .step-head h3, html .steps.compact .step-head h2, html .steps.compact .step-head h3 { font-size: 1.65rem; line-height: 1.1; margin: 0 0 4px; }
+  html .steps .step-head p { font-size: 1.12rem; line-height: 1.35; }
+  html .steps .step-body { grid-column: 1 / -1; }
+
+  /* feature blocks (standards, holder, why, about): symbol and title on one line */
+  html .features > *, html .features.two > * { display: grid; grid-template-columns: 34px minmax(0, 1fr); column-gap: 14px; align-items: center; padding: calc(var(--space-4) + 6px) 0 var(--space-4) !important; background-position: 0 -14px; }
+  html .features > * > *:not(.mark):not(h2):not(h3) { grid-column: 1 / -1; }
+  html .features .mark { width: 34px; height: 34px; margin: 0; }
+  html .features h2, html .features h3 { font-size: 1.5rem; margin: 0; }
+  html .features h2 + *, html .features h3 + * { margin-top: var(--space-3); }
+
+  /* questions */
+  html .faq-list summary { padding: 20px 40px 20px 0; font-size: 1.32rem; }
+
+  /* contact */
+  html .ways li { padding: 16px 0; }
+  html .two-col { gap: var(--space-5); }
+
+  /* forms: a slimmer frame so the fields get the width */
+  html form.stack { padding: 1.5rem 1.15rem 1.25rem; gap: 24px; }
+  html .form-grid { gap: 24px; }
+  html .field label { font-size: 0.72rem; letter-spacing: 0.18em; }
+  html .field .hint, html .form-note { font-size: 0.9rem; }
+  html form.stack .btn { width: 100%; }
+  html textarea { min-height: 7.5rem; }
+
+  /* certificate lookup and card */
+  html .verify-page-panel { padding: 1.4rem 1.25rem 2.1rem; }
+  html .inrow input { font-size: 1.35rem; min-height: 56px; }
+  html .inrow .btn { padding-left: 14px; }
+  html .cert-card { padding: 1.4rem 1.15rem; gap: var(--space-3); }
+  html .cert-card-head h2 { font-size: 1.35rem; }
+  html dl.facts dt { font-size: 0.7rem; letter-spacing: 0.16em; }
+
+  /* journal */
+  html .post-list li { padding: var(--space-4) 0; }
+  html article.post { padding: var(--space-6) 0 var(--space-7); }
+  html article.post h1 { font-size: clamp(2.2rem, 10vw, 2.7rem); }
+
+  /* footer: compact, the two link lists side by side */
+  html .site-footer { padding: var(--space-6) 0 var(--space-4); font-size: 1rem; }
+  html .footer-top { grid-template-columns: 1fr 1fr; gap: var(--space-5) var(--space-4); }
+  html .footer-brand, html .footer-top > :last-child { grid-column: 1 / -1; }
+  html .footer-brand .brand { margin-bottom: var(--space-3); }
+  html .footer-brand p { margin: 0; }
+  html .site-footer h2 { margin: 0 0 var(--space-2); }
+  html .site-footer ul { gap: 0; }
+  html .site-footer nav li a { display: inline-block; padding: 12px 0 10px; }
+  html .footer-top > :last-child ul { gap: 4px; }
+  html .footer-top > :last-child li a { display: inline-block; padding: 11px 0; }
+  html .footer-seal { margin-top: var(--space-5); }
+  html .footer-legal { margin-top: var(--space-3); letter-spacing: 0.14em; flex-direction: column; align-items: flex-start; gap: 0; }
+  html .footer-legal nav { gap: var(--space-4); }
+  html .footer-legal a { display: inline-block; padding: 16px 0; }
+}
+
+/* ---------- small phones ---------- */
+@media (max-width: 380px) {
+  html h1 { font-size: 2.35rem; }
+  html .eyebrow { letter-spacing: 0.16em; }
+  html .steps > li, html .steps.compact > li { grid-template-columns: 46px minmax(0, 1fr); column-gap: 14px; }
+  html .steps .step-n .medallion { width: 46px; height: 46px; }
+  html .steps .step-head h2, html .steps .step-head h3, html .steps.compact .step-head h2, html .steps.compact .step-head h3 { font-size: 1.5rem; }
+}
+
+/* ---------- home, phones ---------- */
+@media (max-width: 720px) {
+  /* hero: the river fills the screen; the copy sits a touch above centre, where the eye lands */
+  html .hero-copy { padding: calc(var(--header-h) + 28px) var(--gutter) 72px; }
+  html .hero-statement { font-size: 1.08rem; max-width: 21rem; }
+  html .hero-copy .deco-rule { margin: var(--space-3) 0 var(--space-4); }
+
+  /* carousel: comfortable touch targets */
+  html .carousel { padding: var(--space-4) 0 var(--space-2); }
+  html .car-ui { margin-top: var(--space-3); gap: var(--space-3); }
+  html .car-btn { width: 44px; height: 44px; }
+  html .car-dots { gap: 4px; }
+  html .car-dot { width: 30px; height: 44px; }
+  html .car-ph-text { letter-spacing: 0.3em; }
+
+  /* section rhythm */
+  html .sec-head { margin-bottom: var(--space-5); }
+  html .notable { padding-top: var(--space-5); }
+  html .scope { padding-top: var(--space-6); }
+
+  /* notable coins: a swipeable row, each card most of the screen wide with the next one peeking in */
+  html .notable-grid { display: flex; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; margin: 0 calc(var(--gutter) * -1); padding: 4px var(--gutter) 6px; scroll-padding: 0 var(--gutter); }
+  html .notable-grid::-webkit-scrollbar { display: none; }
+  html .notable-grid > li { flex: 0 0 min(80%, 320px); scroll-snap-align: start; }
+  html .coin-card { padding: 2.6rem 1.1rem 1.4rem; }
+  html .coin-card h3 { font-size: 1.32rem; }
+  html .coin-note { font-size: 1rem; }
+  html .bead { width: 76%; }
+
+  /* footage: shorter on a phone (still most of the screen), finer corners */
+  html .reel { height: 68vh; height: 68svh; min-height: 400px; }
+  html .reel-frame { inset: 12px; }
+  html .reel-frame > .c { width: 30px; height: 30px; background-size: 30px 30px; }
+  html .reel-caption, html .reel-2 .reel-caption { bottom: 11%; }
+  html .reel-caption h2 { font-size: clamp(2rem, 9vw, 2.4rem); }
+
+  /* what we grade: a tighter list */
+  html .scope-list li, html .scope-list li + li { padding: var(--space-3) 0 calc(var(--space-3) + 4px); grid-template-columns: 52px 1fr; }
+  html .scope-list .medallion { width: 52px; height: 52px; }
+  html .scope-list .medallion::after { inset: 4px; }
+  html .scope-list .medallion .mark { width: 28px; height: 28px; }
+  html .scope-list h3 { font-size: 1.45rem; margin-bottom: 4px; }
+  html .scope-list p { font-size: 1rem; line-height: 1.6; }
+
+  /* the nine steps: a compact index, one line of summary each */
+  html .glance-grid { gap: var(--space-4); }
+  html .glance-list li { grid-template-columns: 2.6rem 1fr; gap: 0 10px; padding: 15px 0 14px; }
+  html .glance-list .numeral { padding-top: 0.5em; font-size: 0.72rem; }
+  html .glance-list h3 { font-size: 1.32rem; margin: 0 0 2px; }
+  html .glance-list p { font-size: 1rem; line-height: 1.5; }
+
+  /* holder: a smaller drawing with less air around it */
+  html .holder-sec { padding: var(--space-6) 0 var(--space-4); }
+  html .holder-copy p { font-size: 1.0625rem; }
+
+  /* verify: the seal sits beside the label, the field gets the width */
+  html .verify-sec { padding: var(--space-3) 0 var(--space-6); }
+  html .verify-panel { padding: 1.6rem 1.25rem 2.2rem; }
+  html .verify-head { flex-direction: row; align-items: center; gap: 14px; margin-bottom: var(--space-3); }
+  html .verify-head > div { display: contents; }
+  html .verify-head { flex-wrap: wrap; }
+  html .verify-head .foil-seal { width: 40px; height: 40px; }
+  html .verify-head .foil-seal::after { inset: 5px; }
+  html .verify-head .eyebrow { margin: 0; flex: 1; }
+  html .verify-head h2 { flex-basis: 100%; margin-top: var(--space-3); }
+}
+@media (max-width: 560px) {
+  html .ex-scene { height: 380px; }
+  html .ex-stack { scale: 0.72; }
+}
+
+/* ---------- inner pages, phones ---------- */
+@media (max-width: 720px) {
+  /* process: the step index becomes one swipeable row of chips instead of five ragged lines */
+  html .step-index { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 8px; margin: var(--space-4) calc(var(--gutter) * -1) 0; padding: 0 var(--gutter) 2px; scroll-padding: 0 var(--gutter); scroll-snap-type: x proximity; -webkit-mask: linear-gradient(90deg, #000 calc(100% - 44px), transparent); mask: linear-gradient(90deg, #000 calc(100% - 44px), transparent); }
+  html .step-index::-webkit-scrollbar { display: none; }
+  html .step-index a { flex: none; scroll-snap-align: start; align-items: center; min-height: 44px; padding: 0 15px; border: 1px solid var(--color-border-strong); border-radius: 2px; white-space: nowrap; font-size: 0.95rem; color: var(--color-text-2); background: rgba(14, 14, 16, 0.6); }
+  html .step-index a:last-child { margin-right: 44px; }
+  html .step-index .numeral { font-size: 0.66rem; }
+
+  /* grading scale */
+  html .scale { margin-bottom: var(--space-6); }
+  html .scale-list li { grid-template-columns: 4.6rem 1fr; padding: 16px 0; }
+  html .scale-range { font-size: 1.5rem; }
+  html .scale-name { font-size: 1.28rem; }
+  html .scale-text { font-size: 1rem; line-height: 1.6; }
+  html .scale-nums { font-size: 0.7rem; }
+
+  /* holder page */
+  html .holder-feature { margin-bottom: var(--space-6); gap: var(--space-3); }
+
+  /* about, submissions */
+  html .about-prose { margin-bottom: var(--space-6); }
+  html .fees-note { margin: var(--space-6) 0; padding: 1.6rem 1.25rem 2.3rem; }
+  html .request { gap: var(--space-3); }
+
+  /* certificate facts: a two-column ledger (label left, value right) instead of a long stack */
+  html dl.facts { grid-template-columns: minmax(6.6rem, 36%) minmax(0, 1fr); }
+  html dl.facts dt { border-bottom: 1px dotted rgba(201, 164, 92, 0.22); padding: 15px 12px 11px 0; line-height: 1.35; }
+  html dl.facts dd { padding: 11px 0; }
+  html .coin-photos { gap: 12px; }
+  html .verify-note { margin-top: var(--space-4); }
+
+  /* 404 */
+  html .not-found { min-height: 62vh; padding: var(--space-6) 0; }
+}
+@media (max-width: 720px) {
+  /* the holder copy's paragraph size must not reach its label (it did: the label read at 17px and wrapped) */
+  html .holder-copy .eyebrow { font-size: 0.7rem; }
+}
+@media (max-width: 720px) {
+  /* framed panels: finer corners so they never touch the text, and room for the microtext line at the foot */
+  html .deco-frame > .c { width: 24px; height: 24px; background-size: 34px 34px; }
+  html .cert-panel > .c, html .verify-panel > .c, html .fees-note > .c, html .verify-page-panel > .c { margin: 9px; }
+  html .verify-page-panel { padding: 1.75rem 1.4rem 2.7rem; }
+  html .verify-panel { padding-bottom: 2.6rem; }
+  html .fees-note { padding: 1.9rem 1.4rem 2.7rem; }
+  html dl.facts { grid-template-columns: minmax(7rem, 38%) minmax(0, 1fr); }
+  html dl.facts dt { letter-spacing: 0.12em; }
+  html .page-body { padding-top: var(--space-5); }
+}
+@media (min-width: 721px) and (max-width: 960px) {
+  html .holder-copy .eyebrow { font-size: 0.72rem; }
+}
+
+/* ======================================================================================================== */
+/* pass 2 (2026-11-03): fixes found with real-looking content and a second look                              */
+/* ======================================================================================================== */
+@media (max-width: 720px) {
+  /* the microtext line at the foot of framed panels ran under the corner ornaments (verify, home verify, fees):
+     it now runs between them and fades at both ends instead of stopping mid-letter */
+  html .cert-panel > .microtext { left: 42px; right: 42px; -webkit-mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); mask: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent); }
+
+  /* the page title's base rule and the first step's (or post's) own rule sat 40px apart and read as a doubled line:
+     the first item drops its rule and its lozenge, and starts right under the page head */
+  html .page-body > .steps:first-child > li:first-child, html .page-body > .post-list:first-child > li:first-child { border-top: 0; padding-top: 0; }
+  html .page-body > .steps:first-child > li:first-child::before { display: none; }
+
+  /* journal: quotes had 40px of padding on each side of a 350px column; images keep a slimmer mat */
+  html .prose blockquote { padding: var(--space-3) var(--space-4); font-size: 1.22rem; }
+  html .prose img, html .post-cover img { padding: 6px; }
+
+
+  /* holder page: the drawing had 50px of empty stage above and below, while its caption sat 30px from the next label */
+  html .holder-feature { gap: var(--space-5); }
+}
+@media (max-width: 560px) {
+  html .ex-scene { height: 330px; }
+}
+@media (max-width: 720px) {
+  /* journal article: less air between the header, the back link and the date */
+  html article.post { padding-top: var(--space-5); }
+  html article.post .back { margin-bottom: var(--space-4); }
+}
+
+/* ---------- small laptops and iPad landscape (961–1120) ---------- */
+@media (min-width: 961px) and (max-width: 1120px) {
+  /* feature blocks: three columns were about 270px wide (35 characters a line, nine-line paragraphs); two read better */
+  html .features, html .features.two { grid-template-columns: 1fr 1fr; }
+  html .features > :nth-child(n), html .features.two > :nth-child(n) { padding-left: var(--space-5); padding-right: var(--space-5); border-left: 1px solid var(--color-border); }
+  html .features > :nth-child(2n + 1), html .features.two > :nth-child(2n + 1) { padding-left: 0; border-left: 0; }
+}
+@media (max-width: 720px) {
+  /* swipe rows: the space after the last item is a spacer element, not the row's end padding or the last item's
+     margin, which older iOS Safari leaves out of the scroll width (the last card or chip would end flush against
+     the screen edge). The step index also stops a sideways swipe at its ends from turning into "go back". */
+  html .notable-grid { padding-right: 0; }
+  html .notable-grid::after { content: ''; flex: 0 0 calc(var(--gutter) - 12px); }
+  html .step-index { padding-right: 0; overscroll-behavior-x: contain; }
+  html .step-index a:last-child { margin-right: 0; }
+  html .step-index::after { content: ''; flex: 0 0 36px; }
+}
+@media (max-width: 720px) {
+  /* footer and menu tap targets: pass 1 meant 44px, but the footer's hover-underline rule (detail.css, more
+     specific) kept a 2px bottom padding, so footer links measured 41px and the legal links 33px */
+  html .site-footer nav li a:not(.brand) { padding: 9px 0 8px; }
+  html .site-footer .footer-legal a:not(.brand) { padding: 15px 0 14px; }
+  html .nav-foot .nav-reach a { padding: 11px 0; }
+}
+/* tablets held in the hand (iPad portrait and landscape, touch laptops in tablet mode): controls at least 44px */
+@media (max-width: 1120px) and (pointer: coarse) {
+  html .link-arrow { padding-top: 14px; padding-bottom: 14px; }
+  html .car-dot { height: 44px; }
+  html .step-index a { padding-top: 9px; padding-bottom: 9px; }
+  html .site-footer nav li a:not(.brand) { display: inline-block; padding: 9px 0 8px; }
+  html .site-footer .footer-legal a:not(.brand) { display: inline-block; padding: 14px 0; }
+  html .site-footer ul { gap: 0; }
+}
+@media (max-width: 380px) {
+  /* certificate ledger on small phones: "DENOMINATION" no longer fits a 7rem label column at 0.12em tracking */
+  html dl.facts { grid-template-columns: minmax(7.7rem, 40%) minmax(0, 1fr); }
+  html dl.facts dt { letter-spacing: 0.07em; padding-right: 10px; }
+}
+/* ---------- tablet portrait (721–900): the steps had numeral and symbol on a line of their own, then the title, then
+   the summary (about 190px before the text began). They now use the phone layout, a little larger: symbol and
+   numeral in a column beside the title and summary. The doubled rule under the page head goes too. ---------- */
+@media (min-width: 721px) and (max-width: 900px) {
+  html .steps > li, html .steps.compact > li { grid-template-columns: 60px minmax(0, 1fr); column-gap: 22px; row-gap: 18px; }
+  html .steps .step-n { grid-auto-flow: row; justify-items: center; align-content: start; gap: 10px; }
+  html .steps .step-n .medallion { width: 60px; height: 60px; order: -1; }
+  html .steps .step-n .mark { width: 30px; height: 30px; }
+  html .steps .step-head { align-self: center; }
+  html .steps .step-head h2, html .steps .step-head h3 { margin: 0 0 6px; }
+  html .steps .step-body { grid-column: 1 / -1; }
+  html .page-body > .steps:first-child > li:first-child, html .page-body > .post-list:first-child > li:first-child { border-top: 0; padding-top: 0; }
+  html .page-body > .steps:first-child > li:first-child::before { display: none; }
+}
+@media (min-width: 721px) and (max-width: 900px) { html .page-body { padding-top: var(--space-6); } }
+
+/* ======================================================================================================== */
+/* pass 3 (2026-11-03, final): a fresh look with real-looking content                                         */
+/* (the grade, certificate number, carousel caption, microtext and numbered-list fixes are bugs and now apply  */
+/*  on every screen: home.css, deco.css and global.css)                                                       */
+/* ======================================================================================================== */
+
+/* type: no lone word on the last line of a paragraph or list item, and headings in balanced lines ("Registry record
+   and / verification" became "Registry record / and verification"); desktop keeps its own wrapping */
+@media (max-width: 1120px) {
+  html p, html li, html dd, html figcaption, html blockquote { text-wrap: pretty; }
+  html h1, html h2, html h3 { text-wrap: balance; }
+}
+
+/* touch: every control at least 44px tall. Arrow links measured 40px, a notable coin's certificate link 15px (the
+   whole link was its one line of small capitals) and the phone number on Contact 30px. */
+@media (max-width: 720px), (max-width: 1120px) and (pointer: coarse) {
+  html .link-arrow { min-height: 44px; }
+  html .coin-cert { display: inline-block; padding: 12px 4px; }
+  html .ways a { display: inline-block; padding: 7px 0; }
+}
+
+/* notable coins: cards in a row are the same height, so the certificate line now sits at the foot of every card
+   (it floated about 70px above the foot of the shorter cards) */
+@media (max-width: 1120px) {
+  html .coin-card { display: flex; flex-direction: column; }
+  html .coin-card .coin-cert { margin-top: auto; align-self: center; }
+}
+/* the next card peeks in at the right as a quiet fade instead of a hard sliver of cut-off text ("Cons", "Stru");
+   the fade lifts once the row is swiped to its end (site.ts sets .at-end) */
+@media (max-width: 720px) {
+  html .notable-grid { -webkit-mask: linear-gradient(90deg, #000 calc(100% - 64px), rgba(0, 0, 0, 0.25) calc(100% - 6px)); mask: linear-gradient(90deg, #000 calc(100% - 64px), rgba(0, 0, 0, 0.25) calc(100% - 6px)); }
+  html .notable-grid.at-end { -webkit-mask: none; mask: none; }
+}
+/* tablets (721–1120): the cards are laid out by how many there are, so there is never a lone card on a row of its
+   own (4 coins showed as 3 + 1): 1, 2 or 4 sit two to a row, 3, 5 or 6 three to a row, every row centred */
+@media (min-width: 721px) and (max-width: 1120px) {
+  html .notable-grid { --g: 14px; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--g); }
+  html .notable-grid > li { flex: 0 1 calc((100% - 2 * var(--g)) / 3); min-width: 0; }
+  html .notable-grid:is([data-count='1'], [data-count='2'], [data-count='4']) > li { flex-basis: min(calc((100% - var(--g)) / 2), 340px); }
+}
+@media (min-width: 901px) and (max-width: 1120px) { html .notable-grid { --g: 1.5rem; } }
+
+/* what we grade: four columns were about 230px wide at 1001–1120 (nine-line paragraphs); two by two, as below 1000 */
+@media (min-width: 1001px) and (max-width: 1120px) {
+  html .scope-list { grid-template-columns: 1fr 1fr; }
+  html .scope-list li:nth-child(3) { padding-left: 0; border-left: 0; }
+  html .scope-list li:nth-child(n + 3) { border-top: 1px solid var(--color-border); }
+}
+
+/* certificate page: the two notes meant to be read were 14.4px */
+@media (max-width: 720px) {
+  html .cert-card p.small, html .verify-note { font-size: 1rem; line-height: 1.6; }
+}
+
+/* footer on phones: Contact moves under Grading, beside the longer Company list, instead of a full-width block of its
+   own below both (about 55px shorter on every page, and the two columns end closer together) */
+@media (min-width: 381px) and (max-width: 720px) {
+  html .footer-top > nav:nth-of-type(2) { grid-row: span 2; }
+  html .footer-top > :last-child { grid-column: 1; }
+}
+@media (max-width: 380px) {
+  /* 148px columns broke "About the company" over two lines (Contact stays full width here: the opening hours
+     would take three lines in a column) */
+  html .footer-top { column-gap: 14px; }
+}
+
+/* the open menu on a tablet held upright (iPad portrait, 1024×1366): phone-size items left most of the screen empty;
+   they now grow with the screen's height, up to 2.4rem (landscape and short screens keep the phone size) */
+@media (min-width: 721px) and (max-width: 1120px) and (min-height: 900px) {
+  html .nav li a { font-size: clamp(1.75rem, 3.1vh, 2.4rem); padding: clamp(18px, 1.9vh, 26px) 0; }
+  html .nav ul { padding-top: var(--space-5); }
+}
+
+/* home rhythm: "What we grade" ended 150px above the next label (its 68px foot, then the microtext divider and the
+   next section's own top); now about 120px, like the other section joins */
+@media (max-width: 720px) {
+  html .scope { padding-bottom: var(--space-5); }
+}

@@ -126,7 +126,7 @@ const wreath = wreathSvg({ cx: 100, cy: 100, r: 52, from: 100, to: 250, leaves: 
   doc.setAttribute('data-intro', 'playing');
   if (performance.mark) performance.mark('intro-start');
 
-  var W = innerWidth, H = innerHeight, D = Math.round(Math.max(180, Math.min(320, Math.min(W, H) * 0.54)));
+  var W = innerWidth, H = innerHeight, D = Math.round(Math.max(180, Math.min(320, Math.min(W, H) * (W < 600 ? 0.6 : 0.54)))); // phones: a slightly larger medallion
   var R = Math.ceil(Math.hypot(W, H) / 2) + 24, S = (2 * R) / (D * 0.97) * 1.06; // shadow spread, final iris scale
   ov.style.setProperty('--pi-d', D + 'px');
   ov.style.setProperty('--pi-r', R + 'px');

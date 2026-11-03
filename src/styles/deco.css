@@ -81,3 +81,6 @@
 /* inner-page closing band: full-bleed rule and sunburst */
 .page-coda { margin: 0 calc(50% - 50vw); padding-left: var(--gutter); padding-right: var(--gutter); }
 .page-coda .coda-sun { width: 1200px; left: 50%; top: 50%; transform: translate(-50%, -50%); opacity: 0.7; }
+/* the microtext line ran under the bottom corner ornaments of framed panels (verify, home verify, fees): it now runs
+   between the corners and fades out at both ends instead of stopping mid-letter (approved bug fix, pass 3) */
+.cert-panel > .microtext { left: 54px; right: 54px; -webkit-mask: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent); mask: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent); }

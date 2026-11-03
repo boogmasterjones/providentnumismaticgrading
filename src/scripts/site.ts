@@ -52,8 +52,15 @@ if ('IntersectionObserver' in window) {
     (entries) => {
       for (const e of entries) {
         if (e.isIntersecting || e.boundingClientRect.bottom < 0) {
-          e.target.classList.add('in');
-          io.unobserve(e.target);
+          // a swipeable row (notable coins on a phone) reveals all its cards together, so a card that was off to
+          // the side is already in place when it is swiped in, instead of rising while it slides
+          const row = e.target.closest('.notable-grid');
+          const swipe = row && row.scrollWidth > row.clientWidth + 1;
+          const group = swipe ? row.querySelectorAll('.rv') : [e.target];
+          for (const el of group) {
+            el.classList.add('in');
+            io.unobserve(el);
+          }
         }
       }
     },
@@ -62,4 +69,24 @@ if ('IntersectionObserver' in window) {
   reveal.forEach((el) => io.observe(el));
 } else {
   reveal.forEach((el) => el.classList.add('in'));
+}
+
+// Swipeable notable coins (phones): the next card peeks in under a soft fade at the right edge; once the row is
+// swiped to its end, or does not scroll at all, the fade lifts (.at-end, mobile.css). Driven by the row's own
+// sideways scroll, never by the page scroll.
+for (const row of document.querySelectorAll<HTMLElement>('.notable-grid')) {
+  let queued = false;
+  const check = () => {
+    queued = false;
+    row.classList.toggle('at-end', row.scrollLeft + row.clientWidth >= row.scrollWidth - 8);
+  };
+  const queue = () => {
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(check);
+    }
+  };
+  row.addEventListener('scroll', queue, { passive: true });
+  addEventListener('resize', queue, { passive: true });
+  check();
 }

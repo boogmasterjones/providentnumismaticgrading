@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import PageIntro from '../../components/PageIntro.astro';
 import { loadPage } from '../../lib/pages';
 import { publishedPosts, formatDate } from '../../lib/blog';
+import { publicImageSize } from '../../lib/imagesize';
 
 const { data, Content, hasBody } = await loadPage('blog');
 const posts = await publishedPosts();
@@ -19,7 +20,7 @@ const posts = await publishedPosts();
           <li class="rv">
             <time datetime={p.data.date.toISOString().slice(0, 10)}>{formatDate(p.data.date)}</time>
             <div>
-              {p.data.cover && <img src={p.data.cover} alt={p.data.coverAlt ?? ''} loading="lazy" decoding="async" />}
+              {p.data.cover && <img src={p.data.cover} alt={p.data.coverAlt ?? ''} {...(publicImageSize(p.data.cover) ?? {})} loading="lazy" decoding="async" />}
               <h2><a href={`/blog/${p.id}`}>{p.data.title}</a></h2>
               <p class="muted">{p.data.description}</p>
             </div>

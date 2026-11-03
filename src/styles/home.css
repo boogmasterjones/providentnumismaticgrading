@@ -95,6 +95,8 @@
 .holder-sec { border-top: 1px solid var(--color-border); background: radial-gradient(900px 640px at 25% 50%, rgba(201, 164, 92, 0.06), transparent 70%); padding: var(--space-6) 0; }
 .holder-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-6); align-items: center; }
 .holder-copy p { color: var(--color-text-2); font-size: 1.08rem; max-width: 30rem; }
+/* the paragraph size must not reach the gold label above it (it did, on every screen: 17px instead of 11.5px) */
+.holder-copy .eyebrow { font-size: 0.72rem; color: var(--gold); }
 @media (max-width: 900px) { .holder-grid { grid-template-columns: 1fr; gap: var(--space-4); } .holder-copy { order: -1; } }
 
 /* ---------- verify (compact) ---------- */
@@ -154,7 +156,10 @@
 .coin-card > .c { margin: 10px; opacity: 0.55; }
 .coin-disc { position: relative; width: min(78%, 260px); aspect-ratio: 1; margin: 0 auto var(--space-4); border-radius: 50%; overflow: hidden; background: radial-gradient(circle at 38% 32%, #2a2622, #121011 70%); box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(201, 164, 92, 0.25), 0 0 0 7px rgba(12, 10, 11, 0.9), 0 0 0 8px rgba(201, 164, 92, 0.14); }
 .coin-disc img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.coin-rev { width: 30%; position: absolute; right: 9%; top: 34%; margin: 0; }
+/* the reverse inset sits inside .bead, against the obverse's lower right. The selector is specific on purpose: the
+   shine layer's .proof (position: relative) and .bead > .coin-disc (width: 100%) must not reach it. Before pass 2
+   they did, and the inset dropped into the card's flow as a second large coin under the first. */
+.bead > .coin-disc.coin-rev { position: absolute; width: 36%; right: -9%; bottom: -3%; margin: 0; z-index: 2; }
 .ph-disc .rosette { position: absolute; inset: -20%; width: auto; opacity: 0.35; }
 .ph-disc::before { content: ''; position: absolute; inset: 10%; border-radius: 50%; border: 1px dashed rgba(201, 164, 92, 0.35); z-index: 1; }
 .coin-grade { font: 500 clamp(1.7rem, 2.6vw, 2.2rem)/1 var(--font-caps); letter-spacing: 0.12em; margin: 0 0 var(--space-2); }
@@ -174,3 +179,16 @@
   .wm-top { font-size: clamp(2.2rem, 12.4vw, 3.1rem); letter-spacing: 0.08em; margin-right: -0.08em; }
   @keyframes heroTrack { from { opacity: 0; letter-spacing: 0.3em; margin-right: -0.3em; } to { opacity: 1; letter-spacing: 0.08em; margin-right: -0.08em; } }
 }
+
+/* ---------- approved bug fixes, every screen (mobile pass 3, 2026-11-03) ---------- */
+/* a long grade stacked into five touching lines between the sprigs ("CH XF, / STRIKE / 5/5, / SURFACE / 4/5"). The
+   grade proper stays between the sprigs; what follows its first comma is a small line of its own (Notable.astro). A
+   long grade without a comma is set smaller and wraps into balanced lines that don't touch. */
+.coin-grade.long { font-size: clamp(1.3rem, 1.9vw, 1.6rem); line-height: 1.2; letter-spacing: 0.08em; text-wrap: balance; }
+.grade-row:has(+ .coin-sub) { margin-bottom: 8px; }
+.coin-sub { font: 600 0.68rem/1.6 var(--font-caps); letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); opacity: 0.9; margin: 0 0 var(--space-3); text-wrap: balance; }
+/* a long certificate number moves to its own line whole instead of breaking at a dash ("TMP-2026- / 000123") */
+.coin-cert .cert-no { display: inline-block; }
+/* carousel captions stay clear of the slide's edges, so the next slide's caption never shows as stray letters in the
+   sliver of it that peeks in */
+.car-slide figcaption { padding: 0 28px; line-height: 1.6; text-wrap: balance; }
