@@ -3,6 +3,7 @@
  * Provident Studio sign-in. A plain form (it works without JavaScript); the small script below only adds a nicer
  * "Signing in…" state and shows errors without a page load. Sign-in rules: src/lib/studio/auth.ts.
  */
+import '../../styles/fonts.css';
 import '../../styles/studio.css';
 import BrandMark from '../../components/BrandMark.astro';
 import { config, currentSession } from '../../lib/studio/server';
@@ -30,9 +31,6 @@ const notSetUp = cfg.loginProblems.length > 0;
     <meta name="theme-color" content="#0b0b0c" />
     <title>Sign in · Provident Studio</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" />
   </head>
   <body class="st-login">
     <main class="st-login-card">

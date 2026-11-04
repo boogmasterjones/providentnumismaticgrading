@@ -49,7 +49,9 @@ field labels and options, system messages (verify "not found", 404), the holder 
 ## Design
 
 Dark, warm ivory and a restrained gold; Cormorant Garamond (display), Cinzel (wordmark, numerals and the inscription
-capitals of labels; self-hosted, `public/fonts/cinzel/`, SIL Open Font License), Inter (text).
+capitals of labels), Inter (text). All three are self-hosted (`public/fonts/`, Latin subset, variable weights,
+`font-display: swap`, the upright faces preloaded; faces in `src/styles/fonts.css`; SIL Open Font License): no Google
+Fonts request.
 Approved references (owner, 2026-11-02): security printing, Art Deco, coin engraving, raking light, film titles,
 watch movements, and patek.com's footage panels (below). No loupe, no hover flips, no pointer-driven toys.
 **Animations always play** (owner's rule: no reduced-motion opt-out). Coins never show an edge: the only flip (the home opening) is an edge-free 2D turn.

@@ -3,6 +3,7 @@
  * Provident Studio, the owner's website editor (signed in only: src/middleware.ts). The app itself is
  * src/studio/App.tsx; it talks to /api/studio/… and shows the real pages through /admin/preview/….
  */
+import '../../styles/fonts.css';
 import '../../styles/studio.css';
 import App from '../../studio/App';
 
@@ -38,9 +39,6 @@ export const prerender = false;
       </script>
     )}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" />
   </head>
   <body class="st-body">
     <App client:only="react" />

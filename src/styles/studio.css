@@ -3,14 +3,6 @@
  * Cormorant Garamond for titles, Inter for everything else, Cinzel for small capitals), but calm: a tool, not a
  * showpiece. Text contrast is at least 4.5:1 on its background; every control has a visible gold focus ring.
  */
-@font-face {
-  font-family: 'Cinzel';
-  font-style: normal;
-  font-weight: 500 600;
-  font-display: swap;
-  src: url('/fonts/cinzel/cinzel-latin-wght.woff2') format('woff2');
-}
-
 :root {
   color-scheme: dark;
   --st-bg: #0b0b0c;
