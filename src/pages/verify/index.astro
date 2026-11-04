@@ -2,14 +2,19 @@
 import Divider from '../../components/Divider.astro';
 import Base from '../../layouts/Base.astro';
 import PageIntro from '../../components/PageIntro.astro';
-import { loadPage } from '../../lib/pages';
-import { settings, telHref } from '../../lib/site';
+import Body from '../../components/Body.astro';
+import { getSettings, loadPage } from '../../lib/content';
+import { editor } from '../../lib/edit';
+import { telHref } from '../../lib/site';
 
-const { data, Content, hasBody } = await loadPage('verify');
+const { data, body, hasBody } = await loadPage(Astro, 'verify');
+const settings = getSettings(Astro);
 const tel = telHref(settings.phone);
+const D = 'page:verify';
+const e = editor(Astro);
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow || 'Certificate registry'} />
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} doc={D} />
   <div class="page-body">
     <div class="cert-panel foil verify-page-panel deco-frame draw">
       <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
@@ -44,11 +49,8 @@ const tel = telHref(settings.phone);
     </template>
 
     <Divider kind="diamond" />
-    {hasBody && <div class="prose"><Content /></div>}
-    <p class="muted prose small verify-note">
-      A match means this certificate number is on record in our registry with the details shown. Compare them, and the
-      photos, with the coin and label in your hand.
-    </p>
+    {(hasBody || e.on) && <div class="prose" {...e(D, 'body')}><Body of={body} /></div>}
+    {data.verifyNote && <p class="muted prose small verify-note" {...e(D, 'verifyNote')}>{data.verifyNote}</p>}
   </div>
 </Base>
 

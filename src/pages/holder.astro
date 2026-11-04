@@ -6,27 +6,28 @@ import PageIntro from '../components/PageIntro.astro';
 import Features from '../components/Features.astro';
 import HolderExplode from '../components/HolderExplode.astro';
 import Coda from '../components/Coda.astro';
-import { loadPage } from '../lib/pages';
+import Body from '../components/Body.astro';
+import { loadPage } from '../lib/content';
+import { editor } from '../lib/edit';
 
-const { data, Content, hasBody } = await loadPage('holder');
+const { data, body, hasBody } = await loadPage(Astro, 'holder');
 const sections = data.sections ?? [];
+const D = 'page:holder';
+const e = editor(Astro);
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} doc={D} />
   <div class="page-body">
     <div class="holder-feature">
       <HolderExplode />
       <div class="holder-note rv">
-        <p class="eyebrow"><Inscr text="Anatomy" /></p>
-        <p class="lead">Five parts, sealed into one: a back shell, an insert that holds the coin without touching its faces, the coin, the label, and a clear front shell welded to the back.</p>
+        {data.anatomyEyebrow && <p class="eyebrow" {...e(D, 'anatomyEyebrow', { raw: data.anatomyEyebrow })}><Inscr text={data.anatomyEyebrow} /></p>}
+        {data.anatomyText && <p class="lead" {...e(D, 'anatomyText')}>{data.anatomyText}</p>}
       </div>
     </div>
     <Divider kind="diamond" />
-    <Features items={sections} columns={2} />
-    {hasBody && <div class="prose rv" style="margin-top: var(--space-6)"><Content /></div>}
+    <Features items={sections} columns={2} doc={D} />
+    {(hasBody || e.on) && <div class="prose rv" style="margin-top: var(--space-6)" {...e(D, 'body')}><Body of={body} /></div>}
   </div>
-  <Coda
-    title="Check any holder against our registry."
-    links={[{ href: '/verify', label: 'Verify a certificate' }, { href: '/contact', label: 'Ask about custom labels' }]}
-  />
+  <Coda coda={data.coda} doc={D} />
 </Base>

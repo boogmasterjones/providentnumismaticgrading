@@ -3,25 +3,25 @@ import Base from '../layouts/Base.astro';
 import PageIntro from '../components/PageIntro.astro';
 import Steps from '../components/Steps.astro';
 import Coda from '../components/Coda.astro';
-import { loadPage } from '../lib/pages';
+import Body from '../components/Body.astro';
+import { loadPage } from '../lib/content';
+import { editor } from '../lib/edit';
 import { roman } from '../lib/text';
 
-const { data, Content, hasBody } = await loadPage('process');
+const { data, body, hasBody } = await loadPage(Astro, 'process');
 const steps = data.sections ?? [];
+const D = 'page:process';
+const e = editor(Astro);
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow}>
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} doc={D}>
     <nav class="step-index rv d3" aria-label="Steps">
       {steps.map((s, i) => <a href={`#step-${i + 1}`}><span class="numeral">{roman(i + 1)}</span>{s.title}</a>)}
     </nav>
   </PageIntro>
   <div class="page-body">
-    <Steps items={steps} />
-    {hasBody && <div class="prose rv" style="margin-top: var(--space-6)"><Content /></div>}
+    <Steps items={steps} doc={D} />
+    {(hasBody || e.on) && <div class="prose rv" style="margin-top: var(--space-6)" {...e(D, 'body')}><Body of={body} /></div>}
   </div>
-  <Coda
-    title="Questions about a particular coin?"
-    text="We are glad to discuss a coin or a group before anything is sent."
-    links={[{ href: '/grading-standards', label: 'Grading standards' }, { href: '/contact', label: 'Contact' }]}
-  />
+  <Coda coda={data.coda} doc={D} />
 </Base>

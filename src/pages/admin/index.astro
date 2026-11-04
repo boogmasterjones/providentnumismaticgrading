@@ -1,0 +1,49 @@
+---
+/**
+ * Provident Studio, the owner's website editor (signed in only: src/middleware.ts). The app itself is
+ * src/studio/App.tsx; it talks to /api/studio/… and shows the real pages through /admin/preview/….
+ */
+import '../../styles/studio.css';
+import App from '../../studio/App';
+
+export const prerender = false;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#0b0b0c" />
+    <title>Provident Studio</title>
+    {import.meta.env.DEV && (
+      /* Local development only: `astro dev` reloads every open page when a content file changes, which would throw
+         away Studio's open panels after each save. Studio's own preview frame still reloads; Studio itself does not. */
+      <script is:inline>
+        (() => {
+          const Real = window.WebSocket;
+          function Studio(url, protocols) {
+            const p = [].concat(protocols || []);
+            if (p.includes('vite-hmr')) {
+              const t = new EventTarget();
+              Object.assign(t, { readyState: 0, send() {}, close() {} });
+              return t;
+            }
+            return new Real(url, protocols);
+          }
+          Object.assign(Studio, { CONNECTING: 0, OPEN: 1, CLOSING: 2, CLOSED: 3 });
+          Studio.prototype = Real.prototype;
+          window.WebSocket = Studio;
+        })();
+      </script>
+    )}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" />
+  </head>
+  <body class="st-body">
+    <App client:only="react" />
+    <noscript><p class="st-noscript">Provident Studio needs JavaScript. Turn it on in your browser's settings and reload.</p></noscript>
+  </body>
+</html>

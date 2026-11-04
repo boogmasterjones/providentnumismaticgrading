@@ -11,7 +11,10 @@ import BrandMark from '../components/BrandMark.astro';
 import Inscr from '../components/Inscr.astro';
 import Seal from '../components/Seal.astro';
 import { cssUrl, sprigSvg } from '../lib/roman';
-import { settings, telHref, mailtoHref } from '../lib/site';
+import StudioOverlay from '../components/StudioOverlay.astro';
+import { telHref, mailtoHref } from '../lib/site';
+import { getSettings, studioOf } from '../lib/content';
+import { editor } from '../lib/edit';
 import { NAV, FOOTER_NAV, MENU_MORE } from '../lib/nav';
 
 interface Props {
@@ -25,13 +28,18 @@ interface Props {
   jsonLd?: Record<string, unknown>;
 }
 const { title, description, noindex = false, home = false, jsonLd } = Astro.props;
+// Inside Provident Studio's preview these are the drafts, and `e()` adds the editing annotations (src/lib/edit.ts).
+const settings = getSettings(Astro);
+const studio = studioOf(Astro);
+const e = editor(Astro);
 const fullTitle = title.includes(settings.siteName) ? title : `${title} | ${settings.siteName}`;
 // One switch for the whole site: until "launched" is ticked in Site settings, nothing is indexed.
 const blockIndexing = noindex || !settings.launched;
-const canonical = new URL(Astro.url.pathname, settings.siteUrl).href;
+const pathname = studio?.path ?? Astro.url.pathname;
+const canonical = new URL(pathname, settings.siteUrl).href;
 const tel = telHref(settings.phone);
 const mailto = mailtoHref(settings.email);
-const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const path = pathname.replace(/\/$/, '') || '/';
 const year = new Date().getFullYear();
 const nav = NAV.filter((l) => l.href !== '/population' || settings.showPopulation);
 const words = settings.siteName.split(' ');
@@ -49,7 +57,7 @@ const current = (href: string) => (path === href || path.startsWith(href + '/') 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    {blockIndexing && <meta name="robots" content="noindex, nofollow" />}
+    {(blockIndexing || studio) && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
@@ -79,7 +87,7 @@ const current = (href: string) => (path === href || path.startsWith(href + '/') 
       <div class="container bar">
         <a class="brand" href="/" aria-label={`${settings.siteName}, home`}>
           <BrandMark />
-          <span class="brand-name" aria-hidden="true"><b>{nameTop.toUpperCase()}</b>{nameRest && <small>{nameRest}</small>}</span>
+          <span class="brand-name" aria-hidden="true" {...e('settings', 'siteName', { panel: true })}><b>{nameTop.toUpperCase()}</b>{nameRest && <small>{nameRest}</small>}</span>
         </a>
         <nav class="nav" id="site-nav" aria-label="Main">
           <ul>
@@ -113,7 +121,7 @@ const current = (href: string) => (path === href || path.startsWith(href + '/') 
               <BrandMark />
               <span class="brand-name" aria-hidden="true"><b>{nameTop.toUpperCase()}</b>{nameRest && <small>{nameRest}</small>}</span>
             </a>
-            <p>Independent authentication, attribution and grading of coins, tokens and medals.</p>
+            {settings.footerText && <p {...e('settings', 'footerText')}>{settings.footerText}</p>}
           </div>
           <nav aria-labelledby="f-grading">
             <h2 id="f-grading"><Inscr text="Grading" /></h2>
@@ -126,11 +134,11 @@ const current = (href: string) => (path === href || path.startsWith(href + '/') 
           <div>
             <h2><Inscr text="Contact" /></h2>
             <ul>
-              {settings.location && <li>{settings.location}</li>}
-              {settings.phone && <li>{tel ? <a href={tel}>{settings.phone}</a> : settings.phone}</li>}
-              {settings.email && <li>{mailto ? <a href={mailto}>{settings.email}</a> : settings.email}</li>}
-              {settings.hours && <li>{settings.hours}</li>}
-              {settings.socialLinks.map((s) => <li><a href={s.url} rel="noopener">{s.label}</a></li>)}
+              {settings.location && <li {...e('settings', 'location')}>{settings.location}</li>}
+              {settings.phone && <li>{tel ? <a href={tel} {...e('settings', 'phone')}>{settings.phone}</a> : <span {...e('settings', 'phone')}>{settings.phone}</span>}</li>}
+              {settings.email && <li>{mailto ? <a href={mailto} {...e('settings', 'email')}>{settings.email}</a> : <span {...e('settings', 'email')}>{settings.email}</span>}</li>}
+              {settings.hours && <li {...e('settings', 'hours')}>{settings.hours}</li>}
+              {settings.socialLinks.map((s, i) => <li><a href={s.url} rel="noopener" {...e('settings', `socialLinks.${i}`, { panel: true })}>{s.label}</a></li>)}
             </ul>
           </div>
         </div>
@@ -147,5 +155,6 @@ const current = (href: string) => (path === href || path.startsWith(href + '/') 
     <script>
       import '../scripts/site';
     </script>
+    {studio && <StudioOverlay />}
   </body>
 </html>

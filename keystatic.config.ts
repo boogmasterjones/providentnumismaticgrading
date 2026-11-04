@@ -2,7 +2,9 @@ import { config, collection, fields, singleton } from '@keystatic/core';
 import { MARKS } from './src/lib/marks';
 
 /**
- * Keystatic editor config (the owner edits at /admin, which redirects to /keystatic).
+ * Keystatic editor config: a fallback editor for local development only (http://localhost:4321/keystatic). The
+ * owner edits in Provident Studio at /admin (src/studio/, field rules in src/lib/studio/schema.ts). Keep the two in
+ * step: Keystatic drops fields it does not know when it saves a file.
  *
  * Storage:
  * - Local mode (default, for development): edits are written straight to the files in this folder.
@@ -74,6 +76,24 @@ function sections(label: string, itemLabel: string) {
 
 /** A plain text field (multi-line) for the named blocks on the home and submissions pages. */
 const t = (label: string, description?: string) => fields.text({ label, description, multiline: true });
+/** A one-line text field. */
+const l = (label: string, description?: string) => fields.text({ label, description });
+
+/** The closing band at the bottom of an inner page. */
+const coda = fields.object(
+  {
+    title: fields.text({ label: 'Closing statement', validation: { isRequired: true } }),
+    text: fields.text({ label: 'Line under it (optional)', multiline: true }),
+    links: fields.array(
+      fields.object({
+        label: fields.text({ label: 'Words shown', validation: { isRequired: true } }),
+        href: fields.text({ label: 'Goes to (e.g. /contact)', validation: { isRequired: true } }),
+      }),
+      { label: 'Links', itemLabel: (p) => p.fields.label.value || 'Link' },
+    ),
+  },
+  { label: 'Closing band' },
+);
 
 export default config({
   storage,
@@ -109,6 +129,7 @@ export default config({
       schema: {
         siteName: fields.text({ label: 'Business name', validation: { isRequired: true } }),
         tagline: fields.text({ label: 'Short tagline' }),
+        footerText: fields.text({ label: 'Line in the footer', multiline: true }),
         siteUrl: fields.url({
           label: 'Website address',
           description: 'The live address, e.g. https://www.example.com. Used for the sitemap and links.',
@@ -210,15 +231,22 @@ export default config({
             itemLabel: (p) => p.fields.alt.value || 'Photo',
           },
         ),
+        notableEyebrow: l('Notable coins: small label'),
         notableTitle: t('Notable coins: heading', 'The coins themselves are under Notable coins in the menu.'),
         notableIntro: t('Notable coins: intro'),
+        gradeEyebrow: l('What we grade: small label'),
         gradeTitle: t('What we grade: heading'),
         grades: sections('What we grade: fields', 'Field'),
         film: sections('Footage panels: captions (two at most). "One-line summary" is the small line above; "Title" is the line over the footage. Text is not shown.', 'Caption'),
+        processEyebrow: l('Process at a glance: small label'),
         processTitle: t('Process at a glance: heading', 'The steps themselves come from the Our process page.'),
         processText: t('Process at a glance: intro'),
+        processLink: l('Process at a glance: link'),
+        holderEyebrow: l('Holder and label: small label'),
         holderTitle: t('Holder and label: heading'),
         holderText: t('Holder and label: text (keep it to one or two sentences)'),
+        holderLink: l('Holder and label: link'),
+        verifyEyebrow: l('Verification: small label'),
         verifyTitle: t('Verification: heading'),
         verifyText: t('Verification: text'),
       },
@@ -227,7 +255,7 @@ export default config({
       label: 'Our process',
       path: 'content/pages/process',
       format: { contentField: 'body' },
-      schema: { ...pageFields, sections: sections('Steps', 'Step') },
+      schema: { ...pageFields, sections: sections('Steps', 'Step'), coda },
     }),
     pageStandards: singleton({
       label: 'Grading standards',
@@ -235,6 +263,8 @@ export default config({
       format: { contentField: 'body' },
       schema: {
         ...pageFields,
+        scaleEyebrow: l('Scale: small label'),
+        scaleTitle: l('Scale: heading'),
         scale: fields.array(
           fields.object({
             range: fields.text({ label: 'Numbers', description: 'e.g. 60–70', validation: { isRequired: true } }),
@@ -248,26 +278,27 @@ export default config({
           },
         ),
         sections: sections('Sections', 'Section'),
+        coda,
       },
     }),
     pageHolder: singleton({
       label: 'The holder and label',
       path: 'content/pages/holder',
       format: { contentField: 'body' },
-      schema: { ...pageFields, sections: sections('Sections', 'Section') },
+      schema: { ...pageFields, anatomyEyebrow: l('Drawing: small label'), anatomyText: t('Drawing: text'), sections: sections('Sections', 'Section'), coda },
     }),
-    pageVerify: singleton({ label: 'Verify a certificate', path: 'content/pages/verify', format: { contentField: 'body' }, schema: pageFields }),
+    pageVerify: singleton({ label: 'Verify a certificate', path: 'content/pages/verify', format: { contentField: 'body' }, schema: { ...pageFields, verifyNote: t('Note under the lookup') } }),
     pageWhy: singleton({
       label: 'Why Provident',
       path: 'content/pages/why-provident',
       format: { contentField: 'body' },
-      schema: { ...pageFields, sections: sections('Reasons', 'Reason') },
+      schema: { ...pageFields, sections: sections('Reasons', 'Reason'), coda },
     }),
     pageAbout: singleton({
       label: 'About',
       path: 'content/pages/about',
       format: { contentField: 'body' },
-      schema: { ...pageFields, sections: sections('What we offer', 'Service') },
+      schema: { ...pageFields, servicesEyebrow: l('Services: small label'), servicesTitle: l('Services: heading'), sections: sections('What we offer', 'Service'), coda },
     }),
     pageSubmit: singleton({
       label: 'Submissions',
@@ -276,13 +307,18 @@ export default config({
       schema: {
         ...pageFields,
         sections: sections('Steps', 'Step'),
+        feesEyebrow: l('Fees note: small label'),
         feesTitle: t('Fees note: heading'),
         feesText: t('Fees note: text', 'Leave a blank line between paragraphs. No price lists: fees are quoted per submission.'),
+        feesLink: l('Fees note: link'),
+        requestEyebrow: l('Request form: small label'),
+        requestTitle: l('Request form: heading'),
+        requestText: t('Request form: line under the heading'),
       },
     }),
     pageFaq: singleton({ label: 'FAQ page', path: 'content/pages/faq', format: { contentField: 'body' }, schema: pageFields }),
-    pageContact: singleton({ label: 'Contact', path: 'content/pages/contact', format: { contentField: 'body' }, schema: pageFields }),
-    pageBlog: singleton({ label: 'Journal (list page)', path: 'content/pages/blog', format: { contentField: 'body' }, schema: pageFields }),
+    pageContact: singleton({ label: 'Contact', path: 'content/pages/contact', format: { contentField: 'body' }, schema: { ...pageFields, directTitle: l('Heading over the contact details'), formTitle: l('Heading over the form') } }),
+    pageBlog: singleton({ label: 'Journal (list page)', path: 'content/pages/blog', format: { contentField: 'body' }, schema: { ...pageFields, emptyText: l('Shown while there are no posts') } }),
     pagePopulation: singleton({ label: 'Population report', path: 'content/pages/population', format: { contentField: 'body' }, schema: pageFields }),
     pagePrivacy: singleton({ label: 'Privacy', path: 'content/pages/privacy', format: { contentField: 'body' }, schema: pageFields }),
     pageTerms: singleton({ label: 'Terms of use', path: 'content/pages/terms', format: { contentField: 'body' }, schema: pageFields }),

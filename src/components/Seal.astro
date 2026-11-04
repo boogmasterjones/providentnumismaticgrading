@@ -3,9 +3,10 @@
  * The footer seal, in the manner of a Roman seal: the company's initials in the centre (never "SPQR"), a laurel
  * wreath around them and the full name cut into an inscription ring. Inline SVG; the lettering is Cinzel.
  */
-import { settings } from '../lib/site';
+import { getSettings } from '../lib/content';
 import { initials, wreathSvg } from '../lib/roman';
 
+const settings = getSettings(Astro);
 const name = settings.siteName.toUpperCase().split(/\s+/).join(' · ');
 const ring = `${name} · `;
 const wreath = wreathSvg({ cx: 60, cy: 60, r: 27, from: 100, to: 250, leaves: 7, leafLen: 5.6, leafW: 1.6, stroke: 0.5 });

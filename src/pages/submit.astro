@@ -8,18 +8,23 @@ import Prose from '../components/Prose.astro';
 import NetlifyForm from '../components/NetlifyForm.astro';
 import Field from '../components/Field.astro';
 import LinkArrow from '../components/LinkArrow.astro';
-import { loadPage } from '../lib/pages';
+import Body from '../components/Body.astro';
+import Ed from '../components/Ed.astro';
+import { loadPage } from '../lib/content';
+import { editor } from '../lib/edit';
 
-const { data, Content, hasBody } = await loadPage('submit');
+const { data, body, hasBody } = await loadPage(Astro, 'submit');
+const D = 'page:submit';
+const e = editor(Astro);
 // No price tiers: fees are quoted per submission (client, 2026-11-02).
 const coinTypes = ['United States', 'World', 'Ancient Roman', 'Ancient Greek', 'Tokens and medals', 'A mix'];
 const services = ['Grading and encapsulation', 'Crossover from another holder', 'Reholder', 'Not sure, please advise'];
 const labels = ['A ready-made design', 'A custom design', 'No preference'];
 ---
 <Base title={data.metaTitle} description={data.metaDescription}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} doc={D} />
   <div class="page-body">
-    <Steps items={data.sections ?? []} compact />
+    <Steps items={data.sections ?? []} compact doc={D} />
 
     <Divider kind="diamond" />
     {data.feesTitle && (
@@ -27,23 +32,23 @@ const labels = ['A ready-made design', 'A custom design', 'No preference'];
         <i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>
         <div class="rosette" aria-hidden="true"></div>
         <div class="fees-inner">
-          <p class="eyebrow"><Inscr text="Fees" /></p>
-          <h2 id="fees-title" class="rake-t">{data.feesTitle}</h2>
-          <Prose text={data.feesText} />
-          <LinkArrow href="/contact">Ask for a quote</LinkArrow>
+          {data.feesEyebrow && <p class="eyebrow" {...e(D, 'feesEyebrow', { raw: data.feesEyebrow })}><Inscr text={data.feesEyebrow} /></p>}
+          <h2 id="fees-title" class="rake-t" {...e(D, 'feesTitle')}>{data.feesTitle}</h2>
+          <Prose text={data.feesText} f={e(D, 'feesText')} />
+          {data.feesLink && <LinkArrow href="/contact"><Ed f={e(D, 'feesLink')}>{data.feesLink}</Ed></LinkArrow>}
         </div>
         <div class="microtext" aria-hidden="true"></div>
       </section>
     )}
 
-    {hasBody && <div class="prose rv"><Content /></div>}
+    {(hasBody || e.on) && <div class="prose rv" {...e(D, 'body')}><Body of={body} /></div>}
 
     <Divider kind="band" />
     <section class="request" aria-labelledby="request-title">
       <div class="request-head">
-        <p class="eyebrow"><Inscr text="Submission request" /></p>
-        <h2 id="request-title">Tell us about your coins.</h2>
-        <p class="muted">We reply with a quote and shipping details. Nothing needs to be sent until then.</p>
+        {data.requestEyebrow && <p class="eyebrow" {...e(D, 'requestEyebrow', { raw: data.requestEyebrow })}><Inscr text={data.requestEyebrow} /></p>}
+        <h2 id="request-title" {...e(D, 'requestTitle')}>{data.requestTitle}</h2>
+        {data.requestText && <p class="muted" {...e(D, 'requestText')}>{data.requestText}</p>}
       </div>
       <NetlifyForm name="submission" submitLabel="Send request" label="Submission request">
         <Field name="name" label="Name" required autocomplete="name" />

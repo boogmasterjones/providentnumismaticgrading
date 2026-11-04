@@ -1,31 +1,39 @@
 ---
 /**
- * Notable coins: the best coins we have graded (Keystatic collection "Notable coins", src/lib/notable.ts).
- * A showcase: large coin photos on dark velvet panels, the grade in gold, the certificate linked to Verify.
- * Nothing is ever invented: with no entries it shows three clearly marked placeholder cards.
+ * Notable coins: the best coins we have graded (Studio → Notable coins; one file per coin in content/notable/,
+ * src/lib/notable.ts). A showcase: large coin photos on dark velvet panels, the grade in gold, the certificate linked
+ * to Verify. Nothing is ever invented: with no entries it shows three clearly marked placeholder cards.
  */
-import { notableCoins, splitGrade, verifyHref } from '../lib/notable';
+import { splitGrade, verifyHref } from '../lib/notable';
+import { getNotable } from '../lib/content';
+import { editor } from '../lib/edit';
 import Inscr from './Inscr.astro';
 
 interface Props {
+  eyebrow?: string | null;
   title?: string | null;
   intro?: string | null;
+  /** Studio: the document the heading texts come from ("page:home") */
+  doc?: string;
 }
-const { title, intro } = Astro.props;
-const coins = notableCoins().slice(0, 6);
+const { eyebrow, title, intro, doc } = Astro.props;
+const all = getNotable(Astro);
+const coins = all.slice(0, 6);
 const placeholder = coins.length === 0;
 const grades = coins.map((c) => splitGrade(c.grade));
 const corners = '<i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i>';
+const e = editor(Astro);
+const ed = (p: string, raw?: string | null) => (doc ? e(doc, p, { raw }) : {});
 ---
 <section class="sec notable rake" aria-labelledby="notable-title">
   <div class="container">
     <div class="sec-head center">
-      <p class="eyebrow center"><Inscr text="From our registry" /></p>
-      <h2 id="notable-title" class="rake-t">{title || 'Notable coins.'}</h2>
+      {eyebrow && <p class="eyebrow center" {...ed('notableEyebrow', eyebrow)}><Inscr text={eyebrow} /></p>}
+      <h2 id="notable-title" class="rake-t" {...ed('notableTitle')}>{title || 'Notable coins.'}</h2>
       <div class="deco-rule center" aria-hidden="true"><i></i><i></i><i></i></div>
-      {intro && <p class="lead">{intro}</p>}
+      {intro && <p class="lead" {...ed('notableIntro')}>{intro}</p>}
     </div>
-    <ul class="notable-grid" data-count={placeholder ? 3 : coins.length}>
+    <ul class="notable-grid" data-count={placeholder ? 3 : coins.length} {...(placeholder ? e.add('page:home', '@notable', 'Add your first notable coin') : {})}>
       {placeholder
         ? [0, 1, 2].map((i) => (
             <li class={`coin-card is-ph rv d${i} shine deco-frame`} data-proof-hover>
@@ -37,28 +45,31 @@ const corners = '<i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i 
               <p class="coin-note">A coin from our registry will be shown here.</p>
             </li>
           ))
-        : coins.map((c, i) => (
-            <li class={`coin-card rv d${i % 3} shine deco-frame`} data-proof-hover>
-              <Fragment set:html={corners} />
-              <div class="bead">
-                <div class="coin-disc proof">
-                  <img src={c.obverse} alt={`${c.name}, obverse`} loading="lazy" decoding="async" />
-                </div>
-                {/* the reverse, as a small inset tucked against the obverse's lower right (inside .bead so it is
-                    placed against the coin, not against the card's height, which changes with the text) */}
-                {c.reverse && (
-                  <div class="coin-disc coin-rev proof">
-                    <img src={c.reverse} alt={`${c.name}, reverse`} loading="lazy" decoding="async" />
+        : coins.map((c, i) => {
+            const d = `notable:${c.slug}`;
+            return (
+              <li class={`coin-card rv d${i % 3} shine deco-frame`} data-proof-hover {...e.item(d, '@notable', i, all.length)}>
+                <Fragment set:html={corners} />
+                <div class="bead">
+                  <div class="coin-disc proof">
+                    <img src={c.obverse} alt={`${c.name}, obverse`} loading="lazy" decoding="async" {...e(d, 'obverse')} />
                   </div>
-                )}
-              </div>
-              <div class="grade-row"><span class="sprig l" aria-hidden="true"></span><p class:list={['coin-grade metal', { long: grades[i].long }]}>{grades[i].main}{grades[i].sub && <span class="sr-only">, {grades[i].sub}</span>}</p><span class="sprig r" aria-hidden="true"></span></div>
-              {grades[i].sub && <p class="coin-sub" aria-hidden="true">{grades[i].sub}</p>}
-              <h3>{c.name}</h3>
-              {c.note && <p class="coin-note">{c.note}</p>}
-              <a class="coin-cert" href={verifyHref(c.cert)}>Certificate No. <span class="cert-no">{c.cert}</span></a>
-            </li>
-          ))}
+                  {/* the reverse, as a small inset tucked against the obverse's lower right (inside .bead so it is
+                      placed against the coin, not against the card's height, which changes with the text) */}
+                  {c.reverse && (
+                    <div class="coin-disc coin-rev proof">
+                      <img src={c.reverse} alt={`${c.name}, reverse`} loading="lazy" decoding="async" {...e(d, 'reverse')} />
+                    </div>
+                  )}
+                </div>
+                <div class="grade-row"><span class="sprig l" aria-hidden="true"></span><p class:list={['coin-grade metal', { long: grades[i].long }]} {...e(d, 'grade', { raw: c.grade })}>{grades[i].main}{grades[i].sub && <span class="sr-only">, {grades[i].sub}</span>}</p><span class="sprig r" aria-hidden="true"></span></div>
+                {grades[i].sub && <p class="coin-sub" aria-hidden="true">{grades[i].sub}</p>}
+                <h3 {...e(d, 'name')}>{c.name}</h3>
+                {c.note && <p class="coin-note" {...e(d, 'note')}>{c.note}</p>}
+                <a class="coin-cert" href={verifyHref(c.cert)}>Certificate No. <span class="cert-no" {...e(d, 'cert')}>{c.cert}</span></a>
+              </li>
+            );
+          })}
     </ul>
   </div>
 </section>

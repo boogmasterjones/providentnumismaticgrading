@@ -1,9 +1,17 @@
 ---
-/** Editor text as paragraphs (blank line = new paragraph), with [text](link) links. Nothing else is treated as HTML. */
+/**
+ * Editor text as paragraphs (blank line = new paragraph), with [text](link) links. Nothing else is treated as HTML.
+ * `f`: Studio's editing annotation (src/lib/edit.ts); inside the preview the paragraphs share one editable wrapper.
+ */
 import { paragraphs } from '../lib/site';
 import { inlineLinks } from '../lib/text';
-interface Props { text?: string | null; class?: string; as?: 'p' | 'span' }
-const { text, class: cls } = Astro.props;
+interface Props { text?: string | null; class?: string; as?: 'p' | 'span'; f?: Record<string, string> }
+const { text, class: cls, f = {} } = Astro.props;
 const paras = paragraphs(text);
+const wrap = Object.keys(f).length > 0;
 ---
-{paras.map((p) => <p class={cls} set:html={inlineLinks(p)} />)}
+{wrap ? (
+  <div class="sf-prose" {...f}>{paras.map((p) => <p class={cls} set:html={inlineLinks(p)} />)}</div>
+) : (
+  paras.map((p) => <p class={cls} set:html={inlineLinks(p)} />)
+)}

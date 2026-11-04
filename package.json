@@ -12,7 +12,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
-    "astro": "astro"
+    "astro": "astro",
+    "studio:hash": "node scripts/studio-hash.mjs"
   },
   "dependencies": {
     "@astrojs/markdoc": "2.1.0",
@@ -21,14 +22,18 @@
     "@astrojs/sitemap": "3.7.4",
     "@keystatic/astro": "6.0.0",
     "@keystatic/core": "0.6.9",
+    "@markdoc/markdoc": "0.5.11",
     "@netlify/blobs": "11.1.4",
     "astro": "7.4.0",
+    "bcryptjs": "3.0.2",
+    "js-yaml": "4.3.2",
     "react": "19.1.10",
     "react-dom": "19.1.10"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@netlify/functions": "6.0.2",
+    "@types/js-yaml": "4.0.9",
     "@types/node": "24.13.5",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",

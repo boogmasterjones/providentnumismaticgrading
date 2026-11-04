@@ -2,10 +2,14 @@
 import Divider from '../components/Divider.astro';
 import Base from '../layouts/Base.astro';
 import PageIntro from '../components/PageIntro.astro';
-import { loadPage } from '../lib/pages';
-import { faq } from '../lib/site';
+import Body from '../components/Body.astro';
+import { getFaq, loadPage } from '../lib/content';
+import { editor } from '../lib/edit';
 
-const { data, Content, hasBody } = await loadPage('faq');
+const { data, body, hasBody } = await loadPage(Astro, 'faq');
+const faq = getFaq(Astro);
+const D = 'page:faq';
+const e = editor(Astro);
 // FAQ structured data: answers carry no prices (client, 2026-11-02).
 const ld = {
   '@context': 'https://schema.org',
@@ -14,17 +18,17 @@ const ld = {
 };
 ---
 <Base title={data.metaTitle} description={data.metaDescription} jsonLd={faq.items.length ? ld : undefined}>
-  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} />
+  <PageIntro heading={data.heading} intro={data.intro} eyebrow={data.eyebrow} doc={D} />
   <div class="page-body">
-    <div class="faq-list rv">
-      {faq.items.map((i) => (
-        <details>
-          <summary>{i.question}</summary>
-          <p style="white-space: pre-line">{i.answer}</p>
+    <div class="faq-list rv" {...(faq.items.length ? {} : e.add('faq', 'items', 'Add the first question'))}>
+      {faq.items.map((i, n) => (
+        <details open={e.on || undefined} {...e.item('faq', 'items', n, faq.items.length)}>
+          <summary><span {...e('faq', `items.${n}.question`)}>{i.question}</span></summary>
+          <p style="white-space: pre-line" {...e('faq', `items.${n}.answer`)}>{i.answer}</p>
         </details>
       ))}
     </div>
     <Divider kind="band" />
-    {hasBody && <div class="prose"><Content /></div>}
+    {(hasBody || e.on) && <div class="prose" {...e(D, 'body')}><Body of={body} /></div>}
   </div>
 </Base>

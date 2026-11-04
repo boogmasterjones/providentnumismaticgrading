@@ -1,0 +1,9 @@
+---
+/** A page or post body: rendered by astro:content on the public site, or from a draft inside Studio's preview. */
+import { render } from 'astro:content';
+import type { BodyRef } from '../lib/content';
+interface Props { of: BodyRef }
+const { of } = Astro.props;
+const Content = of.entry ? (await render(of.entry)).Content : null;
+---
+{Content ? <Content /> : <Fragment set:html={of.html ?? ''} />}
