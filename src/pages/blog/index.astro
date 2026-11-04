@@ -5,7 +5,7 @@ import Body from '../../components/Body.astro';
 import { getPosts, loadPage } from '../../lib/content';
 import { editor } from '../../lib/edit';
 import { formatDate } from '../../lib/blog';
-import { publicImageSize } from '../../lib/imagesize';
+import Photo from '../../components/Photo.astro';
 
 const { data, body, hasBody } = await loadPage(Astro, 'blog');
 const posts = await getPosts(Astro);
@@ -24,7 +24,7 @@ const e = editor(Astro);
           <li class="rv">
             <time datetime={p.data.date.toISOString().slice(0, 10)}>{formatDate(p.data.date)}</time>
             <div>
-              {p.data.cover && <img src={p.data.cover} alt={p.data.coverAlt ?? ''} {...(publicImageSize(p.data.cover) ?? {})} loading="lazy" decoding="async" {...e(`post:${p.id}`, 'cover')} />}
+              {p.data.cover && <Photo src={p.data.cover} alt={p.data.coverAlt ?? ''} sizes="(max-width: 720px) 100vw, 1000px" {...e(`post:${p.id}`, 'cover')} />}
               <h2><a href={`/blog/${p.id}`}>{p.data.title}</a>{e.on && p.data.draft && <small class="sf-badge"> Hidden</small>}</h2>
               <p class="muted" {...e(`post:${p.id}`, 'description')}>{p.data.description}</p>
             </div>

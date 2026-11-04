@@ -8,6 +8,7 @@ import { splitGrade, verifyHref } from '../lib/notable';
 import { getNotable } from '../lib/content';
 import { editor } from '../lib/edit';
 import Inscr from './Inscr.astro';
+import Photo from './Photo.astro';
 
 interface Props {
   eyebrow?: string | null;
@@ -52,13 +53,13 @@ const ed = (p: string, raw?: string | null) => (doc ? e(doc, p, { raw }) : {});
                 <Fragment set:html={corners} />
                 <div class="bead">
                   <div class="coin-disc proof">
-                    <img src={c.obverse} alt={`${c.name}, obverse`} loading="lazy" decoding="async" {...e(d, 'obverse')} />
+                    <Photo src={c.obverse} alt={`${c.name}, obverse`} sizes="(max-width: 600px) 240px, 260px" {...e(d, 'obverse')} />
                   </div>
                   {/* the reverse, as a small inset tucked against the obverse's lower right (inside .bead so it is
                       placed against the coin, not against the card's height, which changes with the text) */}
                   {c.reverse && (
                     <div class="coin-disc coin-rev proof">
-                      <img src={c.reverse} alt={`${c.name}, reverse`} loading="lazy" decoding="async" {...e(d, 'reverse')} />
+                      <Photo src={c.reverse} alt={`${c.name}, reverse`} sizes="96px" {...e(d, 'reverse')} />
                     </div>
                   )}
                 </div>

@@ -2,12 +2,13 @@
 /**
  * Home photo carousel (Studio → Homepage slideshow). Wide, slow and smooth: a slide every 5 seconds, swipe
  * on phones (native scroll-snap), drag with a mouse, arrows and progress dots (src/scripts/carousel.ts). Pauses on
- * hover, on focus and off screen. Images are lazy-loaded.
+ * hover, on focus and off screen. Photos are lazy-loaded and sized at build time (Photo.astro).
  * There are no real photos yet and no stock or AI images may stand in, so until the owner adds photos it shows
  * clearly marked placeholder slides.
  */
 import { editor } from '../lib/edit';
 import Ed from './Ed.astro';
+import Photo from './Photo.astro';
 interface Slide {
   image: string;
   alt: string;
@@ -44,7 +45,7 @@ const e = editor(Astro);
           <figure class="car-slide" aria-roledescription="slide" aria-label={`${i + 1} of ${count}`} {...(doc ? e.item(doc, path, i, count) : {})}>
             <div class="car-mat deco-frame">
               <Fragment set:html={corners} />
-              <img src={s.image} alt={s.alt} loading="lazy" decoding="async" {...(doc ? e(doc, `${path}.${i}.image`) : {})} />
+              <Photo src={s.image} alt={s.alt} sizes="100vw" {...(doc ? e(doc, `${path}.${i}.image`) : {})} />
             </div>
             {s.caption && <figcaption><Ed f={doc ? e(doc, `${path}.${i}.caption`) : {}}>{s.caption}</Ed></figcaption>}
           </figure>

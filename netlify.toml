@@ -7,3 +7,9 @@
 
 # Only the production branch builds. Keystatic edits go to "edits/..." branches and do not trigger a build until
 # they are merged ("published"). Set Branch deploys to "None" in the Netlify UI as well (see README).
+
+# Photo sizes made at build time (src/integrations/photos.ts) are named by a hash of the photo, so they never change.
+[[headers]]
+  for = "/_img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

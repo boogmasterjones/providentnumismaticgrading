@@ -6,6 +6,7 @@ import react from '@astrojs/react';
 import markdoc from '@astrojs/markdoc';
 import sitemap from '@astrojs/sitemap';
 import keystatic from '@keystatic/astro';
+import photos from './src/integrations/photos.ts';
 
 /** Site settings live in content/settings.json (edited in Provident Studio). The live address feeds the sitemap. */
 const settings = JSON.parse(readFileSync(new URL('./content/settings.json', import.meta.url), 'utf8'));
@@ -22,7 +23,8 @@ export default defineConfig({
   // /population.
   output: 'static',
   // No edge functions in this site; turning off their local emulation avoids a Deno start-up error in `astro dev`.
-  adapter: netlify({ devFeatures: { images: true, environmentVariables: false, edgeFunctions: false } }),
+  // imageCDN off: photos are sized at build time (src/integrations/photos.ts); Netlify's Image CDN would cost credits.
+  adapter: netlify({ imageCDN: false, devFeatures: { images: true, environmentVariables: false, edgeFunctions: false } }),
   integrations: [
     react(),
     markdoc(),
@@ -34,6 +36,8 @@ export default defineConfig({
       // /population is rendered on request, so it is added by hand (only when it is switched on).
       customPages: settings.showPopulation ? [new URL('/population', settings.siteUrl).href] : [],
     }),
+    // every photo in public/images at a few widths, AVIF + WebP, into dist/_img (src/lib/photo.ts); no image CDN
+    photos(),
   ],
   redirects: {
     // Old addresses: fee tables were removed (fees are quoted per submission); the submit steps moved to /submit.

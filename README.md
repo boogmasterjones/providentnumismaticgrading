@@ -183,6 +183,12 @@ Approved looks are kept as annotated git tags, so we can always go back to one.
 - Header, phone menu, reveals: `src/scripts/site.ts`. Glints, sweeps and flashes: `src/scripts/shine.ts`. Footage:
   `src/scripts/film.ts`. Carousel: `src/scripts/carousel.ts`.
 - Add `?shot` to a URL to freeze the coin river for screenshots.
+- Photos: `src/components/Photo.astro` (carousel, notable coins, journal covers, photos in page/journal text via
+  `markdoc.config.mjs`). After `astro build`, `src/integrations/photos.ts` writes every photo in `public/images/` at
+  320–1920 px wide as AVIF and WebP into `dist/_img/` with sharp (hash-named, cached a year; encoded sizes are kept in
+  `node_modules/.cache/provident-photos` so a publish only encodes new photos). The page gets `<picture>` with
+  srcset/sizes, width and height, lazy loading except a journal post's cover. **No Netlify Image CDN** (it costs
+  credits; `imageCDN: false` in `astro.config.mjs`). In `astro dev` and Studio's preview photos are plain `<img>`.
 
 ## Stack
 

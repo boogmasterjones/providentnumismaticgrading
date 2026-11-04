@@ -1,0 +1,40 @@
+---
+/**
+ * A photo from public/images/, served at the right size: <picture> with AVIF and WebP srcsets made at build time
+ * (src/lib/photo.ts, src/integrations/photos.ts), width and height so nothing shifts, lazy unless `priority`.
+ * In `astro dev` and inside Studio's preview (where the photo may be a draft) it is a plain <img> of the original.
+ * Any other attributes (Studio's editing annotations, a class) go on the <img>.
+ */
+import type { HTMLAttributes } from 'astro/types';
+import { editor } from '../lib/edit';
+import { publicImageSize } from '../lib/imagesize';
+import { heightAt, planPhoto, srcsetFor } from '../lib/photo';
+
+interface Props extends Omit<HTMLAttributes<'img'>, 'src' | 'alt' | 'sizes' | 'loading' | 'width' | 'height'> {
+  src: string;
+  alt: string;
+  /** how wide the photo is shown, as an <img sizes> value */
+  sizes?: string;
+  /** the main photo of the first screen: fetched first, never lazy */
+  priority?: boolean;
+  /** markdoc passes a title for images in text */
+  title?: string;
+}
+const { src, alt, sizes = '100vw', priority = false, ...rest } = Astro.props;
+const plain = import.meta.env.DEV || editor(Astro).on;
+const plan = plain ? null : planPhoto(src);
+const size = plan ?? publicImageSize(src);
+const load = priority
+  ? { loading: 'eager' as const, fetchpriority: 'high' as const }
+  : { loading: 'lazy' as const };
+const largest = plan ? plan.widths[plan.widths.length - 1] : 0;
+---
+{plan ? (
+  <picture class="photo">
+    <source type="image/avif" srcset={srcsetFor(plan, 'avif')} sizes={sizes} />
+    <source type="image/webp" srcset={srcsetFor(plan, 'webp')} sizes={sizes} />
+    <img src={src} alt={alt} width={largest} height={heightAt(plan, largest)} decoding="async" {...load} {...rest} />
+  </picture>
+) : (
+  <img src={src} alt={alt} width={size?.width} height={size?.height} decoding="async" {...load} {...rest} />
+)}

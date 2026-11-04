@@ -5,7 +5,7 @@ import Body from '../../components/Body.astro';
 import { publishedPosts, formatDate } from '../../lib/blog';
 import { getSettings, type Post } from '../../lib/content';
 import { editor } from '../../lib/edit';
-import { publicImageSize } from '../../lib/imagesize';
+import Photo from '../../components/Photo.astro';
 
 export async function getStaticPaths() {
   const posts = await publishedPosts();
@@ -16,8 +16,6 @@ const { post } = Astro.props;
 const settings = getSettings(Astro);
 const D = `post:${post.id}`;
 const e = editor(Astro);
-// the cover is usually the largest thing on a phone's first screen: sized (no shift when it arrives) and fetched first
-const coverSize = publicImageSize(post.data.cover);
 // The publisher is the company; no personal author (anonymity rule).
 const ld = {
   '@context': 'https://schema.org',
@@ -35,7 +33,7 @@ const ld = {
     <p class="post-meta"><time datetime={post.data.date.toISOString().slice(0, 10)} {...e(D, 'date', { panel: true })}>{formatDate(post.data.date)}</time></p>
     <h1 {...e(D, 'title')}>{post.data.title}</h1>
     <div class="deco-rule in" aria-hidden="true"><i></i><i></i><i></i></div>
-    {post.data.cover && <img src={post.data.cover} alt={post.data.coverAlt ?? ''} width={coverSize?.width} height={coverSize?.height} fetchpriority="high" decoding="async" {...e(D, 'cover')} />}
+    {post.data.cover && <Photo src={post.data.cover} alt={post.data.coverAlt ?? ''} sizes="(max-width: 720px) 100vw, 640px" priority {...e(D, 'cover')} />}
     {e.on && !post.data.cover && <p class="sf-empty-img" {...e(D, 'cover')}>Add a cover photo</p>}
     {e.on ? <div {...e(D, 'body')}><Body of={post.body} /></div> : <Body of={post.body} />}
     <Divider kind="laurel" />
