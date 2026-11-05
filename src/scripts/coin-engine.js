@@ -238,13 +238,17 @@
         img.onload = function () {
           var C = Math.round(S * (1 + 2 * PAD)), pad = (C - S) / 2, cv = document.createElement("canvas");
           cv.width = cv.height = C;
-          var x = cv.getContext("2d");
+          // a CPU-backed canvas: same pixels, but no GPU round trip (where the GPU is emulated, as in PageSpeed
+          // tests, a GPU canvas made each sprite a long main-thread task), and toBlob reads it back for free
+          var x = cv.getContext("2d", { willReadFrequently: true });
           if (o.blur && "filter" in x) x.filter = "blur(" + (o.blur * DPR) + "px)";
           if (o.shadow !== false) { x.shadowColor = "rgba(0,0,0,.55)"; x.shadowBlur = S * 0.07; x.shadowOffsetY = S * 0.05; }
           x.drawImage(img, pad, pad, S, S);
           x.filter = "none"; x.shadowColor = "transparent";
           if (o.dim) { x.globalCompositeOperation = "source-atop"; x.fillStyle = "rgba(7,8,11," + o.dim + ")"; x.fillRect(0, 0, C, C); }
-          var done = function (url) { res({ url: url, canvas: cv, S: S, C: C }); next(); };
+          // the next sprite starts drawing now; this one is encoded off the main thread meanwhile
+          next();
+          var done = function (url) { res({ url: url, canvas: cv, S: S, C: C }); };
           // screenshots encode synchronously (headless virtual time does not wait for toBlob)
           try { if (shot) done(cv.toDataURL("image/png")); else cv.toBlob(function (b) { done(b ? URL.createObjectURL(b) : src); }, "image/png"); } catch (e) { done(src); }
         };
