@@ -322,7 +322,6 @@ are stored, and (at launch) a read-only token restricted to that doc, pasted int
 - [ ] Population report switch: on only if the owner's database can list every certificate and the figures look right.
 - [ ] Every item in `CONTENT_TO_CONFIRM.md` confirmed by the owner (name, headline, process claims, grading scale
       and standards, About text, FAQ answers, phone, email, hours, location, privacy text) and the text updated.
-- [ ] Delete any demo journal posts.
 - [ ] Replace the stock-footage frames with the owner's own footage if he has some (optional; the Pexels licence allows the current ones).
 - [ ] No credential or claim (years at another grading service, memberships, guarantees, "best", "industry accepted") unless the owner confirms
       it and can back it up.
