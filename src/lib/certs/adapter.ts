@@ -12,6 +12,8 @@
 import type { CertificateInput } from './certificate';
 import { createMockAdapter } from './providers/mock';
 import { CodaConfigError, createCodaAdapter, isCodaConfigured, readCodaConfig, type CodaEnv } from './providers/coda';
+import { createCodaMultiAdapter, readCodaMultiConfig } from './providers/coda-multi';
+import type { KVStore } from './verify';
 
 export interface CertAdapter {
   /** Short id, part of the cache key so demo answers are never served once the real database is connected. */
@@ -27,6 +29,11 @@ export interface CertAdapter {
    * the population page then says the report isn't available (and stays hidden unless switched on).
    */
   listAll?(): Promise<CertificateInput[]>;
+  /**
+   * Optional: one spelling per certificate (e.g. "A400107133" and "a400107-133" → "A400107-133"), used for the cache
+   * key and to check that the database answered for the number asked.
+   */
+  canonicalNumber?(certNumber: string): string;
 }
 
 export type CertAdapterErrorKind = 'auth' | 'busy' | 'timeout' | 'upstream';
@@ -45,15 +52,18 @@ export type CertEnv = CodaEnv;
 
 /**
  * Coda when any CODA_* setting is present (a missing token or doc then fails safely as an error, never as demo
- * data), otherwise the DEMO records.
+ * data), otherwise the DEMO records. CODA_DOCS set → the multi-doc layout (one doc per prefix, one table per batch);
+ * else the single table in CODA_DOC_ID / CODA_TABLE_ID.
  */
 export function getCertAdapter(
   env: CertEnv,
   fetchImpl: typeof fetch = globalThis.fetch,
   log?: (msg: string) => void,
+  kv?: KVStore,
 ): CertAdapter {
   if (!isCodaConfigured(env)) return createMockAdapter();
   try {
+    if (env.CODA_DOCS?.trim()) return createCodaMultiAdapter({ config: readCodaMultiConfig(env), fetch: fetchImpl, log, kv });
     return createCodaAdapter({ config: readCodaConfig(env), fetch: fetchImpl, log });
   } catch (e) {
     // A setup mistake (bad doc link, column map or API address): every lookup reports an error until it's fixed.

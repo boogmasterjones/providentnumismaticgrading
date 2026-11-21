@@ -81,6 +81,8 @@ export interface CodaEnv {
   CODA_API_TOKEN?: string;
   CODA_COLUMN_MAP?: string;
   CODA_API_BASE?: string;
+  /** Multi-doc mode (providers/coda-multi.ts): prefix letter → doc id, as JSON. Takes priority over DOC_ID/TABLE_ID. */
+  CODA_DOCS?: string;
 }
 
 export interface CodaConfig {
@@ -133,7 +135,7 @@ export function parseCodaColumnMap(raw: string | undefined): CodaColumnMap {
   return out as CodaColumnMap;
 }
 
-function parseApiBase(raw: string | undefined): string {
+export function parseApiBase(raw: string | undefined): string {
   const v = (raw?.trim() || CODA_DEFAULT_API_BASE).replace(/\/+$/, '');
   let u: URL;
   try {
@@ -149,7 +151,7 @@ function parseApiBase(raw: string | undefined): string {
 
 /** True when any CODA_* setting is present: the site then uses Coda (and fails safely if a setting is missing). */
 export function isCodaConfigured(env: CodaEnv): boolean {
-  return !!(env.CODA_DOC_ID?.trim() || env.CODA_TABLE_ID?.trim() || env.CODA_API_TOKEN?.trim());
+  return !!(env.CODA_DOC_ID?.trim() || env.CODA_TABLE_ID?.trim() || env.CODA_API_TOKEN?.trim() || env.CODA_DOCS?.trim());
 }
 
 /** Read the settings. Missing token/doc/table are reported later, per request, as an "auth"/"upstream" error. */
@@ -285,35 +287,35 @@ export function retryDelayMs(res: Response, attempt: number, now = Date.now()): 
 }
 
 /** Short FNV-1a hash, so the cache key changes when the doc, table or column map changes. */
-function shortHash(s: string): string {
+export function shortHash(s: string): string {
   let h = 0x811c9dc5;
   for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x01000193);
   return (h >>> 0).toString(36);
 }
 
-export function createCodaAdapter(opts: CodaAdapterOptions): CertAdapter {
-  const { config } = opts;
+export interface CodaClientOptions {
+  token: string;
+  fetch: typeof fetch;
+  log?: (msg: string) => void;
+  sleep?: (ms: number) => Promise<void>;
+  timeoutMs?: number;
+}
+
+/**
+ * One GET to Coda (a list endpoint: the reply must have an `items` list). 429 is retried while the total wait stays
+ * within budgetMs; 5xx is retried `serverRetries` times. Every failure becomes a CertAdapterError whose message holds
+ * a status code and a hint, never the reply body. The token only ever goes in the Authorization header.
+ */
+export function createCodaClient(opts: CodaClientOptions) {
   const log = opts.log ?? (() => {});
   const sleep = opts.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
-  const rowsUrl = `${config.apiBase}/docs/${encodeURIComponent(config.docId)}/tables/${encodeURIComponent(config.table)}/rows`;
-
-  function checkSetup() {
-    if (!config.token) throw new CertAdapterError('auth', 'CODA_API_TOKEN is not set.');
-    if (!config.docId || !config.table) throw new CertAdapterError('upstream', 'CODA_DOC_ID or CODA_TABLE_ID is not set.');
-  }
-
-  /**
-   * One GET to Coda. 429 is retried while the total wait stays within budgetMs; 5xx is retried `serverRetries` times.
-   * Every failure becomes a CertAdapterError whose message holds a status code and a hint, never the reply body.
-   */
-  async function get(params: URLSearchParams, budgetMs: number, serverRetries: number): Promise<Rec> {
-    const url = `${rowsUrl}?${params.toString()}`;
+  return async function get(url: string, budgetMs: number, serverRetries: number): Promise<Rec> {
     let waited = 0;
     for (let attempt = 0; ; attempt++) {
       let res: Response;
       try {
         res = await opts.fetch(url, {
-          headers: { Accept: 'application/json', Authorization: `Bearer ${config.token}` },
+          headers: { Accept: 'application/json', Authorization: `Bearer ${opts.token}` },
           signal: AbortSignal.timeout(opts.timeoutMs ?? 8000),
         });
       } catch (e) {
@@ -366,6 +368,19 @@ export function createCodaAdapter(opts: CodaAdapterOptions): CertAdapter {
       if (!isObj(body) || !Array.isArray(body.items)) throw new CertAdapterError('upstream', 'Reply had no rows list.');
       return body;
     }
+  };
+}
+
+export function createCodaAdapter(opts: CodaAdapterOptions): CertAdapter {
+  const { config } = opts;
+  const log = opts.log ?? (() => {});
+  const rowsUrl = `${config.apiBase}/docs/${encodeURIComponent(config.docId)}/tables/${encodeURIComponent(config.table)}/rows`;
+  const client = createCodaClient({ token: config.token, fetch: opts.fetch, log, sleep: opts.sleep, timeoutMs: opts.timeoutMs });
+  const get = (params: URLSearchParams, budgetMs: number, serverRetries: number) => client(`${rowsUrl}?${params.toString()}`, budgetMs, serverRetries);
+
+  function checkSetup() {
+    if (!config.token) throw new CertAdapterError('auth', 'CODA_API_TOKEN is not set.');
+    if (!config.docId || !config.table) throw new CertAdapterError('upstream', 'CODA_DOC_ID or CODA_TABLE_ID is not set.');
   }
 
   const baseParams = () => new URLSearchParams({ useColumnNames: 'true', valueFormat: 'simpleWithArrays' });

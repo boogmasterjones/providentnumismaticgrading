@@ -9,6 +9,12 @@ The website can only **read** the table: it can never change or delete anything.
 
 There are four short parts. Parts 1–3 take about 10 minutes. You don't need to send us your password, ever.
 
+> **Update 2026-11-20: Alex's docs are already mapped.** His certificates live in four docs (one per series) with
+> one table per batch, and the website now reads that layout directly ("multi-doc mode", below). Parts 1 and 2 are
+> done. What is left for Alex is Part 3 (a **read-only** token covering the four docs) and Part 4 (paste
+> `CODA_API_TOKEN` and `CODA_DOCS` into Hostinger). The token he emailed has **full access to his whole Coda**: once
+> the read-only one is in place, he deletes the emailed one (Account settings → API settings → Delete).
+
 ---
 
 ## Part 1: Find your doc link and table name
@@ -107,7 +113,39 @@ shows within the hour.
 none set, the DEMO records (`DEMO-0001..0003`) are served. The old generic JSON provider
 (`providers/registry-api.ts`, `CERT_API_URL` / `CERT_API_KEY`) was removed; it is in Git history.
 
+### Multi-doc mode (Alex's real layout; `src/lib/certs/providers/coda-multi.ts`)
+
+Used whenever `CODA_DOCS` is set (it wins over `CODA_DOC_ID` / `CODA_TABLE_ID`).
+
+- **Number**: `A400107-133` = prefix letter + six-digit batch + line. Spaces, lower case and a missing dash are
+  tolerated (`a400107133` works). Lines are tried as typed, then zero-padded to 3 (US/World store `-001`), so
+  `U102703-1` finds `U102703-001`; the cache key uses one spelling (`canonicalNumber`).
+- **Doc**: `CODA_DOCS` (not secret) maps the prefix to the doc:
+  `{"A":"2R77RysYRn","U":"iT3-jw54Xq","W":"-igypeHBY8","M":"6OBUDSaNMR"}` (Roman, US coins, World coins, World
+  medals). Other prefixes are "not found".
+- **Table**: the table named exactly like the batch (`A400107`). Each doc's table list (names and ids only) is
+  cached for an hour in the site's database; an unknown batch refreshes it at most every 5 minutes, so a new batch
+  shows up within minutes. Only names like `A400107` count: templates, "Copy of …" tables, lookups (GRADE, DATE…)
+  and planning tables are ignored.
+- **Row**: `query="Invoice Num1":"A400107-133"`. Rows with no grade, or no title/denomination/emperor (blank
+  placeholders), are "not found".
+- **Card**: Roman → coin "EMPEROR, DENOMINATION", year DATE, country/denomination "TITLE, METAL DENOMINATION", grade,
+  strike ST/5, surface SR/5, notes from LINE4 (reverse), LINE5 (mint), RIC/Craw/RPC, weight, diameter, COM1/COM2,
+  STYLE. US/World/Medals → coin "TITLE DATE MINT MARK DENOMINATION", strike STRIKE, notes from Top Line, LINE4-6,
+  Attribution, 2nd Attr, metal, weight, COM1/COM2, STYLE.
+- **Privacy (strict)**: Coda's API returns every column, so each row is cut down to a whitelist
+  (`PUBLIC_COLUMNS`) the moment it is parsed. **Pur Price, + 20%, Sell Price, Notes, Link, 2nd Link, Web Link,
+  Image URL links to other sites, Created on** and any column not on the list are never mapped, cached, logged or
+  returned. `tests/coda-multi.test.ts` fills every private column with a marker and fails if it appears anywhere.
+- **Photos**: only the `Image` column (pictures uploaded into Coda, on codahosted.io) and `Image URL` when it is a
+  codahosted.io link. In Alex's data (checked 2026-11-20) no row has an uploaded image yet; `Image URL` holds auction
+  pages (acsearch.info, CNG), which is why other hosts are never used. Whether codahosted.io links are public and
+  lasting is still to check once he uploads one (open it in a private window); if not, add a server-side photo proxy.
+- **Population report**: not available in this mode (it would mean reading 200+ tables); leave the switch off.
+
 **Variables** (Hostinger → Environment variables; see `.env.example`):
+
+- `CODA_DOCS` (not secret, multi-doc mode) and `CODA_API_TOKEN` (secret).
 
 - `CODA_API_TOKEN` (secret), `CODA_DOC_ID` (id or browser link), `CODA_TABLE_ID` (name or `grid-…` id).
 - `CODA_COLUMN_MAP` (optional JSON): our field → his column name. Fields: `certNumber`, `coinDescription`, `year`,

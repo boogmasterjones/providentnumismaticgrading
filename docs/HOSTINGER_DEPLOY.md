@@ -58,7 +58,8 @@ installed (so `sharp`, needed by the build, is a normal dependency), and the pro
 | `SMTP_USER`, `SMTP_PASSWORD` | yes | the mailbox that sends the form emails |
 | `FORM_TO` | recommended | where form entries go (default: `SMTP_USER`) |
 | `SMTP_HOST`, `SMTP_PORT` | optional | defaults `smtp.hostinger.com`, `465` |
-| `CODA_DOC_ID`, `CODA_TABLE_ID`, `CODA_API_TOKEN`, `CODA_COLUMN_MAP`, `CODA_API_BASE` | at launch | the certificate database (all empty = DEMO records) |
+| `CODA_DOCS`, `CODA_API_TOKEN` | at launch | Alex's certificate docs (map not secret, token secret; all empty = DEMO records) |
+| `CODA_DOC_ID`, `CODA_TABLE_ID`, `CODA_COLUMN_MAP`, `CODA_API_BASE` | no | single-table mode / API address (not used with `CODA_DOCS`) |
 | `SITE_HOSTS` | optional | extra addresses the site answers on (e.g. the temporary Hostinger address), read at build |
 
 `PORT` is set by Hostinger; do not add it.

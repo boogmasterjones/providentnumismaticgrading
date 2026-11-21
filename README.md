@@ -229,7 +229,7 @@ Locally Studio runs in **local mode**: saving writes straight to the files in `c
 "What's changed" is what git sees as changed, Undo restores the committed version, and Publish is simulated (it shows
 the diff; nothing is committed or pushed). To sign in, put `STUDIO_EMAIL`, `STUDIO_PASSWORD_HASH` and
 `STUDIO_SESSION_SECRET` in `.env` (see `.env.example`; `npm run studio:hash` makes the last two).
-Without `CODA_DOC_ID` the Verify page runs in **demo mode** with three clearly labelled made-up records: try
+Without any `CODA_*` setting the Verify page runs in **demo mode** with three clearly labelled made-up records: try
 `DEMO-0001`, `DEMO-0002` or `DEMO-0003` (anything else shows the "not found" state). Copy `.env.example` to `.env` to try settings.
 
 ## Where things are
@@ -250,7 +250,7 @@ Without `CODA_DOC_ID` the Verify page runs in **demo mode** with three clearly l
 | Certificate shape + schema | `src/lib/certs/certificate.ts` |
 | Adapter interface (website ↔ the owner's database) | `src/lib/certs/adapter.ts` |
 | **The owner's database: the only provider-specific file** | `src/lib/certs/providers/coda.ts` |
-| DEMO records (used when `CODA_DOC_ID` is unset) | `src/lib/certs/providers/mock.ts` |
+| DEMO records (used when no `CODA_*` setting is present) | `src/lib/certs/providers/mock.ts` |
 | Lookup, cache, rate limit, population loader | `src/lib/certs/verify.ts`, `src/pages/api/verify.ts`, `src/lib/population.ts` |
 
 ### How certificate verification works
@@ -276,6 +276,10 @@ website edit or rebuild.
   also called Superhuman Docs), read with a read-only, doc-restricted API token. Column names are mapped with
   `CODA_COLUMN_MAP`. With no `CODA_*` variable set, `providers/mock.ts` serves the DEMO records. Setup steps:
   `docs/CODA_SETUP.md`.
+- **Alex's real layout** (`providers/coda-multi.ts`, on when `CODA_DOCS` is set): four docs (A Roman, U US, W World,
+  M Medals), one table per batch, the number in "Invoice Num1" (`A400107-133`). Only whitelisted public columns are
+  ever read: **prices (Pur Price, + 20%, Sell Price), Notes and source links never leave the server** and a test
+  fails if they do. Population report: not available in this mode.
 - **Population report** (`/population`): needs the database to list every certificate (`listAll()`). It is hidden
   (404, not in the menu or sitemap) until **Business info → Show the population report** is switched on. With the DEMO
   records it shows demo numbers labelled DEMO; if the real database can't list certificates it says the report isn't
@@ -365,7 +369,8 @@ code with "Action required"; fill those in. Leave out any you do not have yet.
 | `STUDIO_GITHUB_REPO` | `boogmasterjones/providentnumismaticgrading` (his own after the transfer) |
 | `STUDIO_GITHUB_APP_ID` | from the Studio GitHub App ([docs/STUDIO_SETUP.md](docs/STUDIO_SETUP.md)) |
 | `STUDIO_GITHUB_APP_PRIVATE_KEY` | the app's private key, **base64-encoded on one line** |
-| `CODA_DOC_ID`, `CODA_TABLE_ID`, `CODA_API_TOKEN`, `CODA_COLUMN_MAP` | the certificate database ([docs/CODA_SETUP.md](docs/CODA_SETUP.md)); leave all out to show the DEMO records |
+| `CODA_DOCS` | `{"A":"2R77RysYRn","U":"iT3-jw54Xq","W":"-igypeHBY8","M":"6OBUDSaNMR"}` (not secret: which Coda doc holds each series) |
+| `CODA_API_TOKEN` | Alex's Coda API token, read-only ([docs/CODA_SETUP.md](docs/CODA_SETUP.md)); leave it and `CODA_DOCS` out to show the DEMO records |
 | `SITE_HOSTS` | only while testing on the temporary address: that address, e.g. `something.hostingersite.com` |
 
 Do **not** add `PORT` (Hostinger sets it) or `STUDIO_STORAGE`. Never set any value in the code or in GitHub. Saving
@@ -400,8 +405,13 @@ More detail, sources and Hostinger's limits: [docs/HOSTINGER_DEPLOY.md](docs/HOS
 
 ## LAUNCH CHECKLIST
 
-- [ ] `CODA_*` variables + read-only `CODA_API_TOKEN` set in Hostinger; one real certificate and one wrong number tested (the
-      DEMO records disappear by themselves once the `CODA_*` variables are set).
+- [ ] `CODA_DOCS` + read-only `CODA_API_TOKEN` set in Hostinger; one real certificate (e.g. A400107-133) and one wrong
+      number tested (the DEMO records disappear by themselves once the `CODA_*` variables are set).
+- [ ] **Coda token swap**: the token Alex emailed (2026-11) has FULL access to his whole Coda. Before go-live Alex
+      creates a new token in Coda → Account settings → API settings with **Read** access only, covering the four
+      certificate docs (Roman, US Coins, World Coins, World Medals; if Coda allows only one doc per restricted token,
+      use an unrestricted **read-only** token). Put it in Hostinger as `CODA_API_TOKEN`, check a lookup, then
+      **delete the emailed token** in Coda and delete the email.
 - [ ] Population report switch: on only if the owner's database can list every certificate and the figures look right.
 - [ ] Every item in `CONTENT_TO_CONFIRM.md` confirmed by the owner (name, headline, process claims, grading scale
       and standards, About text, FAQ answers, phone, email, hours, location, privacy text) and the text updated.

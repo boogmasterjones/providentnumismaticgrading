@@ -108,7 +108,8 @@ export async function lookupCertificate(
   deps: { adapter: CertAdapter; store: KVStore; now: () => number; log?: (msg: string) => void },
 ): Promise<LookupOutcome> {
   const now = deps.now();
-  const key = certCacheKey(deps.adapter, n);
+  const canon = (s: string) => (deps.adapter.canonicalNumber ? deps.adapter.canonicalNumber(s) : s);
+  const key = certCacheKey(deps.adapter, canon(n));
   const hit = await cacheGet<{ found: boolean; certificate?: Certificate }>(deps.store, key, now);
   if (hit) {
     const cert = hit.found ? parseCertificate(hit.certificate) : null;
@@ -136,7 +137,7 @@ export async function lookupCertificate(
     return { kind: 'error', errorKind: 'invalid' };
   }
   // The database must answer for the number that was asked; anything else is treated as not found.
-  if (normalizeCertNumber(cert.certNumber) !== n) {
+  if (canon(normalizeCertNumber(cert.certNumber)) !== canon(n)) {
     deps.log?.('certificate lookup: reply was for a different number');
     return { kind: 'not-found', cached: false };
   }

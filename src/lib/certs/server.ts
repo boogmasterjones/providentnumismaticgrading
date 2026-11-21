@@ -23,8 +23,11 @@ export function getServerCertAdapter(): CertAdapter {
       CODA_API_TOKEN: process.env.CODA_API_TOKEN,
       CODA_COLUMN_MAP: process.env.CODA_COLUMN_MAP,
       CODA_API_BASE: process.env.CODA_API_BASE,
+      CODA_DOCS: process.env.CODA_DOCS,
     },
     globalThis.fetch,
     (m) => console.warn(m),
+    // multi-doc mode keeps each doc's table list (names and ids only) here for about an hour
+    getCertStore(),
   );
 }
