@@ -2,9 +2,10 @@
  * Server-only wiring for Studio's routes: configuration, the content store, the sign-in limiter store and small
  * HTTP helpers. Never import this from browser code.
  */
-import { getStore } from '@netlify/blobs';
 import type { APIContext } from 'astro';
-import { MemoryKV, readCookie, readSession, cookieName, type AuthKV, type Session } from './auth';
+import { readCookie, readSession, cookieName, type AuthKV, type Session } from './auth';
+import { clientIp as visitorIp } from '../client-ip';
+import { getKV } from '../kv';
 import { readConfig, type StudioConfig } from './config';
 import { InstallationTokens } from './github-app';
 import { EditError } from './ops';
@@ -36,24 +37,13 @@ export function service(cfg = config()): StudioService {
   return new StudioService(contentStore(cfg));
 }
 
-let memoryKV: MemoryKV | null = null;
-
-/** Netlify Blobs store "studio-auth" on Netlify (strong consistency, so a lock is seen at once); memory locally. */
+/**
+ * Sign-in limits and locks, namespace "studio-auth": Hostinger MySQL in production (a lock is seen at once and
+ * survives a restart or redeploy), files under `astro dev` (src/lib/kv.ts). Every entry is forgotten after two
+ * days; the longest window it tracks is an hour.
+ */
 export function authKV(): AuthKV {
-  if (import.meta.env.DEV) return (memoryKV ??= new MemoryKV());
-  try {
-    const blobs = getStore({ name: 'studio-auth', consistency: 'strong' });
-    return {
-      async get(key) {
-        return (await blobs.get(key, { type: 'json' })) ?? null;
-      },
-      async set(key, value) {
-        await blobs.setJSON(key, value);
-      },
-    };
-  } catch {
-    return (memoryKV ??= new MemoryKV());
-  }
+  return getKV('studio-auth', { dev: import.meta.env.DEV, defaultTtlMs: 2 * 24 * 60 * 60 * 1000 });
 }
 
 export function currentSession(request: Request, cfg = config()): Session | null {
@@ -61,11 +51,7 @@ export function currentSession(request: Request, cfg = config()): Session | null
 }
 
 export function clientIp(ctx: Pick<APIContext, 'clientAddress' | 'request'>): string {
-  try {
-    return ctx.clientAddress;
-  } catch {
-    return ctx.request.headers.get('x-nf-client-connection-ip') ?? '';
-  }
+  return visitorIp(ctx);
 }
 
 const NO_STORE = { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' };

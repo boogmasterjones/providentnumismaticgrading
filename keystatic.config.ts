@@ -8,10 +8,10 @@ import { MARKS } from './src/lib/marks';
  *
  * Storage:
  * - Local mode (default, for development): edits are written straight to the files in this folder.
- * - GitHub mode (production): set PUBLIC_KEYSTATIC_GITHUB_REPO=owner/repo in Netlify (plus the Keystatic GitHub app
- *   variables listed in README.md). Every save then becomes a commit in that repository, and Netlify rebuilds.
+ * - GitHub mode (production): set PUBLIC_KEYSTATIC_GITHUB_REPO=owner/repo in the host (plus the Keystatic GitHub app
+ *   variables listed in README.md). Every save then becomes a commit in that repository, and the host rebuilds.
  *   Edits are made on a branch whose name starts with "edits/" and go live when the owner presses "publish"
- *   (merges the branch), so a day of edits is one Netlify build instead of one per save.
+ *   (merges the branch), so a day of edits is one build instead of one per save.
  *
  * There is deliberately no fee or price model: fees are quoted per submission (client, 2026-11-02).
  */

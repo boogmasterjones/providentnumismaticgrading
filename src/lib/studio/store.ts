@@ -5,7 +5,7 @@
  *   shows as changed against the last commit; Publish is simulated (it lists the changes and the diff).
  * - GitHubStore (production): the client's GitHub repository through the GitHub API, with a GitHub App installation
  *   token held server-side. Edits are commits on a drafts branch; Publish merges drafts into the live branch, so
- *   Netlify builds once per publish.
+ *   Hostinger rebuilds once per publish (it deploys every push to the live branch).
  *
  * Only paths that pass `assertWritable` (content files and photos in public/images) can ever be written.
  */

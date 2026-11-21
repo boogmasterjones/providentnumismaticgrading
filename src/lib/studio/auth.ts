@@ -20,7 +20,7 @@ export const LOCK_MS = 15 * 60 * 1000;
 export const ACCOUNT_WINDOW_MS = 60 * 60 * 1000;
 export const ACCOUNT_MAX_FAILS = 30;
 
-/** A small key-value store with expiry: Netlify Blobs in production, memory in development and tests. */
+/** A small key-value store: MySQL in production, files or memory in development and tests (src/lib/kv.ts). */
 export interface AuthKV {
   get(key: string): Promise<unknown | null>;
   set(key: string, value: unknown): Promise<void>;

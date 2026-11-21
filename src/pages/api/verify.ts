@@ -1,21 +1,16 @@
 import type { APIRoute } from 'astro';
 import { handleVerify, RateLimiter } from '../../lib/certs/verify';
 import { getCertStore, getServerCertAdapter } from '../../lib/certs/server';
+import { clientIp } from '../../lib/client-ip';
 
-// Runs on demand as a Netlify Function (the Astro Netlify adapter bundles it), never at build time.
+// Runs on demand in the Node server, never at build time.
 export const prerender = false;
 
-// One limiter per running copy of the function (see RateLimiter).
+// One limiter per running server process (see RateLimiter).
 const limiter = new RateLimiter(20, 300);
 
-export const GET: APIRoute = async ({ request, clientAddress }) => {
-  let ip = '';
-  try {
-    ip = clientAddress;
-  } catch {
-    ip = request.headers.get('x-nf-client-connection-ip') ?? '';
-  }
-  return handleVerify(request, ip, {
+export const GET: APIRoute = async (ctx) => {
+  return handleVerify(ctx.request, clientIp(ctx), {
     adapter: getServerCertAdapter(),
     store: getCertStore(),
     limiter,

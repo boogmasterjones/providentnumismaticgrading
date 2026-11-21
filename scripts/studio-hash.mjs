@@ -5,7 +5,7 @@
  *   npm run studio:hash
  *
  * Type the password when asked (it is not shown and not saved anywhere). The script prints the bcrypt hash twice:
- * as is, and base64-encoded. Paste either one into Netlify as STUDIO_PASSWORD_HASH (the base64 form is safest in
+ * as is, and base64-encoded. Paste either one into Hostinger (hPanel > Environment variables) as STUDIO_PASSWORD_HASH (the base64 form is safest in
  * .env files, which may treat "$" specially). It also prints a fresh random STUDIO_SESSION_SECRET.
  */
 import bcrypt from 'bcryptjs';

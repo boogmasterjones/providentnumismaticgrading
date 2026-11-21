@@ -9,35 +9,37 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "npm run build && npm start",
     "check": "astro check",
     "test": "vitest run",
     "astro": "astro",
-    "studio:hash": "node scripts/studio-hash.mjs"
+    "studio:hash": "node scripts/studio-hash.mjs",
+    "start": "node dist/server/start.mjs"
   },
   "dependencies": {
     "@astrojs/markdoc": "2.1.0",
-    "@astrojs/netlify": "8.2.10",
+    "@astrojs/node": "11.1.11",
     "@astrojs/react": "7.1.0",
     "@astrojs/sitemap": "3.7.4",
     "@keystatic/astro": "6.0.0",
     "@keystatic/core": "0.6.9",
     "@markdoc/markdoc": "0.5.11",
-    "@netlify/blobs": "11.1.4",
     "astro": "7.4.0",
     "bcryptjs": "3.0.2",
     "js-yaml": "4.3.2",
+    "mysql2": "3.24.6",
+    "nodemailer": "10.3.1",
     "react": "19.1.10",
-    "react-dom": "19.1.10"
+    "react-dom": "19.1.10",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
-    "@netlify/functions": "6.0.2",
     "@types/js-yaml": "4.0.9",
     "@types/node": "24.13.5",
+    "@types/nodemailer": "8.0.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "sharp": "0.35.5",
     "typescript": "6.0.3",
     "vitest": "4.1.12"
   },

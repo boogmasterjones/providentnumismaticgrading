@@ -1,8 +1,8 @@
 /**
  * Build step: every photo in public/images/ is written again at the widths in src/lib/photo.ts, as AVIF and WebP,
- * into dist/_img/ (see that file for the why). Runs once after `astro build`, with sharp (already installed with
- * Astro). Made files are kept in node_modules/.cache/provident-photos (Netlify keeps node_modules between builds), so a
- * publish only encodes the photos that are new.
+ * into dist/client/_img/ (see that file for the why). Runs once after `astro build`, with sharp. Made files are kept
+ * in node_modules/.cache/provident-photos, so a rebuild only encodes the photos that are new when the host keeps
+ * node_modules between builds (when it does not, every photo is encoded again: slower, same result).
  */
 import type { AstroIntegration } from 'astro';
 import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'node:fs';

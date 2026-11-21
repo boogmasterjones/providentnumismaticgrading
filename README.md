@@ -1,8 +1,9 @@
 # Provident grading website
 
 Website for a coin grading company (Provident Numismatic Authentication, Venice FL; the final name is the owner's
-call). Built by Biggify. At launch the repository moves to **the owner's own GitHub** and the site to **the owner's own
-Netlify account**: the owner owns everything.
+call). Built by Biggify. Hosted as a **Node.js Web App on the owner's own Hostinger Business plan** (moved from
+Netlify on 2026-11-20; details and sources: [docs/HOSTINGER_DEPLOY.md](docs/HOSTINGER_DEPLOY.md)). The repository
+moves to **the owner's own GitHub** later: the owner owns everything.
 
 **Anonymity rule (client request, 2026-11-02): the owner stays anonymous.** No name, title ("President",
 "founder"), personal bio, photo of him, "he/his" phrasing about a specific person, schema.org Person data or personal
@@ -185,10 +186,10 @@ Approved looks are kept as annotated git tags, so we can always go back to one.
 - Add `?shot` to a URL to freeze the coin river for screenshots.
 - Photos: `src/components/Photo.astro` (carousel, notable coins, journal covers, photos in page/journal text via
   `markdoc.config.mjs`). After `astro build`, `src/integrations/photos.ts` writes every photo in `public/images/` at
-  320–1920 px wide as AVIF and WebP into `dist/_img/` with sharp (hash-named, cached a year; encoded sizes are kept in
-  `node_modules/.cache/provident-photos` so a publish only encodes new photos). The page gets `<picture>` with
-  srcset/sizes, width and height, lazy loading except a journal post's cover. **No Netlify Image CDN** (it costs
-  credits; `imageCDN: false` in `astro.config.mjs`). In `astro dev` and Studio's preview photos are plain `<img>`.
+  320–1920 px wide as AVIF and WebP into `dist/client/_img/` with sharp (hash-named, cached a year by
+  `server/headers.mjs`; encoded sizes are kept in `node_modules/.cache/provident-photos` so a rebuild only encodes new
+  photos when the host keeps that folder). The page gets `<picture>` with srcset/sizes, width and height, lazy loading
+  except a journal post's cover. No image service at runtime. In `astro dev` and Studio's preview photos are plain `<img>`.
 
 ## Stack
 
@@ -196,13 +197,15 @@ Approved looks are kept as annotated git tags, so we can always go back to one.
 - **Provident Studio**, the owner's editor at **/admin** (built in: `src/studio/`, `src/lib/studio/`; setup and how it
   works: [docs/STUDIO_SETUP.md](docs/STUDIO_SETUP.md)). Content lives as files in `content/` and images in
   `public/images/`, so the Git repository is the whole website: no database. On the live site Studio saves to a
-  drafts branch through a GitHub App and Publish merges the drafts into `main` (one Netlify build per publish).
+  drafts branch through a GitHub App and Publish merges the drafts into `main` (Hostinger rebuilds once per publish).
   [Keystatic](https://keystatic.com) remains as a fallback editor in local development only (`/keystatic`).
-- Netlify: hosting, **Netlify Forms** (submission + contact), and on-demand routes run as Netlify Functions through
-  the Astro Netlify adapter: Studio (`/admin`, `/api/studio/…`, signed in only), the certificate lookup
-  (`/api/verify`) and the population report (`/population`, only when switched on).
+- Hostinger Web App (Node.js) with `@astrojs/node` (standalone). Static pages are served from `dist/client` by the
+  Node server `server/start.mjs` (adds cache and security headers). Rendered on request: Studio (`/admin`,
+  `/api/studio/…`, signed in only), the certificate lookup (`/api/verify`), the forms (`/api/form`, emailed over SMTP:
+  `src/lib/forms.ts`, `src/lib/mailer.ts`) and the population report (`/population`, only when switched on).
 - Certificates are **not** stored in this repository: they come live from the owner's own certificate database through its
-  API. Netlify Blobs caches the answers (included in Netlify's free plan).
+  API. The answers are cached in Hostinger MySQL (`src/lib/kv.ts`, one table `provident_kv`; files under `.data/kv`
+  locally). Studio's sign-in locks live there too.
 
 ## Run it locally
 
@@ -214,8 +217,13 @@ npm run dev        # http://localhost:4321  (Studio: http://localhost:4321/admin
 npm test           # unit tests (certificate lookup, adapters, cache, rate limit, population, notable coins, Studio)
 npm run check      # TypeScript / Astro type check
 npm run build      # production build into dist/
+npm start          # run the built site like Hostinger does (http://localhost:4321)
 npm run studio:hash  # make the Studio password hash and session secret
 ```
+
+Locally the forms work without email settings under `npm run dev` (entries are only noted in the console); with
+`npm start` they need the `SMTP_*` variables (any test SMTP server will do: `SMTP_HOST`, `SMTP_PORT`,
+`SMTP_SECURE=false`).
 
 Locally Studio runs in **local mode**: saving writes straight to the files in `content/` and `public/images/`,
 "What's changed" is what git sees as changed, Undo restores the committed version, and Publish is simulated (it shows
@@ -257,9 +265,9 @@ website edit or rebuild.
   `/verify?cert=XXXX` loads the result directly.
 - The card says what verification means: the number is on record in the owner's registry with these details; the visitor
   compares them and the photos with the coin and label in hand.
-- `/api/verify` (Netlify Function) normalises the number (capitals, spaces, `#`, `No.` ignored; letters, digits and
-  dashes only), applies a **per-visitor limit** (20 a minute, 300 a day per IP, per running copy of the function),
-  checks the **cache** (Netlify Blobs store `cert-verify`: found 1 hour so corrections show quickly, not found
+- `/api/verify` (rendered on request) normalises the number (capitals, spaces, `#`, `No.` ignored; letters, digits and
+  dashes only), applies a **per-visitor limit** (20 a minute, 300 a day per IP, per running server),
+  checks the **cache** (MySQL, namespace `cert-verify`: found 1 hour so corrections show quickly, not found
   5 minutes), then asks the adapter. The reply is validated against our certificate schema (https photo links only)
   and must be for the number asked. Errors reach the visitor only as a generic message; logs carry the error kind
   only. **The API key is read from server environment variables and is never sent to the browser or logged.**
@@ -276,7 +284,7 @@ website edit or rebuild.
 ### What we need from the owner about the certificate database (Coda)
 
 See `docs/CODA_SETUP.md`: the doc link, the table name, a screenshot of the header row, how photos and cert numbers
-are stored, and (at launch) a read-only token restricted to that doc, pasted into Netlify only.
+are stored, and (at launch) a read-only token restricted to that doc, pasted into Hostinger's environment variables only.
 
 ## How the owner edits the site (after launch)
 
@@ -285,39 +293,114 @@ are stored, and (at launch) a read-only token restricted to that doc, pasted int
    photo to replace it; lists have Move, Add, Details and Remove buttons; computer and phone views), **Notable
    coins**, **Homepage slideshow**, **Journal**, **Photo library**, **Business info** and **Publish**. Every change
    is saved at once as a draft and is **not live yet**; "Not published yet" lists them, each with Undo.
-3. When he's done he presses **Publish**: all drafts go live together, Netlify rebuilds once (a minute or two). One
-   build per publish keeps Netlify's build allowance safe. How it works: [docs/STUDIO_SETUP.md](docs/STUDIO_SETUP.md).
+3. When he's done he presses **Publish**: all drafts go live together, Hostinger rebuilds once (a few minutes). How
+   it works: [docs/STUDIO_SETUP.md](docs/STUDIO_SETUP.md).
 4. Certificates are **not** edited here: the owner keeps entering them in the existing certificate database as he does today.
    A new certificate is verifiable on the site within about 5 minutes; a correction shows within the hour.
 
 ## Launch setup (in the owner's name; he creates the accounts, we never hold his passwords)
 
-1. **GitHub**: the owner creates a free GitHub account; we transfer this repository to him (or he creates an empty repo and
-   we push to it).
-2. **Netlify**: the owner creates a free Netlify account and imports the repository (build command `npm run build`,
-   publish directory `dist`, production branch `main`). In Site configuration → Build & deploy → Branches and deploy
-   contexts set **Branch deploys: Deploy only the production branch** and **Deploy Previews: Don't deploy pull
-   requests** (so Studio's draft saves don't trigger builds).
-3. **Provident Studio** (the owner's editor at /admin), step by step in [docs/STUDIO_SETUP.md](docs/STUDIO_SETUP.md):
-   - Create the small **GitHub App** in the owner's GitHub account (Contents: read and write, this repository only)
-     and add `STUDIO_GITHUB_REPO`, `STUDIO_GITHUB_APP_ID`, `STUDIO_GITHUB_APP_PRIVATE_KEY` in Netlify.
-   - Run `npm run studio:hash` with the password the owner chooses and add `STUDIO_EMAIL`, `STUDIO_PASSWORD_HASH`,
-     `STUDIO_SESSION_SECRET` in Netlify (Functions scope, marked secret). Redeploy.
-   - Sign in at `/admin`, change one word, check that Netlify does **not** build; Publish, check that it builds once.
-4. **Certificate database (Coda)**: follow `docs/CODA_SETUP.md`. The owner creates a **read-only** token restricted to
-   his certificate doc, and the Netlify variables are added (Functions scope, token marked secret): `CODA_API_TOKEN`,
-   `CODA_DOC_ID`, `CODA_TABLE_ID`, `CODA_COLUMN_MAP`. Redeploy, then verify one real certificate
-   number and one wrong number. If his API can list every certificate, switch on **Show the population report** in Studio →
-   Business info and check the figures.
-5. **Forms**: Netlify → Forms → enable form detection, redeploy, then Forms → Form notifications → email to the owner's
-   address for both `submission` and `contact`. Send one test of each. (Free plan: 100 submissions a month.)
-6. **Domain**: point the owner's domain at Netlify (Domain management), HTTPS on, and set **Website address** in Studio →
-   Business info to the final address (used by the sitemap and canonical links).
-7. **Search Console**: add the domain under the owner's Google account and submit `/sitemap-index.xml` after launch.
+### Put the site on Hostinger, click by click
+
+You need: Alex's Hostinger login (he signs in, or shares the screen; we never hold his password), the GitHub
+account that holds this repository (ours for now: `boogmasterjones/providentnumismaticgrading`), and about 30
+minutes. Never paste a password or key into a chat or an email: only into hPanel.
+
+**Step 1: make the database** (the site keeps its lookup cache and sign-in locks here)
+
+1. Sign in at hpanel.hostinger.com.
+2. Click **Websites** in the left menu. If his domain is already listed, click **Dashboard** next to it; if not, any
+   website dashboard on the plan works for this step.
+3. In the left menu click **Databases**, then **MySQL Databases**.
+4. Under "Create a new MySQL database", type a name such as `provident` and click **Create**. Hostinger adds a
+   user to it. Write down three things in a safe place: the **database name**, the **user name** (both start with
+   `u` and some numbers, like `u123456789_provident`) and the **password** (click the eye or "Change password" to set
+   one you can copy).
+5. You do not need to create any tables: the website makes its own table the first time it runs.
+
+**Step 2: make the mailbox that sends the form emails**
+
+1. In hPanel click **Emails** in the left menu, pick his domain, and click **Create email account**.
+2. Name it `forms` (so it reads `forms@hisdomain.com`), set a strong password, click **Create**.
+3. Write down the address and the password. The website signs in to this mailbox to send each form entry to Alex.
+
+**Step 3: create the Web App and connect GitHub**
+
+1. In hPanel click **Websites**, then **Add website** (or **Create site**), and choose **Web App** /
+   **Node.js web app**.
+2. Pick the domain: his real domain if it is already on Hostinger, or the **temporary domain** Hostinger offers if
+   you want to test first (you can add his domain later).
+3. Choose **Import your Git repository** → **GitHub**. A GitHub window opens: sign in, click **Install** for the
+   Hostinger app, choose **Only select repositories**, pick `providentnumismaticgrading`, and click **Install**.
+   (One Hostinger plan can be connected to one GitHub account at a time.)
+4. Back in hPanel pick the repository and click **Next**.
+5. Check the settings exactly like this, then click **Continue**:
+   - Framework: **Astro**
+   - Branch: **main**
+   - Node version: **22** (or 24)
+   - Root directory: leave as is (the top of the repository)
+   - Package manager: **npm**
+   - Build command / build script: **build**
+   - Output directory: **dist**
+   - Entry file: **server/start.mjs** (type it exactly; NOT `dist/server/start.mjs`, and do not leave it empty, or
+     the forms, certificate lookup and Studio will not work)
+
+**Step 4: add the settings (environment variables)**
+
+On the "Environment variables" part of the setup (or later: the website's dashboard → **Environment variables**),
+click **Add** for each name below and paste its value. Hostinger may already list some names it found in the
+code with "Action required"; fill those in. Leave out any you do not have yet.
+
+| Name | What to paste |
+|---|---|
+| `DB_NAME` | the database name from Step 1 |
+| `DB_USER` | the database user from Step 1 |
+| `DB_PASSWORD` | the database password from Step 1 |
+| `SMTP_USER` | the mailbox address from Step 2 (`forms@hisdomain.com`) |
+| `SMTP_PASSWORD` | that mailbox's password |
+| `FORM_TO` | the address that should receive the forms (Alex's own email) |
+| `STUDIO_EMAIL` | the email Alex signs in to Studio with |
+| `STUDIO_PASSWORD_HASH` | from `npm run studio:hash` (we run it with Alex typing his password; paste the base64 line) |
+| `STUDIO_SESSION_SECRET` | the second line `npm run studio:hash` prints |
+| `STUDIO_GITHUB_REPO` | `boogmasterjones/providentnumismaticgrading` (his own after the transfer) |
+| `STUDIO_GITHUB_APP_ID` | from the Studio GitHub App ([docs/STUDIO_SETUP.md](docs/STUDIO_SETUP.md)) |
+| `STUDIO_GITHUB_APP_PRIVATE_KEY` | the app's private key, **base64-encoded on one line** |
+| `CODA_DOC_ID`, `CODA_TABLE_ID`, `CODA_API_TOKEN`, `CODA_COLUMN_MAP` | the certificate database ([docs/CODA_SETUP.md](docs/CODA_SETUP.md)); leave all out to show the DEMO records |
+| `SITE_HOSTS` | only while testing on the temporary address: that address, e.g. `something.hostingersite.com` |
+
+Do **not** add `PORT` (Hostinger sets it) or `STUDIO_STORAGE`. Never set any value in the code or in GitHub. Saving
+the variables redeploys the site (a few minutes).
+
+**Step 5: deploy and test**
+
+1. Click **Deploy**. Wait for "Deployment completed". If it fails, open the build log: Hostinger shows the error.
+2. Open the site. Check: the home page loads; `/verify` → type `DEMO-0001` → a DEMO card shows (or a real number once
+   Coda is set); send the **contact** form and the **submission** form once each and check that both emails reach
+   `FORM_TO` (look in spam the first time); `/admin` → sign in.
+3. In Studio change one word: the live site does **not** rebuild. Press **Publish**: hPanel → Deployments shows one
+   new deployment, and a few minutes later the word is live. Then undo the test word and publish again.
+
+**Step 6: point the domain**
+
+1. If his domain is registered at Hostinger and the Web App was created on it, there is nothing to do.
+2. If the Web App was made on the temporary domain: website dashboard → **Domains** (or "Connect domain") → add his
+   domain, then follow Hostinger's prompt. If the domain is registered elsewhere, Hostinger shows the two
+   **nameservers** (or the A record) to enter at that registrar.
+3. Wait for the free SSL certificate to show **Active** (website dashboard → **Security → SSL**), and switch on
+   **Force HTTPS** if it is offered.
+4. In Studio → **Business info**, set **Website address** to `https://` + the domain (it feeds the sitemap and tells
+   the server which address to trust), and Publish. Then remove `SITE_HOSTS` if you added it.
+5. **Search Console**: add the domain under Alex's Google account and submit `/sitemap-index.xml`.
+
+**When the repository moves to Alex's GitHub:** hPanel → the website → GitHub settings → **Disconnect**, connect
+Alex's GitHub account, pick his repository with the same settings as Step 3, and change `STUDIO_GITHUB_REPO` (and the
+Studio GitHub App, installed on his account).
+
+More detail, sources and Hostinger's limits: [docs/HOSTINGER_DEPLOY.md](docs/HOSTINGER_DEPLOY.md).
 
 ## LAUNCH CHECKLIST
 
-- [ ] `CODA_*` variables + read-only `CODA_API_TOKEN` set in Netlify; one real certificate and one wrong number tested (the
+- [ ] `CODA_*` variables + read-only `CODA_API_TOKEN` set in Hostinger; one real certificate and one wrong number tested (the
       DEMO records disappear by themselves once the `CODA_*` variables are set).
 - [ ] Population report switch: on only if the owner's database can list every certificate and the figures look right.
 - [ ] Every item in `CONTENT_TO_CONFIRM.md` confirmed by the owner (name, headline, process claims, grading scale
@@ -329,11 +412,11 @@ are stored, and (at launch) a read-only token restricted to that doc, pasted int
 - [ ] Business info → **Website address** = the real domain.
 - [ ] Business info → switch on **The site is launched** (removes noindex, opens robots.txt, hides the preview banner).
 - [ ] PageSpeed mobile checked on the live address.
-- [ ] Netlify Forms detection on + notification emails set; test both forms.
-- [ ] Provident Studio: GitHub App installed on this repository only; the six `STUDIO_*` variables set in Netlify
-      (Functions scope, secrets marked secret); the owner can sign in at /admin, a test edit does not build, Publish
-      builds once and the change goes live; Undo the test edit afterwards.
-- [ ] Branch deploys and Deploy Previews off in Netlify (only `main` builds).
+- [ ] Hostinger Web App: entry file `server/start.mjs`, branch `main`, Node 22 or 24; `DB_*` and `SMTP_*` / `FORM_TO`
+      set; both forms tested and both emails arrived; Runtime Logs show no `[kv] database unavailable` or `[form]` errors.
+- [ ] Provident Studio: GitHub App installed on this repository only; the six `STUDIO_*` variables set in Hostinger;
+      the owner can sign in at /admin, a test edit does not rebuild, Publish rebuilds once and the change goes live;
+      Undo the test edit afterwards.
 - [ ] `/api/studio/changes` in a private window answers 401; `/keystatic` is a 404 on the live site.
 - [ ] Domain + HTTPS; Search Console verified and sitemap submitted.
 - [ ] Anonymity check: search the built `dist/` for the owner's name, "President" and "founder": zero hits.

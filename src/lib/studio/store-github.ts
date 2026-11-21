@@ -2,9 +2,9 @@
  * Production storage: the client's GitHub repository, through the GitHub REST API.
  *
  * - Every save is a commit on the drafts branch (default "studio-drafts") through the Contents API. The live branch
- *   (default "main") is untouched, so Netlify does not build (branch deploys are off).
+ *   (default "main") is untouched, so Hostinger does not rebuild (it deploys only the live branch).
  * - "What's changed" is GitHub's compare of live...drafts.
- * - Publish merges drafts into live with one merge commit: one Netlify build per publish. Drafts then fast-forwards
+ * - Publish merges drafts into live with one merge commit: one Hostinger rebuild per publish. Drafts then fast-forwards
  *   to the merge, ready for the next round of edits.
  * - Undo puts a file on the drafts branch back to its live version; Undo all resets drafts to live.
  *

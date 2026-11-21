@@ -1,5 +1,5 @@
 /**
- * Studio's server settings, read from environment variables at request time (Netlify: Site configuration →
+ * Studio's server settings, read from environment variables at request time (Hostinger: hPanel → the site →
  * Environment variables; locally: .env, loaded into process.env by astro.config.mjs). Names only are documented in
  * docs/STUDIO_SETUP.md. None of these values is ever sent to the browser or logged.
  */

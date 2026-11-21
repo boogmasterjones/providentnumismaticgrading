@@ -20,7 +20,7 @@ export type Fetch = typeof globalThis.fetch;
 const API = 'https://api.github.com';
 const b64url = (b: Buffer | string) => Buffer.from(b).toString('base64url');
 
-/** Accepts the key as pasted into Netlify: real newlines, "\n" escapes, or the whole PEM base64-encoded. */
+/** Accepts the key as pasted into the host's environment variables: real newlines, "\n" escapes, or the whole PEM base64-encoded. */
 export function normalizePem(key: string): string {
   let k = key.trim();
   if (!k.includes('-----BEGIN')) {

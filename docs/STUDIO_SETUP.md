@@ -2,10 +2,12 @@
 
 Provident Studio is the owner's editor at **`https://<his domain>/admin`**. He signs in with an email and a password,
 sees his real pages, clicks any words or photo to change them, and presses **Publish** when he is done. Everything is
-saved in the website's own GitHub repository, so there is no database and nothing else to pay for.
+saved in the website's own GitHub repository (the small MySQL database on his Hostinger plan only holds sign-in
+counters and a lookup cache), so there is nothing else to pay for.
 
 This page is for whoever sets the site up (Biggify now, the owner's web person later). It lists the settings by
-**name only**: the values are secrets and live only in Netlify.
+**name only**: the values are secrets and live only in Hostinger (hPanel → the website → Environment variables). The
+whole hosting setup is in the README ("Put the site on Hostinger") and [HOSTINGER_DEPLOY.md](HOSTINGER_DEPLOY.md).
 
 ## What Studio is made of
 
@@ -23,10 +25,10 @@ This page is for whoever sets the site up (Biggify now, the owner's web person l
 The public pages are unchanged static HTML: they carry no editor code and no extra markup. The editing markers
 (`data-sf…` attributes) are only added when a page is rendered inside Studio's preview.
 
-## Settings (Netlify → Site configuration → Environment variables)
+## Settings (Hostinger: hPanel → the website → Environment variables)
 
-Add each one with **Scopes: Functions** (Studio runs as a Netlify Function; the build does not need them) and tick
-**Contains secret values** where Netlify offers it.
+Add each one with **Add** (values are stored encrypted and masked). Saving redeploys the site, which is when the new
+values take effect.
 
 | Name | What it is | Secret |
 |---|---|---|
@@ -35,13 +37,14 @@ Add each one with **Scopes: Functions** (Studio runs as a Netlify Function; the 
 | `STUDIO_SESSION_SECRET` | A long random value that signs the session cookie. `npm run studio:hash` prints one. Changing it signs everyone out. | yes |
 | `STUDIO_GITHUB_REPO` | The repository, as `owner/repository`. | no |
 | `STUDIO_GITHUB_APP_ID` | The GitHub App's "App ID" (a number). | no |
-| `STUDIO_GITHUB_APP_PRIVATE_KEY` | The App's private key (the whole `.pem` file; real line breaks, `\n`, or base64 of the file all work). | yes |
+| `STUDIO_GITHUB_APP_PRIVATE_KEY` | The App's private key (the whole `.pem` file; on Hostinger paste it **base64-encoded on one line**; real line breaks and `\n` also work). | yes |
 | `STUDIO_GITHUB_INSTALLATION_ID` | Optional. Looked up automatically when empty. | no |
-| `STUDIO_LIVE_BRANCH` | Optional. The branch Netlify publishes, default `main`. | no |
+| `STUDIO_LIVE_BRANCH` | Optional. The branch Hostinger deploys, default `main`. | no |
 | `STUDIO_DRAFTS_BRANCH` | Optional. Where unpublished edits are kept, default `studio-drafts`. | no |
 
 Without the three sign-in settings nobody can sign in (the sign-in page says so). Without the GitHub settings the live
-Studio refuses to save and says it is not connected; it never falls back to anything else.
+Studio refuses to save and says it is not connected; it never falls back to anything else. (Never set
+`STUDIO_STORAGE=local` on Hostinger: files the app writes there are wiped by the next deploy.)
 
 **Locally** none of the GitHub settings are needed: `npm run dev` runs Studio in *local mode*, which edits the files
 in this folder directly, and Publish only shows what would be published (nothing is committed or pushed). Put the
@@ -51,10 +54,10 @@ three sign-in settings in `.env` (git-ignored); `astro.config.mjs` loads it for 
 
 1. In this folder run `npm run studio:hash` and type the new password (at least 12 characters; a short sentence is
    easiest). It is not shown and not stored.
-2. Copy the printed hash into `STUDIO_PASSWORD_HASH` in Netlify (either printed line works), and, the first time, the
-   printed secret into `STUDIO_SESSION_SECRET`.
-3. **Deploys → Trigger deploy → Deploy site** so the Function picks up the new value. Changing the hash signs out
-   every open session.
+2. Copy the printed hash into `STUDIO_PASSWORD_HASH` in Hostinger (the base64 line is safest), and, the first time,
+   the printed secret into `STUDIO_SESSION_SECRET`.
+3. **Save**: Hostinger redeploys the site with the new value (a few minutes). Changing the hash signs out every open
+   session.
 
 Studio never emails passwords and has no "forgot password" link on purpose (no email service to attack). If the owner
 forgets it, his web person repeats the three steps above.
@@ -77,25 +80,22 @@ GitHub account** (the account that owns the website repository).
    - **Metadata: Read-only** (GitHub sets this one by itself).
    - Everything else stays **No access**. No organization or account permissions.
 5. **Where can this GitHub App be installed?** → **Only on this account**.
-6. Press **Create GitHub App**. On the page that opens, copy the **App ID** (a number near the top) into Netlify as
+6. Press **Create GitHub App**. On the page that opens, copy the **App ID** (a number near the top) into Hostinger as
    `STUDIO_GITHUB_APP_ID`.
-7. On the same page scroll to **Private keys → Generate a private key**. A `.pem` file downloads. Open it in Notepad,
-   copy **everything** (including the `-----BEGIN` and `-----END` lines) and paste it into Netlify as
-   `STUDIO_GITHUB_APP_PRIVATE_KEY`. Then delete the downloaded file (GitHub keeps no copy; you can always generate a
+7. On the same page scroll to **Private keys → Generate a private key**. A `.pem` file downloads. Turn it into one
+   line of base64 (PowerShell: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\path\to\key.pem"))`; Mac:
+   `base64 -i key.pem`) and paste that line into Hostinger as `STUDIO_GITHUB_APP_PRIVATE_KEY`. Then delete the downloaded file (GitHub keeps no copy; you can always generate a
    new key and delete the old one on the same page).
 8. In the left menu of the App: **Install App → Install** next to the owner's account → **Only select repositories**
    → choose the website repository → **Install**.
-9. In Netlify set `STUDIO_GITHUB_REPO` to `owner/repository` (exactly as in the repository's web address).
-10. **Deploys → Trigger deploy → Deploy site**. Then sign in at `/admin`, change a word, and check that the
-    "Publish" button shows 1 change.
+9. In Hostinger set `STUDIO_GITHUB_REPO` to `owner/repository` (exactly as in the repository's web address) and save
+   (the site redeploys). Then sign in at `/admin`, change a word, and check that the "Publish" button shows 1 change.
 
-### Netlify: build only what is published
+### Hostinger: build only what is published
 
-Studio commits every save to the drafts branch. Those commits must not start a build:
-
-- **Site configuration → Build & deploy → Continuous deployment → Branches and deploy contexts → Configure**:
-  **Production branch** `main`, **Branch deploys: Deploy only the production branch**, **Deploy Previews: Don't
-  deploy pull requests**. Save.
+Studio commits every save to the drafts branch. Those commits do not start a build, because Hostinger deploys only
+the branch set in the Web App's Git settings: keep it on **`main`**. Publish merges into `main`; that push is what
+makes Hostinger rebuild (once per publish).
 
 ## How saving and Publish work
 
@@ -104,7 +104,7 @@ Studio commits every save to the drafts branch. Those commits must not start a b
                                    │
             "What's changed" = GitHub's comparison of main … studio-drafts
                                    │
- owner presses Publish ──► one merge of studio-drafts into main ──► Netlify builds once ──► live in 1–2 minutes
+ owner presses Publish ──► one merge of studio-drafts into main ──► Hostinger rebuilds once ──► live in a few minutes
                                    │
                     studio-drafts moves up to the published commit, ready for the next edits
 ```
@@ -113,7 +113,7 @@ Studio commits every save to the drafts branch. Those commits must not start a b
   by the same templates as the live site, so what he sees is what will go live.
 - **Undo** (top bar, or Ctrl+Z) puts back the text from before his last change. **Undo** next to an item in "What's
   changed" puts that page, coin, post or photo back to the live version; **Undo everything** resets all drafts.
-- **Publish** merges all drafts in one commit, so a day of edits costs one Netlify build. If someone changed the same
+- **Publish** merges all drafts in one commit, so a day of edits costs one rebuild. If someone changed the same
   file on `main` in the meantime and GitHub cannot merge, Studio says so and nothing goes live; a web person merges
   the branches by hand.
 - **Photos** are made web-ready in the browser before upload (turned upright, longest side at most 2400 px, or
@@ -132,7 +132,8 @@ Studio commits every save to the drafts branch. Those commits must not start a b
   to sign out every device, change `STUDIO_SESSION_SECRET` and redeploy.
 - **Limits**: at most 10 sign-in attempts per 15 minutes from one address; 5 wrong passwords in a row lock that
   address for 15 minutes; 30 wrong passwords within an hour from anywhere lock the account for 15 minutes (a slow,
-  spread-out attack). Counters live in Netlify Blobs (store `studio-auth`), with addresses stored only as keyed hashes.
+  spread-out attack). Counters live in the site's MySQL database (namespace `studio-auth`, `src/lib/kv.ts`), with addresses stored only
+  as keyed hashes. The address is the visitor's real one behind Hostinger's proxy (`server/headers.mjs`).
 - **Every Studio route needs a session** (`src/middleware.ts`): `/admin…` redirects to the sign-in page, `/api/studio…`
   answers 401. Requests that change anything must come from Studio's own pages (same origin, JSON or a photo upload);
   together with the SameSite cookie this blocks cross-site requests. Studio pages are never cached, never indexed and
@@ -149,8 +150,8 @@ Studio commits every save to the drafts branch. Those commits must not start a b
 |---|---|---|
 | What the owner needs | An email and a password he chooses | A GitHub account, and to understand GitHub's sign-in and two-factor prompts |
 | Day-to-day | Type email and password; stays signed in for a week | Bounce to github.com and back; GitHub's own screens |
-| Who can sign in | Exactly one person, set in Netlify | Anyone with write access to the repository |
-| Moving parts | One hash and one secret in Netlify | An OAuth app (client ID, client secret, callback URL), token storage and refresh |
+| Who can sign in | Exactly one person, set in the host | Anyone with write access to the repository |
+| Moving parts | One hash and one secret in the host | An OAuth app (client ID, client secret, callback URL), token storage and refresh |
 | Password reset | Web person runs `npm run studio:hash` | GitHub's own reset |
 
 He is not technical and the owner asked for an editor he can "actually use", so Studio uses its own simple sign-in and
@@ -163,6 +164,6 @@ repository, without changing how saving and publishing work.
 
 - `/admin` asks to sign in; a wrong password says so; the right one opens the dashboard.
 - Change a word in **Edit my website**: the Publish button shows 1 change; the live site is unchanged; the drafts
-  branch has a new commit; Netlify shows no new build.
-- **Publish**: one merge commit on `main`, one Netlify build, the change is live in a minute or two.
+  branch has a new commit; hPanel → Deployments shows no new deployment.
+- **Publish**: one merge commit on `main`, one Hostinger deployment, the change is live in a few minutes.
 - `https://<domain>/api/studio/changes` in a private window answers 401.

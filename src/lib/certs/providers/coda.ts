@@ -431,7 +431,7 @@ export function createCodaAdapter(opts: CodaAdapterOptions): CertAdapter {
       return mapped;
     },
 
-    /** Every row, page by page. The caller (loadPopulation) caches the report for an hour in Netlify Blobs. */
+    /** Every row, page by page. The caller (loadPopulation) caches the report for an hour (src/lib/kv.ts). */
     async listAll() {
       checkSetup();
       // Visitors arriving together while the cache is cold share one scan in this running copy.

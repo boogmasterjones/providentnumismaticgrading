@@ -1,35 +1,20 @@
 /**
- * Server-only wiring: the Netlify Blobs cache and the adapter chosen from the server environment.
+ * Server-only wiring: the lookup cache and the adapter chosen from the server environment.
  * Never import this from a browser script.
  */
-import { getStore } from '@netlify/blobs';
 import { getCertAdapter, type CertAdapter } from './adapter';
-import { MemoryStore, type KVStore } from './verify';
-
-let memory: MemoryStore | null = null;
+import type { KVStore } from './verify';
+import { getKV } from '../kv';
 
 /**
- * Netlify Blobs store "cert-verify" when running on Netlify (Blobs is included on the free plan); otherwise a
- * per-process memory store, so `astro dev` and tests work without Netlify.
+ * The cache, namespace "cert-verify": Hostinger MySQL in production (survives redeploys), files under `astro dev`,
+ * memory in tests (src/lib/kv.ts). Entries carry their own expiry (see CACHE_TTL_* in verify.ts).
  */
 export function getCertStore(): KVStore {
-  try {
-    const blobs = getStore({ name: 'cert-verify', consistency: 'eventual' });
-    return {
-      async get(key) {
-        return (await blobs.get(key, { type: 'json' })) ?? null;
-      },
-      async set(key, value) {
-        await blobs.setJSON(key, value);
-      },
-    };
-  } catch {
-    memory ??= new MemoryStore();
-    return memory;
-  }
+  return getKV('cert-verify', { dev: import.meta.env.DEV, defaultTtlMs: 24 * 60 * 60 * 1000 });
 }
 
-/** Read at request time from the server environment (Netlify site settings). The token never reaches the browser. */
+/** Read at request time from the server environment (Hostinger: Environment variables). The token never reaches the browser. */
 export function getServerCertAdapter(): CertAdapter {
   return getCertAdapter(
     {

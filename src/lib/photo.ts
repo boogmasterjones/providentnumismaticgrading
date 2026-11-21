@@ -1,5 +1,5 @@
 /**
- * Responsive photos, made at build time (no Netlify Image CDN: it costs credits).
+ * Responsive photos, made at build time (no image CDN or on-request resizing).
  *
  * Every photo the owner adds (Studio or Keystatic) is a file in public/images/… and is referenced by its address
  * ("/images/notable/coin-123.webp"). At build time `src/integrations/photos.ts` writes each one again at a few widths

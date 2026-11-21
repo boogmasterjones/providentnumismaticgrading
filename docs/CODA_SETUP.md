@@ -51,7 +51,7 @@ doc and only for reading. Coda shows it **once**, so do Part 4 straight after.
    Then click **Generate API token**.
 5. Click **Copy token**. Keep the page open until you've finished Part 4.
 
-> **Never send the token by email, text or chat** — not even to us. It goes only into Netlify (Part 4). If it was
+> **Never send the token by email, text or chat** — not even to us. It goes only into Hostinger (Part 4). If it was
 > ever sent anywhere by mistake, delete it in the same API settings section and create a new one.
 
 Notes:
@@ -61,12 +61,11 @@ Notes:
 - The token acts as **you**: if you later lose access to the doc, the website stops finding certificates.
   Create the token from the account that owns the doc.
 
-## Part 4: Paste the settings into Netlify (you, or us with you on a screen-share)
+## Part 4: Paste the settings into Hostinger (you, or us with you on a screen-share)
 
-1. Sign in to **Netlify** → open the website → **Site configuration** → **Environment variables** →
-   **Add a variable** → **Add a single variable**.
-2. Add these, one at a time. For each: tick **Contains secret values** for the token, and under **Scopes** choose
-   **Functions** (or "Specific scopes → Functions").
+1. Sign in to **hpanel.hostinger.com** → **Websites** → **Dashboard** next to the website → **Environment
+   variables** in the left menu.
+2. Click **Add** for each of these, one at a time (values are stored encrypted and hidden).
 
    | Key | Value |
    |---|---|
@@ -75,7 +74,7 @@ Notes:
    | `CODA_TABLE_ID` | the table name from Part 1, e.g. `Certificates` |
    | `CODA_COLUMN_MAP` | we send you this line once we've seen your column names (Part 2) |
 
-3. **Deploys** → **Trigger deploy** → **Deploy site**. Wait about a minute.
+3. Click **Save**. Hostinger redeploys the website with the new settings; wait a few minutes.
 4. Test: on the website's Verify page, type one real certificate number (it should show the card) and one made-up
    number (it should say "not found"). Open the same real result in a **private/incognito window** and check the
    coin photos show.
@@ -94,7 +93,7 @@ shows within the hour.
 5. Anything else about how you use the table: hidden/void/test rows, numbers with letters (e.g. `PNA-1001`),
    whether a number could ever appear twice.
 
-**Do not send the token.** It goes only into Netlify.
+**Do not send the token.** It goes only into Hostinger.
 
 ---
 
@@ -104,11 +103,11 @@ shows within the hour.
 `src/lib/certs/server.ts`. Tests: `tests/coda.test.ts`, `tests/verify.test.ts`.
 
 **Choosing the provider**: if any `CODA_*` variable is set the site uses Coda; a missing token/doc/table or a bad
-`CODA_COLUMN_MAP` then shows an error on lookups (never DEMO data) and the function log says what to fix. With
+`CODA_COLUMN_MAP` then shows an error on lookups (never DEMO data) and the server log (hPanel → Runtime Logs) says what to fix. With
 none set, the DEMO records (`DEMO-0001..0003`) are served. The old generic JSON provider
 (`providers/registry-api.ts`, `CERT_API_URL` / `CERT_API_KEY`) was removed; it is in Git history.
 
-**Variables** (Netlify → Environment variables, Functions scope; see `.env.example`):
+**Variables** (Hostinger → Environment variables; see `.env.example`):
 
 - `CODA_API_TOKEN` (secret), `CODA_DOC_ID` (id or browser link), `CODA_TABLE_ID` (name or `grid-…` id).
 - `CODA_COLUMN_MAP` (optional JSON): our field → his column name. Fields: `certNumber`, `coinDescription`, `year`,
@@ -136,7 +135,8 @@ generic message; logs carry status codes and hints, never the token or Coda's re
 
 **Population report**: `listAll()` pages through every row (`limit=500`, then `pageToken` only, as Coda requires;
 stops after 200 pages), skipping rows without number/coin/grade. `loadPopulation` caches the report for 1 hour in
-Netlify Blobs (`cert-verify` store), and simultaneous visitors on a cold cache share one scan per function instance.
+the site's MySQL database (`cert-verify` namespace, `src/lib/kv.ts`), and simultaneous visitors on a cold cache share
+one scan per running server.
 
 **What Coda's API docs say (checked 2026-11-02)**:
 - Auth: Bearer token from Account settings → API settings. Tokens can be restricted to a **doc** or a **table** and to

@@ -5,7 +5,7 @@ import Inscr from '../components/Inscr.astro';
 import PageIntro from '../components/PageIntro.astro';
 import Steps from '../components/Steps.astro';
 import Prose from '../components/Prose.astro';
-import NetlifyForm from '../components/NetlifyForm.astro';
+import SiteForm from '../components/SiteForm.astro';
 import Field from '../components/Field.astro';
 import LinkArrow from '../components/LinkArrow.astro';
 import Body from '../components/Body.astro';
@@ -50,7 +50,7 @@ const labels = ['A ready-made design', 'A custom design', 'No preference'];
         <h2 id="request-title" {...e(D, 'requestTitle')}>{data.requestTitle}</h2>
         {data.requestText && <p class="muted" {...e(D, 'requestText')}>{data.requestText}</p>}
       </div>
-      <NetlifyForm name="submission" submitLabel="Send request" label="Submission request">
+      <SiteForm name="submission" submitLabel="Send request" label="Submission request">
         <Field name="name" label="Name" required autocomplete="name" />
         <Field name="email" label="Email" type="email" required autocomplete="email" />
         <Field name="phone" label="Phone" type="tel" autocomplete="tel" />
@@ -63,7 +63,7 @@ const labels = ['A ready-made design', 'A custom design', 'No preference'];
           hint="Helps us advise on the service and on insurance." />
         <Field name="label-design" label="Label" type="select" options={labels} />
         <Field name="message" label="Anything else" type="textarea" rows={3} />
-      </NetlifyForm>
+      </SiteForm>
     </section>
   </div>
 </Base>

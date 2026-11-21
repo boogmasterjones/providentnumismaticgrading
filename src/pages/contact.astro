@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import PageIntro from '../components/PageIntro.astro';
-import NetlifyForm from '../components/NetlifyForm.astro';
+import SiteForm from '../components/SiteForm.astro';
 import Field from '../components/Field.astro';
 import Body from '../components/Body.astro';
 import { getSettings, loadPage } from '../lib/content';
@@ -31,12 +31,12 @@ const e = editor(Astro);
     </section>
     <section aria-labelledby="msg" class="rv d1">
       <h2 id="msg" class="section-title" {...e(D, 'formTitle')}>{data.formTitle}</h2>
-      <NetlifyForm name="contact" submitLabel="Send message" label="Contact">
+      <SiteForm name="contact" submitLabel="Send message" label="Contact">
         <Field name="name" label="Name" required autocomplete="name" />
         <Field name="email" label="Email" type="email" required autocomplete="email" />
         <Field name="phone" label="Phone" type="tel" autocomplete="tel" wide />
         <Field name="message" label="Message" type="textarea" required rows={6} />
-      </NetlifyForm>
+      </SiteForm>
     </section>
   </div>
 </Base>

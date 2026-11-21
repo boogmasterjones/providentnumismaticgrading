@@ -1,5 +1,5 @@
 /**
- * Certificate verification, server side only (/api/verify runs as a Netlify Function).
+ * Certificate verification, server side only (/api/verify runs on demand in the Node server).
  *
  * Flow: check the typed number → per-visitor limit → cache → adapter (the owner's database, or DEMO records) →
  * validate with CertificateSchema → cache → reply. The API key lives only in the adapter; replies and logs carry
@@ -11,10 +11,11 @@ import { computePopulation, type PopulationReport } from '../population';
 
 // ---------------------------------------------------------------- storage
 
-/** Small key-value store: Netlify Blobs in production, memory in tests and local dev. */
+/** Small key-value store: MySQL in production, files or memory in local dev and tests (src/lib/kv.ts). */
 export interface KVStore {
   get(key: string): Promise<unknown | null>;
-  set(key: string, value: unknown): Promise<void>;
+  /** ttlMs: the store may forget the value after this long */
+  set(key: string, value: unknown, ttlMs?: number): Promise<void>;
 }
 
 export class MemoryStore implements KVStore {
@@ -52,13 +53,14 @@ async function cacheGet<T>(store: KVStore, key: string, now: number): Promise<T 
 
 async function cacheSet<T>(store: KVStore, key: string, value: T, ttl: number, now: number): Promise<void> {
   try {
-    await store.set(key, { at: now, ttl, value } satisfies CacheEntry<T>);
+    // the entry checks its own age; the store may drop it a minute after that
+    await store.set(key, { at: now, ttl, value } satisfies CacheEntry<T>, ttl + 60_000);
   } catch {
     /* cache is best effort */
   }
 }
 
-/** Blob keys are safe: the number is already reduced to A-Z, 0-9 and dashes. */
+/** Cache keys are safe: the number is already reduced to A-Z, 0-9 and dashes. */
 export const certCacheKey = (adapter: CertAdapter, n: string) => `v1/${adapter.id}/cert/${n}`;
 
 // ---------------------------------------------------------------- per-visitor limit
